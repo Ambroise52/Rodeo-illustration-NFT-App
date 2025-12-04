@@ -11,6 +11,9 @@ export interface GeneratedData {
   character: string;
   action: string;
   background: string;
+  colorScheme?: string;
+  effects?: string[];
+  isFavorite?: boolean;
 }
 
 export type Category = 'CHARACTERS' | 'ACTIONS' | 'BACKGROUNDS' | 'COLORS' | 'EFFECTS';
@@ -22,3 +25,15 @@ export interface PromptOptions {
   COLORS: string[];
   EFFECTS: string[];
 }
+
+export type SortOption = 'NEWEST' | 'OLDEST' | 'HIGHEST_ETH' | 'LOWEST_ETH' | 'RARITY_DESC';
+
+export interface FilterState {
+  search: string;
+  rarity: RarityTier | 'ALL';
+  favoritesOnly: boolean;
+  minEth?: number;
+  maxEth?: number;
+}
+
+export type ExportType = 'SINGLE_IMAGE' | 'SINGLE_PROMPT' | 'SINGLE_VIDEO' | 'SINGLE_PACKAGE' | 'BULK_ALL' | 'BULK_FAVORITES' | 'BULK_RARITY' | 'BULK_SESSION';

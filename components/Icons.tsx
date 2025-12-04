@@ -8,7 +8,21 @@ import {
   ChevronUp,
   RefreshCw,
   Cpu,
-  Download
+  Download,
+  Heart,
+  Star,
+  Search,
+  Filter,
+  Trash2,
+  X,
+  ArrowLeft,
+  ArrowRight,
+  Share2,
+  Box,
+  Package,
+  Grid,
+  List,
+  Layers
 } from 'lucide-react';
 
 export const Icons = {
@@ -20,5 +34,19 @@ export const Icons = {
   ChevronUp,
   RefreshCw,
   Cpu,
-  Download
+  Download,
+  Heart,
+  Star,
+  Search,
+  Filter,
+  Trash: Trash2,
+  X,
+  ArrowLeft,
+  ArrowRight,
+  Share: Share2,
+  Box,
+  Package,
+  Grid,
+  List,
+  Layers
 };

@@ -6,9 +6,18 @@ interface PreviewAreaProps {
   hasGenerated: boolean;
   imageUrl?: string;
   onRegenerateStronger?: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 }
 
-const PreviewArea: React.FC<PreviewAreaProps> = ({ isGenerating, hasGenerated, imageUrl, onRegenerateStronger }) => {
+const PreviewArea: React.FC<PreviewAreaProps> = ({ 
+  isGenerating, 
+  hasGenerated, 
+  imageUrl, 
+  onRegenerateStronger, 
+  isFavorite, 
+  onToggleFavorite 
+}) => {
   
   const handleDownload = () => {
     if (imageUrl) {
@@ -57,6 +66,16 @@ const PreviewArea: React.FC<PreviewAreaProps> = ({ isGenerating, hasGenerated, i
                   className="w-full h-full object-cover rounded-lg"
                 />
                 
+                {/* Favorite Button (Visible on Hover or if active) */}
+                {(onToggleFavorite) && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+                    className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md transition-all z-30 ${isFavorite ? 'bg-neon-pink text-white shadow-[0_0_15px_rgba(255,0,153,0.5)]' : 'bg-black/40 text-white hover:bg-white/20 opacity-0 group-hover/image:opacity-100'}`}
+                  >
+                    <Icons.Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+                  </button>
+                )}
+
                 {/* Overlay with actions */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-4 backdrop-blur-sm p-4">
                   <div className="flex flex-col items-center gap-2">
