@@ -22,7 +22,10 @@ import {
   Package,
   Grid,
   List,
-  Layers
+  Layers,
+  Sun,
+  Moon,
+  Copy
 } from 'lucide-react';
 
 export const Icons = {
@@ -48,5 +51,8 @@ export const Icons = {
   Package,
   Grid,
   List,
-  Layers
+  Layers,
+  Sun,
+  Moon,
+  Copy
 };

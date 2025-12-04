@@ -1,29 +1,46 @@
 import React from 'react';
 import { Icons } from './Icons';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
   return (
-    <header className="w-full py-6 px-4 md:px-8 border-b border-dark-border bg-black/50 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-light-bg/80 dark:bg-dark-bg/80 backdrop-blur-xl border-b border-light-border dark:border-dark-border transition-colors duration-500">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        
+        {/* Logo Area */}
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-dark-card border border-neon-cyan/30 rounded-lg shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-            <Icons.Cpu className="w-8 h-8 text-neon-cyan" />
+          <div className="w-8 h-8 rounded-lg bg-light-accent dark:bg-dark-accent flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <Icons.Layers className="w-5 h-5 text-white" />
           </div>
-          <div className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white">
-              INFINITE <span className="text-neon-cyan">NFT</span> CREATOR <span className="text-xs align-top bg-neon-cyan text-black px-1 rounded font-bold">PRO</span>
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight text-light-text dark:text-dark-text leading-tight">
+              Infinite Creator
             </h1>
-            <p className="text-gray-400 text-xs md:text-sm font-mono tracking-wide mt-1">
-              GENERATE UNIQUE ASSETS + PERFECT VIDEO PROMPTS
+            <p className="text-[10px] text-light-subtext dark:text-dark-subtext font-medium uppercase tracking-wider">
+              Pro Studio
             </p>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-dark-card border border-dark-border text-xs text-gray-400">
-             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-             System Online
-           </span>
+
+        {/* Navigation / Actions */}
+        <div className="flex items-center gap-4">
+          <button 
+             onClick={toggleTheme}
+             className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-all text-light-subtext dark:text-dark-subtext hover:text-light-text dark:hover:text-dark-text"
+             title="Toggle Theme"
+           >
+             {theme === 'dark' ? <Icons.Sun className="w-5 h-5" /> : <Icons.Moon className="w-5 h-5" />}
+           </button>
+           
+           <div className="h-4 w-[1px] bg-light-border dark:bg-dark-border mx-1"></div>
+
+           <button className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-light-text dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-90 transition-opacity">
+              Sign In
+           </button>
         </div>
       </div>
     </header>

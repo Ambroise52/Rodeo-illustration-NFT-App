@@ -11,7 +11,6 @@ interface DropInfoProps {
 
 const DropInfo: React.FC<DropInfoProps> = ({ ethValue, rarity, animate }) => {
   const [displayValue, setDisplayValue] = useState(0);
-  const config = RARITY_CONFIG[rarity];
 
   useEffect(() => {
     if (animate) {
@@ -23,15 +22,10 @@ const DropInfo: React.FC<DropInfoProps> = ({ ethValue, rarity, animate }) => {
       const update = (currentTime: number) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        
-        // Ease out quartic
         const ease = 1 - Math.pow(1 - progress, 4);
-        
         setDisplayValue(start + (end - start) * ease);
 
-        if (progress < 1) {
-          requestAnimationFrame(update);
-        }
+        if (progress < 1) requestAnimationFrame(update);
       };
 
       requestAnimationFrame(update);
@@ -41,22 +35,19 @@ const DropInfo: React.FC<DropInfoProps> = ({ ethValue, rarity, animate }) => {
   }, [ethValue, animate]);
 
   return (
-    <div className="w-full flex items-center justify-between bg-dark-card border border-dark-border p-4 rounded-xl mb-4 relative overflow-hidden">
-      {/* Background glow based on rarity */}
-      <div className={`absolute inset-0 opacity-10 ${config.bg}`}></div>
-      
-      <div className="flex flex-col z-10">
-        <span className="text-gray-500 text-xs font-mono mb-1 uppercase tracking-widest">Rarity Tier</span>
+    <div className="w-full flex items-center justify-between bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border p-5 rounded-2xl shadow-apple">
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-light-subtext dark:text-dark-subtext uppercase tracking-wide">Rarity</span>
         <RarityBadge tier={rarity} />
       </div>
 
-      <div className="flex flex-col items-end z-10">
-         <span className="text-gray-500 text-xs font-mono mb-1 uppercase tracking-widest">Market Value</span>
+      <div className="flex flex-col items-end gap-1">
+         <span className="text-xs font-medium text-light-subtext dark:text-dark-subtext uppercase tracking-wide">Est. Value</span>
          <div className="flex items-baseline gap-1">
-           <span className={`text-3xl font-black font-mono tracking-tighter ${config.color} drop-shadow-lg`}>
+           <span className="text-2xl font-bold text-light-text dark:text-dark-text">
              {displayValue.toFixed(4)}
            </span>
-           <span className="text-sm font-bold text-gray-400">{APP_CONFIG.CURRENCY_SYMBOL}</span>
+           <span className="text-sm font-medium text-light-subtext dark:text-dark-subtext">{APP_CONFIG.CURRENCY_SYMBOL}</span>
          </div>
       </div>
     </div>

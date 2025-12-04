@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GeneratedData } from '../types';
 import RarityBadge from './RarityBadge';
 import { Icons } from './Icons';
@@ -13,6 +13,7 @@ interface DetailsModalProps {
   onToggleFavorite: (id: string) => void;
   onDelete: (id: string) => void;
   onDownloadPackage: (item: GeneratedData) => void;
+  onRegenerateStronger: (item: GeneratedData) => void;
 }
 
 const DetailsModal: React.FC<DetailsModalProps> = ({ 
@@ -23,8 +24,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   onPrev,
   onToggleFavorite,
   onDelete,
-  onDownloadPackage
+  onDownloadPackage,
+  onRegenerateStronger
 }) => {
+  const [copiedVideoPrompt, setCopiedVideoPrompt] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -43,111 +47,116 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   if (!isOpen || !item) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-light-bg/80 dark:bg-black/80 backdrop-blur-xl transition-opacity duration-300">
       
-      {/* Navigation Buttons */}
-      <button onClick={onPrev} className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white z-20">
-        <Icons.ArrowLeft className="w-8 h-8" />
-      </button>
-      <button onClick={onNext} className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white z-20">
-        <Icons.ArrowRight className="w-8 h-8" />
+      {/* Navigation & Controls */}
+      <button onClick={onClose} className="absolute top-6 right-6 p-3 bg-white dark:bg-white/10 rounded-full hover:bg-gray-100 dark:hover:bg-white/20 transition-colors shadow-sm z-50">
+        <Icons.X className="w-5 h-5 text-light-text dark:text-white" />
       </button>
 
-      {/* Close Button */}
-      <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-red-500/20 hover:text-red-500 rounded-full transition-colors text-gray-400 z-20">
-        <Icons.X className="w-6 h-6" />
+      <button onClick={onPrev} className="absolute left-6 top-1/2 -translate-y-1/2 p-4 bg-white dark:bg-white/10 rounded-full hover:bg-gray-100 dark:hover:bg-white/20 transition-colors shadow-lg z-50 hidden md:block">
+        <Icons.ArrowLeft className="w-6 h-6 text-light-text dark:text-white" />
+      </button>
+      <button onClick={onNext} className="absolute right-6 top-1/2 -translate-y-1/2 p-4 bg-white dark:bg-white/10 rounded-full hover:bg-gray-100 dark:hover:bg-white/20 transition-colors shadow-lg z-50 hidden md:block">
+        <Icons.ArrowRight className="w-6 h-6 text-light-text dark:text-white" />
       </button>
 
-      <div className="w-full max-w-6xl h-[90vh] flex flex-col md:flex-row gap-8 p-4 md:p-8 relative">
+      {/* Main Card */}
+      <div className="w-full max-w-5xl max-h-[90vh] bg-light-card dark:bg-dark-card rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative mx-4">
         
         {/* Left: Image */}
-        <div className="flex-1 flex items-center justify-center relative bg-dark-card/50 rounded-2xl border border-dark-border p-2">
+        <div className="flex-1 bg-gray-50 dark:bg-black flex items-center justify-center relative p-8">
             <img 
               src={item.imageUrl} 
               alt={item.imagePrompt} 
-              className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" 
+              className="max-h-full max-w-full object-contain rounded-xl shadow-apple" 
             />
-            {/* Quick Actions Overlay */}
-            <div className="absolute bottom-6 flex gap-3">
+            
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4">
                <button 
                 onClick={() => onToggleFavorite(item.id)}
-                className={`p-3 rounded-full backdrop-blur-md border transition-all hover:scale-110 ${item.isFavorite ? 'bg-neon-pink/20 border-neon-pink text-neon-pink' : 'bg-black/50 border-white/20 text-white hover:bg-white/10'}`}
+                className={`p-3 rounded-full backdrop-blur-xl border shadow-lg transition-transform hover:scale-110 ${item.isFavorite ? 'bg-red-500 border-red-500 text-white' : 'bg-white/80 border-white/40 text-gray-700 hover:bg-white'}`}
                >
-                 <Icons.Heart className={`w-6 h-6 ${item.isFavorite ? 'fill-current' : ''}`} />
+                 <Icons.Heart className={`w-5 h-5 ${item.isFavorite ? 'fill-current' : ''}`} />
                </button>
                <button 
                  onClick={() => onDownloadPackage(item)}
-                 className="p-3 bg-black/50 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-white/10 hover:scale-110 transition-all"
+                 className="p-3 bg-white/80 backdrop-blur-xl border border-white/40 rounded-full text-gray-700 hover:bg-white hover:scale-110 transition-transform shadow-lg"
                  title="Download Package"
                >
-                 <Icons.Download className="w-6 h-6" />
+                 <Icons.Download className="w-5 h-5" />
                </button>
             </div>
         </div>
 
-        {/* Right: Details */}
-        <div className="w-full md:w-[400px] flex flex-col gap-6 overflow-y-auto pr-2">
+        {/* Right: Info */}
+        <div className="w-full md:w-[400px] bg-light-card dark:bg-dark-card p-8 flex flex-col overflow-y-auto border-l border-light-border dark:border-dark-border">
           
-          {/* Header Info */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
               <RarityBadge tier={item.rarity} />
-              <span className="text-gray-500 text-xs font-mono">{new Date(item.timestamp).toLocaleDateString()}</span>
+              <span className="text-xs text-light-subtext dark:text-dark-subtext font-medium">{new Date(item.timestamp).toLocaleDateString()}</span>
             </div>
-            <h2 className="text-3xl font-black text-white tracking-tighter flex items-center gap-2">
-              {item.ethValue.toFixed(4)} <span className="text-neon-cyan">{APP_CONFIG.CURRENCY_SYMBOL}</span>
+            <h2 className="text-4xl font-bold text-light-text dark:text-dark-text tracking-tight">
+              {item.ethValue.toFixed(4)} <span className="text-light-subtext dark:text-dark-subtext text-2xl align-top">{APP_CONFIG.CURRENCY_SYMBOL}</span>
             </h2>
           </div>
 
-          {/* Traits Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-dark-card p-3 rounded-lg border border-dark-border">
-              <span className="text-[10px] text-gray-500 uppercase font-mono block mb-1">Character</span>
-              <span className="text-sm font-bold text-gray-200">{item.character}</span>
+          <div className="space-y-6 flex-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 rounded-xl bg-light-bg dark:bg-white/5">
+                 <p className="text-[10px] uppercase tracking-wide text-light-subtext dark:text-dark-subtext mb-1">Character</p>
+                 <p className="text-sm font-semibold text-light-text dark:text-dark-text">{item.character}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-light-bg dark:bg-white/5">
+                 <p className="text-[10px] uppercase tracking-wide text-light-subtext dark:text-dark-subtext mb-1">Action</p>
+                 <p className="text-sm font-semibold text-light-text dark:text-dark-text">{item.action}</p>
+              </div>
             </div>
-            <div className="bg-dark-card p-3 rounded-lg border border-dark-border">
-              <span className="text-[10px] text-gray-500 uppercase font-mono block mb-1">Action</span>
-              <span className="text-sm font-bold text-gray-200">{item.action}</span>
-            </div>
-            <div className="bg-dark-card p-3 rounded-lg border border-dark-border col-span-2">
-              <span className="text-[10px] text-gray-500 uppercase font-mono block mb-1">Background</span>
-              <span className="text-sm font-bold text-gray-200">{item.background}</span>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold uppercase text-light-text dark:text-dark-text flex items-center gap-2">
+                  <Icons.Video className="w-3 h-3" /> Animation Prompt
+                </span>
+                <button
+                   onClick={() => {
+                     navigator.clipboard.writeText(item.videoPrompt);
+                     setCopiedVideoPrompt(true);
+                     setTimeout(() => setCopiedVideoPrompt(false), 2000);
+                   }}
+                   className="text-[10px] font-medium text-light-accent dark:text-dark-accent hover:underline"
+                 >
+                   {copiedVideoPrompt ? 'Copied!' : 'Copy'}
+                 </button>
+              </div>
+              <div className="p-4 rounded-xl bg-light-bg dark:bg-white/5 text-xs leading-relaxed text-light-subtext dark:text-dark-subtext h-32 overflow-y-auto">
+                {item.videoPrompt}
+              </div>
             </div>
           </div>
 
-          {/* Prompts */}
-          <div className="space-y-4 flex-1">
-             <div className="space-y-2">
-               <h3 className="text-xs font-mono text-neon-pink uppercase flex items-center gap-2">
-                 <Icons.Image className="w-3 h-3" /> Image Prompt
-               </h3>
-               <div className="p-3 bg-black/30 rounded border border-dark-border text-xs text-gray-400 font-mono max-h-32 overflow-y-auto">
-                 {item.imagePrompt}
-               </div>
-             </div>
-             
-             <div className="space-y-2">
-               <h3 className="text-xs font-mono text-neon-purple uppercase flex items-center gap-2">
-                 <Icons.Video className="w-3 h-3" /> Video Prompt
-               </h3>
-               <div className="p-3 bg-black/30 rounded border border-dark-border text-xs text-gray-400 font-mono max-h-32 overflow-y-auto">
-                 {item.videoPrompt}
-               </div>
-             </div>
-          </div>
-
-          {/* Danger Zone */}
-          <div className="pt-4 border-t border-dark-border">
+          <div className="mt-8 pt-6 border-t border-light-border dark:border-dark-border space-y-3">
+             <button
+              onClick={() => {
+                onRegenerateStronger(item);
+                onClose();
+              }}
+              className="w-full py-3 bg-light-text dark:bg-white text-white dark:text-black rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+            >
+              <Icons.RefreshCw className="w-4 h-4" /> Enhance Style
+            </button>
+            
             <button 
               onClick={() => {
-                if (window.confirm("Are you sure you want to delete this NFT?")) {
+                if (window.confirm("Delete this asset?")) {
                   onDelete(item.id);
                   onClose();
                 }
               }}
-              className="w-full py-2 flex items-center justify-center gap-2 text-red-500 hover:bg-red-500/10 rounded transition-colors text-sm font-bold"
+              className="w-full py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl font-medium text-sm transition-colors"
             >
-              <Icons.Trash className="w-4 h-4" /> Delete Asset
+              Delete Asset
             </button>
           </div>
 

@@ -83,38 +83,40 @@ export const PROMPT_OPTIONS: PromptOptions = {
 };
 
 export const STYLE_OPTIONS = {
-  SHAPE_STYLES: [
-    "smooth flowing geometric shapes", "organic curves with angular elements",
-    "overlapping layered shapes", "clean shape edges", "smooth organic forms",
-    "modern vector shapes", "interlocking geometry"
+  CHARACTER_PERSONALITIES: [
+    "with confident attitude", "with expressive personality", "with playful vibe",
+    "with cool streetwear style", "with energetic spirit", "with mysterious aura",
+    "with cheerful expression", "with intense focus", "with quirky charm"
   ],
-  COLOR_APPS: [
-    "smooth solid colors", "harmonious limited palette", "flat color fills",
-    "color blocking with no gradients", "shapes defined by color contrast"
+  ACTION_VIBES: [
+    "with explosive energy", "with fluid grace", "with dynamic power",
+    "with rhythmic flow", "with precise control", "with wild abandon",
+    "with effortless cool", "with dramatic flair"
+  ],
+  ILLUSTRATION_STYLES: [
+    "vibrant modern illustration style", "contemporary digital art aesthetic",
+    "trending character illustration", "editorial illustration quality",
+    "fresh pop-culture art style", "expressive digital painting"
   ],
   LINE_WORKS: [
-    "no outlines", "shapes defined by color contrast", "zero line weight",
-    "borderless shapes", "pure shape composition"
+    "bold expressive linework", "clean confident outlines", "variable line weight",
+    "ink-style contour lines", "dynamic sketch-like details", "crisp vector-style inking"
+  ],
+  COLOR_APPS: [
+    "limited bright color palette", "vibrant saturated colors", "bold color blocking",
+    "high contrast color scheme", "punchy pop colors"
   ],
   COMPOSITIONS: [
-    "dynamic action pose", "asymmetric balance", "playful spatial relationship",
-    "floating decorative elements", "clean negative space", "balanced geometric layout"
-  ],
-  CHAR_DETAILS: [
-    "simplified geometric anatomy", "minimal facial features",
-    "flowing body forms", "abstract stylized figure", "smooth silhouette"
-  ],
-  BG_SIMPLICITIES: [
-    "simple solid color background", "soft gradient background",
-    "minimal geometric accents", "clean matte background"
+    "dynamic diagonal composition", "energetic framing", "asymmetric action layout",
+    "perspective distortion for impact", "floating dynamic arrangement"
   ],
   QUALITY_BOOSTERS: [
-    "behance featured", "dribbble aesthetic", "professional digital illustration",
-    "award winning flat art", "modern graphic design"
+    "behance featured", "dribbble trending", "award-winning illustration",
+    "professional character art", "high-end digital art", "detailed magazine illustration"
   ]
 };
 
-export const NEGATIVE_PROMPT = "thick black outlines, heavy borders, comic book style, line art, sketch lines, ink outlines, cartoon outlines, stroke edges, harsh edges, realistic rendering, 3D effects, shadows, textures, gradients on characters, busy composition, detailed shading, photorealistic, airbrushed, noise, grain, grunge, realistic lighting, volumetric light, glossy finish";
+export const NEGATIVE_PROMPT = "photorealistic, 3D render, overly minimalist, too geometric, corporate vector art, clipart style, flat corporate design, stock illustration, generic style, stiff pose, boring composition, muddy colors, too many colors, realistic proportions, lifeless character, static pose, low quality, amateur art, poorly drawn, distorted anatomy, ugly, blurry, watermark, text, logo, realistic lighting, volumetric light, heavy black borders, messy sketch";
 
 export interface RarityConfigItem {
   chance: number;

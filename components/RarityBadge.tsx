@@ -1,5 +1,4 @@
 import React from 'react';
-import { RARITY_CONFIG } from '../constants';
 import { RarityTier } from '../types';
 import { Icons } from './Icons';
 
@@ -10,25 +9,27 @@ interface RarityBadgeProps {
 }
 
 const RarityBadge: React.FC<RarityBadgeProps> = ({ tier, className = "", showIcon = true }) => {
-  const config = RARITY_CONFIG[tier];
   
+  const getStyle = (t: RarityTier) => {
+      switch(t) {
+          case 'COMMON': return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700';
+          case 'UNCOMMON': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800';
+          case 'RARE': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
+          case 'EPIC': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800';
+          case 'LEGENDARY': return 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800';
+      }
+  };
+
   return (
     <div className={`
-      relative inline-flex items-center gap-1.5 px-3 py-1 rounded-full 
-      font-black text-xs tracking-wider uppercase shadow-lg border
-      ${config.bg} ${config.color} ${config.border} ${config.glow || ''}
-      ${className}
+      inline-flex items-center gap-1.5 px-3 py-1 rounded-full 
+      text-[11px] font-semibold tracking-wide border
+      ${getStyle(tier)} ${className}
     `}>
-      {/* Sparkle effects for high tiers */}
-      {tier === 'LEGENDARY' && (
-        <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-yellow-500/0 via-yellow-200/50 to-yellow-500/0 animate-shimmer"></span>
-      )}
-      
       {showIcon && tier !== 'COMMON' && tier !== 'UNCOMMON' && (
-        <Icons.Sparkles className={`w-3 h-3 ${tier === 'LEGENDARY' ? 'animate-pulse' : ''}`} />
+        <Icons.Sparkles className="w-3 h-3" />
       )}
-      
-      <span className="relative z-10">{tier}</span>
+      <span>{tier}</span>
     </div>
   );
 };

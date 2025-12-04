@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Header from './components/Header';
 import PreviewArea from './components/PreviewArea';
 import StatsBar from './components/StatsBar';
@@ -15,6 +15,7 @@ import { generateImage } from './services/geminiService';
 import { downloadBulk, downloadPackage } from './utils/exportUtils';
 
 function App() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationMode, setGenerationMode] = useState<'SINGLE' | 'BATCH'>('SINGLE');
   const [batchProgress, setBatchProgress] = useState(0);
@@ -41,8 +42,20 @@ function App() {
   const [milestoneMsg, setMilestoneMsg] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  // --- Helpers ---
+  // --- Theme Logic ---
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  // --- Helpers ---
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 3000);
@@ -55,7 +68,7 @@ function App() {
       PROMPT_OPTIONS.BACKGROUNDS.length * 
       PROMPT_OPTIONS.COLORS.length * 
       (PROMPT_OPTIONS.EFFECTS.length * (PROMPT_OPTIONS.EFFECTS.length - 1)) *
-      (STYLE_OPTIONS.SHAPE_STYLES.length * STYLE_OPTIONS.COLOR_APPS.length);
+      STYLE_OPTIONS.ILLUSTRATION_STYLES.length;
     
     if (combos > 1000000) return `${(combos / 1000000).toFixed(0)} Million+`;
     return combos.toLocaleString();
@@ -74,7 +87,6 @@ function App() {
   };
 
   // --- Generation Logic ---
-
   const createNFTData = async (forcedTraits?: any, strongerStyle: boolean = false): Promise<GeneratedData> => {
     const rarity = determineRarity(totalGens + (generationMode === 'BATCH' ? Math.floor(Math.random() * 10) : 0));
     const rarityConfig = RARITY_CONFIG[rarity];
@@ -94,20 +106,23 @@ function App() {
     }
 
     const effectsString = selectedEffects.join(", ");
-    const shapeStyle = getRandomItem(STYLE_OPTIONS.SHAPE_STYLES);
-    const colorApp = getRandomItem(STYLE_OPTIONS.COLOR_APPS);
+    
+    // Contemporary Illustration Style Variables
+    const personality = getRandomItem(STYLE_OPTIONS.CHARACTER_PERSONALITIES);
+    const actionVibe = getRandomItem(STYLE_OPTIONS.ACTION_VIBES);
+    const illustrationStyle = getRandomItem(STYLE_OPTIONS.ILLUSTRATION_STYLES);
     const lineWork = getRandomItem(STYLE_OPTIONS.LINE_WORKS);
+    const colorApp = getRandomItem(STYLE_OPTIONS.COLOR_APPS);
     const composition = getRandomItem(STYLE_OPTIONS.COMPOSITIONS);
-    const charDetail = getRandomItem(STYLE_OPTIONS.CHAR_DETAILS);
-    const bgSimplicity = getRandomItem(STYLE_OPTIONS.BG_SIMPLICITIES);
     const quality = getRandomItem(STYLE_OPTIONS.QUALITY_BOOSTERS);
-    const strongerSuffix = strongerStyle ? "NO OUTLINES, SHAPES ONLY, PURE VECTOR, SMOOTH GEOMETRY, MINIMALIST, NO BORDERS, " : "";
+    
+    const strongerSuffix = strongerStyle ? "HIGHLY EXPRESSIVE, DYNAMIC ENERGY, BOLD COLORS, AWARD WINNING QUALITY, " : "";
 
-    const imagePrompt = `${char} ${action}, modern flat illustration, smooth geometric shapes with no outlines, clean vector aesthetic, limited color palette with ${colors}, overlapping layered shapes, minimalist contemporary style, simple clean design, shapes defined by color contrast, set against ${bg}, soft matte finish, professional digital illustration, behance style, ${effectsString}, ${shapeStyle}, ${colorApp}, ${lineWork}, ${composition}, ${charDetail}, ${bgSimplicity}, ${quality}, smooth organic forms, playful composition, no black outlines, no borders, 8K quality. ${strongerSuffix}Exclude: ${NEGATIVE_PROMPT}`;
+    const imagePrompt = `${char} ${personality} ${action} ${actionVibe}, ${illustrationStyle}, ${lineWork}, ${colorApp} with ${colors}, ${bg}, contemporary digital art, stylized character design, ${composition}, ${effectsString}, ${quality}, playful energetic mood, trending illustration style, professional character art, expressive pose, 2024 digital illustration aesthetic, high quality character illustration. ${strongerSuffix}Exclude: ${NEGATIVE_PROMPT}`;
 
     const actionDetails = (ANIMATION_MAPPINGS.ACTIONS as any)[action] || { desc: "move dynamically", vibe: "fluid" };
     const bgMotion = (ANIMATION_MAPPINGS.BACKGROUNDS as any)[bg] || "move gently";
-    const videoPrompt = `Animate this image into a 5-second seamless perfect loop with no hard cuts. The ${char.toLowerCase()} should ${actionDetails.desc}, creating smooth continuous motion that loops back to the starting position perfectly. The ${bg.toLowerCase()} should ${bgMotion}. Motion should be ${actionDetails.vibe} with smooth ease-in-out timing. Camera stays fixed. Ensure the final frame matches the first frame exactly for perfect looping. Style: modern minimalist animation, smooth vector-like movement, no jump cuts, professional NFT animation quality. Maintain the flat 2D illustration style throughout with no realistic motion blur or 3D effects. Keep the bold geometric shapes and clean vector aesthetic. Animation should be smooth but preserve the graphic design quality.`;
+    const videoPrompt = `Animate this image into a 5-second seamless perfect loop with no hard cuts. The ${char.toLowerCase()} should ${actionDetails.desc}, creating smooth continuous motion that loops back to the starting position perfectly. The ${bg.toLowerCase()} should ${bgMotion}. Motion should be ${actionDetails.vibe} with smooth ease-in-out timing. Camera stays fixed. Ensure the final frame matches the first frame exactly for perfect looping. Style: modern minimalist animation, smooth vector-like movement, no jump cuts, professional NFT animation quality. Maintain the hand-drawn digital illustration style throughout with expressive movement. Keep the bold linework and vibrant colors. Animation should be fluid and preserve the artistic quality.`;
 
     const ethValue = Math.random() * (rarityConfig.maxEth - rarityConfig.minEth) + rarityConfig.minEth;
     const imageUrl = await generateImage(imagePrompt);
@@ -133,13 +148,13 @@ function App() {
     setIsGenerating(true);
     setGenerationMode('SINGLE');
     setError(null);
-    setBatchResults([]); // Clear batch results
+    setBatchResults([]); 
     try {
       const data = await createNFTData(forcedTraits, strongerStyle);
       setCurrentView(data);
       setHistory(prev => [data, ...prev]);
       updateStats(data);
-      showToast("NFT Generated Successfully! 🎨");
+      showToast(strongerStyle ? "Style Enhanced" : "Asset Created");
     } catch (e) {
       console.error(e);
       setError("Generation failed. Try again.");
@@ -153,7 +168,7 @@ function App() {
     setGenerationMode('BATCH');
     setBatchProgress(0);
     setError(null);
-    setCurrentView(null); // Clear single view
+    setCurrentView(null);
     const newBatch: GeneratedData[] = [];
 
     try {
@@ -165,7 +180,7 @@ function App() {
       }
       setBatchResults(newBatch);
       setHistory(prev => [...newBatch, ...prev]);
-      showToast("Batch Generation Complete! 🚀");
+      showToast("Batch Complete");
     } catch (e) {
       console.error(e);
       setError("Batch generation failed partially.");
@@ -182,22 +197,18 @@ function App() {
     
     if (data.rarity === 'LEGENDARY') {
       setLegendaryCount(prev => prev + 1);
-      setMilestoneMsg("LEGENDARY DROP! 🌟");
+      setMilestoneMsg("Legendary Drop Acquired");
     }
-    
-    const count = totalGens + 1;
-    if (count === 1) setMilestoneMsg("Welcome! Your NFT journey begins!");
-    else if (count === 10) setMilestoneMsg("10 Generations! You're a Collector!");
-    else if (count === 50) setMilestoneMsg("50 Generations! You're a Curator!");
   };
 
-  const handleRegenerateStronger = () => {
-    if (currentView) {
+  const handleRegenerateStronger = (item?: GeneratedData) => {
+    const target = item || currentView;
+    if (target) {
       const traits = {
-        char: currentView.character,
-        action: currentView.action,
-        bg: currentView.background,
-        colors: currentView.colorScheme,
+        char: target.character,
+        action: target.action,
+        bg: target.background,
+        colors: target.colorScheme,
         effects: []
       };
       handleGenerateSingle(traits, true);
@@ -205,18 +216,15 @@ function App() {
   };
 
   // --- Interaction Logic ---
-
   const toggleFavorite = (id: string) => {
     setHistory(prev => prev.map(item => {
       if (item.id === id) {
         const newState = !item.isFavorite;
-        if (newState) showToast("Added to Favorites ⭐");
+        if (newState) showToast("Saved to Favorites");
         return { ...item, isFavorite: newState };
       }
       return item;
     }));
-    
-    // Also update current views if needed
     if (currentView?.id === id) setCurrentView(prev => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
     setBatchResults(prev => prev.map(item => item.id === id ? { ...item, isFavorite: !item.isFavorite } : item));
     if (modalItem?.id === id) setModalItem(prev => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
@@ -226,32 +234,26 @@ function App() {
     setHistory(prev => prev.filter(i => i.id !== id));
     if (currentView?.id === id) setCurrentView(null);
     setBatchResults(prev => prev.filter(i => i.id !== id));
-    showToast("Asset Deleted 🗑️");
+    showToast("Asset Deleted");
   };
 
   const handleExport = async (type: ExportType) => {
-    showToast("Preparing Export... 📦");
+    showToast("Preparing Download...");
     try {
       if (type === 'BULK_ALL') {
         await downloadBulk(history, 'all-generations');
       } else if (type === 'BULK_FAVORITES') {
         await downloadBulk(history.filter(i => i.isFavorite), 'favorites');
-      } else if (type === 'BULK_SESSION') {
-        // Just exporting current history as session for now
-        await downloadBulk(history, 'session-export');
       }
-      showToast("Export Ready! ✅");
+      showToast("Download Ready");
     } catch (e) {
-      showToast("Export Failed ❌");
+      showToast("Export Failed");
     }
   };
 
   // --- Filtering & Sorting ---
-
   const filteredHistory = useMemo(() => {
     let result = [...history];
-
-    // Filter
     if (filterState.favoritesOnly) result = result.filter(i => i.isFavorite);
     if (filterState.rarity !== 'ALL') result = result.filter(i => i.rarity === filterState.rarity);
     if (filterState.search) {
@@ -262,8 +264,6 @@ function App() {
         i.background.toLowerCase().includes(q)
       );
     }
-
-    // Sort
     result.sort((a, b) => {
       if (sortOption === 'NEWEST') return b.timestamp - a.timestamp;
       if (sortOption === 'OLDEST') return a.timestamp - b.timestamp;
@@ -275,24 +275,8 @@ function App() {
       }
       return 0;
     });
-
     return result;
   }, [history, filterState, sortOption]);
-
-  // --- Keyboard Shortcuts ---
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (isGenerating || isModalOpen) return;
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-
-      if (e.key.toLowerCase() === 'g') handleGenerateSingle();
-      if (e.key.toLowerCase() === 'b') handleGenerateBatch();
-      if (e.key.toLowerCase() === 'f') setFilterState(prev => ({ ...prev, favoritesOnly: !prev.favoritesOnly }));
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [isGenerating, isModalOpen]);
-
 
   const openModal = (item: GeneratedData) => {
     setModalItem(item);
@@ -311,18 +295,17 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-dark-bg text-white selection:bg-neon-cyan selection:text-black pb-20 font-sans">
-      <Header />
+    <div className="min-h-screen flex flex-col pt-24 pb-12 transition-colors duration-500 bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text font-sans antialiased selection:bg-light-accent selection:text-white">
+      <Header theme={theme} toggleTheme={toggleTheme} />
 
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed top-24 right-4 z-[150] bg-dark-card border border-neon-cyan/50 text-white px-6 py-3 rounded-lg shadow-[0_0_20px_rgba(0,240,255,0.2)] animate-in slide-in-from-right fade-in duration-300 flex items-center gap-2">
-          <Icons.Sparkles className="w-4 h-4 text-neon-cyan" />
-          <span className="font-bold tracking-wide text-sm">{toastMsg}</span>
+        <div className="fixed top-24 right-1/2 translate-x-1/2 md:translate-x-0 md:right-8 z-[150] bg-light-card/80 dark:bg-dark-card/80 backdrop-blur-md border border-light-border dark:border-dark-border text-light-text dark:text-dark-text px-6 py-3 rounded-full shadow-apple-hover animate-slide-up flex items-center gap-3">
+          <Icons.Sparkles className="w-4 h-4 text-light-accent dark:text-dark-accent" />
+          <span className="font-medium text-sm">{toastMsg}</span>
         </div>
       )}
 
-      {/* Details Modal */}
       <DetailsModal 
         item={modalItem} 
         isOpen={isModalOpen} 
@@ -332,10 +315,21 @@ function App() {
         onToggleFavorite={toggleFavorite}
         onDelete={deleteItem}
         onDownloadPackage={downloadPackage}
+        onRegenerateStronger={handleRegenerateStronger}
       />
 
-      <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8 flex flex-col items-center">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-6">
         
+        {/* Intro */}
+        <div className="text-center mb-10 space-y-2 animate-fade-in">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-light-text dark:text-dark-text">
+            Studio
+          </h2>
+          <p className="text-light-subtext dark:text-dark-subtext font-medium text-lg">
+            Create limitless 3D assets & animations with Gemini 2.5
+          </p>
+        </div>
+
         {/* Top Stats */}
         <StatsBar 
           totalCount={totalGens} 
@@ -346,70 +340,71 @@ function App() {
 
         {/* Milestone Banner */}
         {milestoneMsg && (
-          <div className="w-full mb-6 p-4 bg-gradient-to-r from-neon-purple/20 to-neon-cyan/20 border-y border-white/10 text-center animate-pulse">
-            <span className="text-xl font-black italic tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-pink">
+          <div className="w-full max-w-2xl mx-auto mb-8 p-4 bg-light-accent/10 dark:bg-dark-accent/10 border border-light-accent/20 dark:border-dark-accent/20 rounded-xl text-center backdrop-blur-md">
+            <span className="text-light-accent dark:text-dark-accent font-semibold tracking-wide">
               {milestoneMsg}
             </span>
           </div>
         )}
 
-        {/* MAIN GENERATION AREA */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+        {/* MAIN WORKSPACE */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20">
           
-          {/* Left: Generation Controls & Preview */}
-          <div className="lg:col-span-5 flex flex-col">
-            <div className="sticky top-24">
-               {/* Generation Buttons */}
-              <div className="flex gap-2 mb-6">
+          {/* Controls & Preview (Left) */}
+          <div className="lg:col-span-5 flex flex-col gap-8">
+            <div className="sticky top-32">
+              
+              {/* Preview Container */}
+              {!batchResults.length || currentView ? (
+                <PreviewArea 
+                  isGenerating={isGenerating && generationMode === 'SINGLE'} 
+                  hasGenerated={!!currentView} 
+                  imageUrl={currentView?.imageUrl}
+                  onRegenerateStronger={() => handleRegenerateStronger(currentView || undefined)}
+                  isFavorite={currentView?.isFavorite}
+                  onToggleFavorite={currentView ? () => toggleFavorite(currentView.id) : undefined}
+                />
+              ) : null}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
                 <button
                   onClick={() => handleGenerateSingle()}
                   disabled={isGenerating}
-                  className="flex-1 py-4 bg-neon-cyan text-black font-black text-lg tracking-wider hover:bg-white hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-[0_0_15px_rgba(0,240,255,0.3)]"
+                  className="flex-1 h-14 bg-light-text dark:bg-white text-white dark:text-black font-semibold rounded-2xl hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
                 >
-                   {isGenerating && generationMode === 'SINGLE' ? 'SYNTHESIZING...' : 'GENERATE NFT'}
+                   {isGenerating && generationMode === 'SINGLE' ? (
+                     <Icons.RefreshCw className="w-5 h-5 animate-spin" />
+                   ) : 'Generate Asset'}
                 </button>
                 <button
                   onClick={() => handleGenerateBatch()}
                   disabled={isGenerating}
-                  className="px-4 bg-dark-card border border-dark-border text-white hover:border-neon-pink hover:text-neon-pink transition-all rounded-lg disabled:opacity-50"
+                  className="w-14 h-14 bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border text-light-text dark:text-dark-text hover:bg-light-bg dark:hover:bg-white/5 rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 shadow-apple"
                   title="Generate 3 Variations"
                 >
                   <Icons.Layers className={`w-6 h-6 ${isGenerating && generationMode === 'BATCH' ? 'animate-bounce' : ''}`} />
                 </button>
               </div>
 
-              {/* Progress for Batch */}
+              {/* Progress Bar */}
               {isGenerating && generationMode === 'BATCH' && (
-                <div className="w-full bg-dark-card rounded-full h-2 mb-4 overflow-hidden border border-dark-border">
+                <div className="mt-4 w-full bg-light-border dark:bg-dark-border rounded-full h-1 overflow-hidden">
                   <div 
-                    className="h-full bg-neon-pink transition-all duration-300" 
+                    className="h-full bg-light-accent dark:bg-dark-accent transition-all duration-300" 
                     style={{ width: `${(batchProgress / 3) * 100}%` }}
                   ></div>
                 </div>
               )}
 
-              {/* Main Preview (Only shows single generation results or empty state) */}
-              {!batchResults.length || currentView ? (
-                <PreviewArea 
-                  isGenerating={isGenerating && generationMode === 'SINGLE'} 
-                  hasGenerated={!!currentView} 
-                  imageUrl={currentView?.imageUrl}
-                  onRegenerateStronger={currentView && !isGenerating ? handleRegenerateStronger : undefined}
-                  isFavorite={currentView?.isFavorite}
-                  onToggleFavorite={currentView ? () => toggleFavorite(currentView.id) : undefined}
-                />
-              ) : null}
-
-              <div className="text-center mt-2">
-                 <span className="text-[10px] font-mono text-neon-cyan/50 tracking-widest uppercase">
-                    Total Possible Combinations: {totalCombinations}
-                 </span>
-              </div>
+              <p className="text-center mt-6 text-xs text-light-subtext dark:text-dark-subtext font-medium">
+                 {totalCombinations} combinations available
+              </p>
             </div>
           </div>
 
-          {/* Right: Results / Batch Grid / Prompts */}
-          <div className="lg:col-span-7 flex flex-col gap-6">
+          {/* Details / Batch / Prompts (Right) */}
+          <div className="lg:col-span-7 flex flex-col gap-6 pt-2">
              
              {/* Batch Results View */}
              {batchResults.length > 0 && !isGenerating && (
@@ -421,59 +416,62 @@ function App() {
                />
              )}
 
-             {/* Prompts Section (Visible if Single Item Selected) */}
+             {/* Prompts Section */}
              {currentView && (
-               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div className="space-y-6 animate-slide-up">
                   <DropInfo ethValue={currentView.ethValue} rarity={currentView.rarity} animate={!batchResults.length} />
                   
-                  <CollapsibleSection
-                    title="Meta AI Video Prompt"
-                    icon={<Icons.Video className="w-5 h-5 text-neon-purple" />}
-                    colorClass="text-neon-purple"
-                    defaultOpen={true}
-                    className="border-neon-purple/50 shadow-[0_0_15px_rgba(189,0,255,0.15)]"
-                  >
-                    <div className="flex flex-col gap-4">
-                      <div className="p-4 bg-black/40 rounded-lg border border-neon-purple/20">
-                        <p className="font-mono text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{currentView.videoPrompt}</p>
+                  <div className="space-y-4">
+                    <CollapsibleSection
+                      title="Video Animation Prompt"
+                      icon={<Icons.Video className="w-5 h-5" />}
+                      colorClass="text-light-accent dark:text-dark-accent"
+                      defaultOpen={true}
+                    >
+                      <div className="space-y-4">
+                        <p className="text-sm text-light-text dark:text-dark-text leading-relaxed opacity-80">{currentView.videoPrompt}</p>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(currentView.videoPrompt);
+                            setVideoPromptCopied(true);
+                            setTimeout(() => setVideoPromptCopied(false), 2000);
+                          }}
+                          className={`w-full py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all ${
+                            videoPromptCopied 
+                              ? 'bg-success text-white' 
+                              : 'bg-light-bg dark:bg-white/5 text-light-text dark:text-white hover:bg-light-border dark:hover:bg-white/10'
+                          }`}
+                        >
+                          {videoPromptCopied ? 'Copied' : 'Copy Prompt'}
+                        </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(currentView.videoPrompt);
-                          setVideoPromptCopied(true);
-                          setTimeout(() => setVideoPromptCopied(false), 2000);
-                        }}
-                        className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${videoPromptCopied ? 'bg-green-500 text-black' : 'bg-neon-purple text-white hover:bg-purple-600'}`}
-                      >
-                        {videoPromptCopied ? 'COPIED!' : 'COPY VIDEO PROMPT'}
-                      </button>
-                    </div>
-                  </CollapsibleSection>
+                    </CollapsibleSection>
 
-                  <CollapsibleSection
-                    title="Image Prompt"
-                    icon={<Icons.Image className="w-5 h-5 text-neon-pink" />}
-                    content={currentView.imagePrompt}
-                    colorClass="text-neon-pink"
-                  />
+                    <CollapsibleSection
+                      title="Image Generation Prompt"
+                      icon={<Icons.Image className="w-5 h-5" />}
+                      content={currentView.imagePrompt}
+                      colorClass="text-light-subtext dark:text-dark-subtext"
+                    />
+                  </div>
                </div>
              )}
           </div>
         </div>
 
-        {/* GALLERY & FILTERS */}
-        <div className="w-full border-t border-dark-border pt-8 mt-8">
-           <div className="flex items-center justify-between mb-6">
-             <h2 className="text-2xl font-black tracking-tight">COLLECTION</h2>
+        {/* COLLECTION GALLERY */}
+        <div className="w-full border-t border-light-border dark:border-dark-border pt-12">
+           <div className="flex items-center justify-between mb-8">
+             <h2 className="text-2xl font-bold text-light-text dark:text-dark-text">Library</h2>
              
-             {/* Bulk Export Menu */}
+             {/* Simple Export Dropdown */}
              <div className="relative group">
-                <button className="flex items-center gap-2 px-4 py-2 bg-dark-card border border-dark-border rounded-lg hover:border-white transition-colors text-xs font-bold uppercase tracking-wider">
-                  <Icons.Package className="w-4 h-4" /> Export Options
+                <button className="flex items-center gap-2 px-4 py-2 bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-lg text-sm font-medium hover:bg-light-bg dark:hover:bg-white/5 transition-colors">
+                  <Icons.Package className="w-4 h-4" /> Export
                 </button>
-                <div className="absolute right-0 top-full mt-2 w-48 bg-dark-card border border-dark-border rounded-lg shadow-xl opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all z-50">
-                  <button onClick={() => handleExport('BULK_ALL')} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm">Export All</button>
-                  <button onClick={() => handleExport('BULK_FAVORITES')} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm text-neon-pink">Export Favorites</button>
+                <div className="absolute right-0 top-full mt-2 w-48 bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 overflow-hidden">
+                  <button onClick={() => handleExport('BULK_ALL')} className="w-full text-left px-4 py-3 hover:bg-light-bg dark:hover:bg-white/5 text-sm">Export All</button>
+                  <button onClick={() => handleExport('BULK_FAVORITES')} className="w-full text-left px-4 py-3 hover:bg-light-bg dark:hover:bg-white/5 text-sm text-red-500">Export Favorites</button>
                 </div>
              </div>
            </div>
@@ -490,19 +488,16 @@ function App() {
              history={filteredHistory} 
              onSelect={openModal} 
              selectedId={currentView?.id}
-             title={filterState.favoritesOnly ? "Favorite Collection" : "All Generations"} 
+             title={filterState.favoritesOnly ? "Favorites" : "All Assets"} 
            />
         </div>
 
       </main>
 
-      <footer className="py-6 text-center text-gray-600 text-[10px] font-mono border-t border-dark-border mt-12">
-        <div className="flex justify-center gap-4 mb-2">
-           <span>G = Generate</span>
-           <span>B = Batch</span>
-           <span>F = Favorites</span>
-        </div>
-        <p>INFINITE NFT CREATOR PRO v3.0 • SYSTEM ACTIVE</p>
+      <footer className="py-12 text-center mt-20 border-t border-light-border dark:border-dark-border">
+        <p className="text-light-subtext dark:text-dark-subtext text-xs font-medium">
+          Infinite Creator Pro © 2024
+        </p>
       </footer>
     </div>
   );
