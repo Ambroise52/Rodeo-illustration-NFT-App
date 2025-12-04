@@ -74,49 +74,47 @@ export const PROMPT_OPTIONS: PromptOptions = {
     "Matrix neon-green, black", "Luxury rose-gold, navy, and burgundy"
   ],
   EFFECTS: [
-    "Motion blur trails", "Speed lines", "Particle sparkles", "Glitter shimmer", 
-    "Confetti burst", "Stardust trail", "Neon edge glow", "Holographic shimmer", 
-    "Chromatic aberration", "Glitch displacement", "Lens flare", "Light rays", 
-    "Gradient overlay", "Vintage film grain", "Vignette edges", "Bokeh circles", 
-    "Cartoon outlined", "Cel shaded", "Glow aura", "Energy particles"
+    "Soft motion trails", "Geometric sparkles", "Floating decorative shapes", 
+    "Subtle light gradient", "Clean energy lines", "Abstract geometric patterns", 
+    "Soft color shift", "Subtle glow", "Clean speed lines", "Floating geometric particles",
+    "Minimalist light rays", "Soft bokeh circles", "Vector stardust", 
+    "Prismatic accent shapes", "Matte finish overlay"
   ]
 };
 
 export const STYLE_OPTIONS = {
   SHAPE_STYLES: [
-    "bold geometric forms", "hard edge shapes", "vector graphic style",
-    "cut paper aesthetic", "screen print look", "poster art style",
-    "graphic design illustration"
+    "smooth flowing geometric shapes", "organic curves with angular elements",
+    "overlapping layered shapes", "clean shape edges", "smooth organic forms",
+    "modern vector shapes", "interlocking geometry"
   ],
   COLOR_APPS: [
-    "solid flat colors only", "limited color palette", "bold color blocking",
-    "high contrast colors", "vibrant flat hues"
+    "smooth solid colors", "harmonious limited palette", "flat color fills",
+    "color blocking with no gradients", "shapes defined by color contrast"
   ],
   LINE_WORKS: [
-    "thick black outlines", "clean vector lines", "bold graphic edges",
-    "simplified contours", "minimal line art"
+    "no outlines", "shapes defined by color contrast", "zero line weight",
+    "borderless shapes", "pure shape composition"
   ],
   COMPOSITIONS: [
-    "centered dynamic composition", "rule of thirds framing",
-    "balanced asymmetric layout", "bold diagonal composition",
-    "vertical portrait orientation"
+    "dynamic action pose", "asymmetric balance", "playful spatial relationship",
+    "floating decorative elements", "clean negative space", "balanced geometric layout"
   ],
   CHAR_DETAILS: [
-    "minimalist simplified features", "geometric facial features",
-    "abstract stylized form", "blocky proportions",
-    "rounded simplified anatomy"
+    "simplified geometric anatomy", "minimal facial features",
+    "flowing body forms", "abstract stylized figure", "smooth silhouette"
   ],
   BG_SIMPLICITIES: [
-    "minimal background elements", "simple geometric backdrop",
-    "clean negative space", "uncluttered composition"
+    "simple solid color background", "soft gradient background",
+    "minimal geometric accents", "clean matte background"
   ],
   QUALITY_BOOSTERS: [
-    "award winning design", "professional illustration",
-    "clean aesthetic", "behance quality", "dribbble featured"
+    "behance featured", "dribbble aesthetic", "professional digital illustration",
+    "award winning flat art", "modern graphic design"
   ]
 };
 
-export const NEGATIVE_PROMPT = "photorealistic, 3D render, realistic textures, detailed shading, complex lighting, blurry, low quality, watermark, text, logos, signatures, distorted anatomy, multiple subjects, cluttered composition, busy background, realistic photography, airbrushed, soft focus";
+export const NEGATIVE_PROMPT = "thick black outlines, heavy borders, comic book style, line art, sketch lines, ink outlines, cartoon outlines, stroke edges, harsh edges, realistic rendering, 3D effects, shadows, textures, gradients on characters, busy composition, detailed shading, photorealistic, airbrushed, noise, grain, grunge, realistic lighting, volumetric light, glossy finish";
 
 export interface RarityConfigItem {
   chance: number;

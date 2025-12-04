@@ -97,9 +97,9 @@ function App() {
       const bgSimplicity = getRandomItem(STYLE_OPTIONS.BG_SIMPLICITIES);
       const quality = getRandomItem(STYLE_OPTIONS.QUALITY_BOOSTERS);
 
-      const strongerSuffix = strongerStyle ? "EXTREMELY FLAT, NO SHADING, PURE VECTOR, 2D ONLY, FLAT COLORS, MINIMALIST, " : "";
+      const strongerSuffix = strongerStyle ? "NO OUTLINES, SHAPES ONLY, PURE VECTOR, SMOOTH GEOMETRY, MINIMALIST, NO BORDERS, " : "";
 
-      const imagePrompt = `A ${char} ${action}, set against ${bg}, ${colors} color palette, STYLE: flat 2D illustration, bold simplified geometric shapes, clean vector art aesthetic, no gradients on character (flat colors only), thick clean outlines, minimalist design, contemporary digital art, modern NFT illustration style, ${effectsString}, ${shapeStyle}, ${colorApp}, ${lineWork}, ${composition}, ${charDetail}, ${bgSimplicity}, ${quality}, professional graphic design, sharp clean edges, no realistic textures, no 3D rendering, no photorealistic elements, trending on artstation, 8K quality. ${strongerSuffix}Exclude: ${NEGATIVE_PROMPT}`;
+      const imagePrompt = `${char} ${action}, modern flat illustration, smooth geometric shapes with no outlines, clean vector aesthetic, limited color palette with ${colors}, overlapping layered shapes, minimalist contemporary style, simple clean design, shapes defined by color contrast, set against ${bg}, soft matte finish, professional digital illustration, behance style, ${effectsString}, ${shapeStyle}, ${colorApp}, ${lineWork}, ${composition}, ${charDetail}, ${bgSimplicity}, ${quality}, smooth organic forms, playful composition, no black outlines, no borders, 8K quality. ${strongerSuffix}Exclude: ${NEGATIVE_PROMPT}`;
 
       // 4. Construct Video Prompt
       const actionDetails = (ANIMATION_MAPPINGS.ACTIONS as any)[action] || { desc: "move dynamically", vibe: "fluid" };
