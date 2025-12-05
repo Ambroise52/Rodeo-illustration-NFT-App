@@ -1,3 +1,4 @@
+
 export type RarityTier = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
 
 export interface GeneratedData {
@@ -14,6 +15,15 @@ export interface GeneratedData {
   colorScheme?: string;
   effects?: string[];
   isFavorite?: boolean;
+}
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  totalGenerations: number;
+  totalValue: number;
+  legendaryCount: number;
+  createdAt: number;
 }
 
 export type Category = 'CHARACTERS' | 'ACTIONS' | 'BACKGROUNDS' | 'COLORS' | 'EFFECTS';

@@ -1,5 +1,10 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { supabase } from './services/supabaseClient';
+import { dataService } from './services/dataService';
+import { Session } from '@supabase/supabase-js';
+
 import Header from './components/Header';
+import Auth from './components/Auth';
 import PreviewArea from './components/PreviewArea';
 import StatsBar from './components/StatsBar';
 import CollapsibleSection from './components/CollapsibleSection';
@@ -10,11 +15,15 @@ import DetailsModal from './components/DetailsModal';
 import BatchResult from './components/BatchResult';
 import { Icons } from './components/Icons';
 import { PROMPT_OPTIONS, APP_CONFIG, ANIMATION_MAPPINGS, RARITY_CONFIG, STYLE_OPTIONS, NEGATIVE_PROMPT } from './constants';
-import { GeneratedData, RarityTier, FilterState, SortOption, ExportType } from './types';
+import { GeneratedData, RarityTier, FilterState, SortOption, ExportType, UserProfile } from './types';
 import { generateImage } from './services/geminiService';
 import { downloadBulk, downloadPackage } from './utils/exportUtils';
 
 function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [appLoading, setAppLoading] = useState(true);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationMode, setGenerationMode] = useState<'SINGLE' | 'BATCH'>('SINGLE');
   const [batchProgress, setBatchProgress] = useState(0);
@@ -30,16 +39,62 @@ function App() {
   const [sortOption, setSortOption] = useState<SortOption>('NEWEST');
   const [modalItem, setModalItem] = useState<GeneratedData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Stats State
-  const [totalGens, setTotalGens] = useState(0);
-  const [sessionValue, setSessionValue] = useState(0);
-  const [legendaryCount, setLegendaryCount] = useState(0);
-  const [bestDrop, setBestDrop] = useState(0);
-  
   const [videoPromptCopied, setVideoPromptCopied] = useState(false);
-  const [milestoneMsg, setMilestoneMsg] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // --- Auth & Initial Load ---
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) loadUserData(session);
+      else setAppLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) loadUserData(session);
+      else {
+        setUserProfile(null);
+        setHistory([]);
+        setAppLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadUserData = async (currentSession: Session) => {
+    setAppLoading(true);
+    const userId = currentSession.user.id;
+    try {
+      const [profile, userHistory] = await Promise.all([
+        dataService.getUserProfile(userId),
+        dataService.getHistory(userId)
+      ]);
+      
+      // If profile is missing (race condition on signup), construct a temporary one from session
+      if (profile) {
+        setUserProfile(profile);
+      } else {
+        setUserProfile({
+          id: userId,
+          username: currentSession.user.user_metadata?.username || 'Creator',
+          totalGenerations: 0,
+          totalValue: 0,
+          legendaryCount: 0,
+          createdAt: Date.now()
+        });
+      }
+      
+      setHistory(userHistory);
+    } catch (e) {
+      console.error("Failed to load user data", e);
+    } finally {
+      setAppLoading(false);
+    }
+  };
 
   // --- Helpers ---
 
@@ -64,7 +119,7 @@ function App() {
   const getRandomItem = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
   const determineRarity = (genCount: number): RarityTier => {
-    if ((genCount + 1) % 100 === 0) return 'LEGENDARY';
+    // Basic pseudo-random rarity logic
     const rand = Math.random();
     if (rand < RARITY_CONFIG.LEGENDARY.chance) return 'LEGENDARY';
     if (rand < RARITY_CONFIG.LEGENDARY.chance + RARITY_CONFIG.EPIC.chance) return 'EPIC';
@@ -76,7 +131,7 @@ function App() {
   // --- Generation Logic ---
 
   const createNFTData = async (forcedTraits?: any, strongerStyle: boolean = false): Promise<GeneratedData> => {
-    const rarity = determineRarity(totalGens + (generationMode === 'BATCH' ? Math.floor(Math.random() * 10) : 0));
+    const rarity = determineRarity((userProfile?.totalGenerations || 0) + (generationMode === 'BATCH' ? Math.floor(Math.random() * 10) : 0));
     const rarityConfig = RARITY_CONFIG[rarity];
 
     const char = forcedTraits?.char || getRandomItem(PROMPT_OPTIONS.CHARACTERS);
@@ -110,15 +165,20 @@ function App() {
     const videoPrompt = `Animate this image into a 5-second seamless perfect loop with no hard cuts. The ${char.toLowerCase()} should ${actionDetails.desc}, creating smooth continuous motion that loops back to the starting position perfectly. The ${bg.toLowerCase()} should ${bgMotion}. Motion should be ${actionDetails.vibe} with smooth ease-in-out timing. Camera stays fixed. Ensure the final frame matches the first frame exactly for perfect looping. Style: modern minimalist animation, smooth vector-like movement, no jump cuts, professional NFT animation quality. Maintain the flat 2D illustration style throughout with no realistic motion blur or 3D effects. Keep the bold geometric shapes and clean vector aesthetic. Animation should be smooth but preserve the graphic design quality.`;
 
     const ethValue = Math.random() * (rarityConfig.maxEth - rarityConfig.minEth) + rarityConfig.minEth;
-    const imageUrl = await generateImage(imagePrompt);
+    
+    // 1. Generate Image (Gemini)
+    const base64Image = await generateImage(imagePrompt);
+    
+    // 2. Upload to Storage (Supabase)
+    const publicUrl = await dataService.uploadImage(base64Image, session!.user.id);
 
     return {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(), // Client side UUID
       imagePrompt,
       videoPrompt,
       ethValue,
       timestamp: Date.now(),
-      imageUrl,
+      imageUrl: publicUrl,
       rarity,
       character: char,
       action,
@@ -130,16 +190,26 @@ function App() {
   };
 
   const handleGenerateSingle = async (forcedTraits?: any, strongerStyle: boolean = false) => {
+    if (!session) return;
     setIsGenerating(true);
     setGenerationMode('SINGLE');
     setError(null);
-    setBatchResults([]); // Clear batch results
+    setBatchResults([]); 
     try {
       const data = await createNFTData(forcedTraits, strongerStyle);
+      
+      // Save to DB
+      await dataService.saveGeneration(data, session.user.id);
+      
+      // Update UI state
       setCurrentView(data);
       setHistory(prev => [data, ...prev]);
-      updateStats(data);
-      showToast("NFT Generated Successfully! 🎨");
+      
+      // Refresh user stats (or optimistic update)
+      const updatedProfile = await dataService.getUserProfile(session.user.id);
+      if (updatedProfile) setUserProfile(updatedProfile);
+
+      showToast("NFT Generated & Saved! 🎨");
     } catch (e) {
       console.error(e);
       setError("Generation failed. Try again.");
@@ -149,22 +219,27 @@ function App() {
   };
 
   const handleGenerateBatch = async () => {
+    if (!session) return;
     setIsGenerating(true);
     setGenerationMode('BATCH');
     setBatchProgress(0);
     setError(null);
-    setCurrentView(null); // Clear single view
+    setCurrentView(null);
     const newBatch: GeneratedData[] = [];
 
     try {
       for (let i = 0; i < 3; i++) {
         const data = await createNFTData();
+        await dataService.saveGeneration(data, session.user.id);
         newBatch.push(data);
         setBatchProgress(i + 1);
-        updateStats(data);
       }
       setBatchResults(newBatch);
       setHistory(prev => [...newBatch, ...prev]);
+      
+      const updatedProfile = await dataService.getUserProfile(session.user.id);
+      if (updatedProfile) setUserProfile(updatedProfile);
+
       showToast("Batch Generation Complete! 🚀");
     } catch (e) {
       console.error(e);
@@ -173,22 +248,6 @@ function App() {
       setIsGenerating(false);
       setBatchProgress(0);
     }
-  };
-
-  const updateStats = (data: GeneratedData) => {
-    setTotalGens(prev => prev + 1);
-    setSessionValue(prev => prev + data.ethValue);
-    setBestDrop(prev => Math.max(prev, data.ethValue));
-    
-    if (data.rarity === 'LEGENDARY') {
-      setLegendaryCount(prev => prev + 1);
-      setMilestoneMsg("LEGENDARY DROP! 🌟");
-    }
-    
-    const count = totalGens + 1;
-    if (count === 1) setMilestoneMsg("Welcome! Your NFT journey begins!");
-    else if (count === 10) setMilestoneMsg("10 Generations! You're a Collector!");
-    else if (count === 50) setMilestoneMsg("50 Generations! You're a Curator!");
   };
 
   const handleRegenerateStronger = () => {
@@ -206,27 +265,46 @@ function App() {
 
   // --- Interaction Logic ---
 
-  const toggleFavorite = (id: string) => {
-    setHistory(prev => prev.map(item => {
-      if (item.id === id) {
-        const newState = !item.isFavorite;
-        if (newState) showToast("Added to Favorites ⭐");
-        return { ...item, isFavorite: newState };
-      }
-      return item;
-    }));
+  const toggleFavorite = async (id: string) => {
+    const item = history.find(i => i.id === id);
+    if (!item) return;
     
-    // Also update current views if needed
-    if (currentView?.id === id) setCurrentView(prev => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
-    setBatchResults(prev => prev.map(item => item.id === id ? { ...item, isFavorite: !item.isFavorite } : item));
-    if (modalItem?.id === id) setModalItem(prev => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
+    const newState = !item.isFavorite;
+    
+    // Optimistic Update
+    setHistory(prev => prev.map(i => i.id === id ? { ...i, isFavorite: newState } : i));
+    if (currentView?.id === id) setCurrentView(prev => prev ? { ...prev, isFavorite: newState } : null);
+    setBatchResults(prev => prev.map(i => i.id === id ? { ...i, isFavorite: newState } : i));
+    if (modalItem?.id === id) setModalItem(prev => prev ? { ...prev, isFavorite: newState } : null);
+
+    try {
+      await dataService.toggleFavorite(id, newState);
+      if (newState) showToast("Added to Favorites ⭐");
+    } catch (e) {
+       console.error("Failed to toggle favorite", e);
+       showToast("Failed to update favorite status");
+    }
   };
 
-  const deleteItem = (id: string) => {
+  const deleteItem = async (id: string) => {
+    const item = history.find(i => i.id === id);
+    if (!item || !item.imageUrl) return;
+
+    // Optimistic remove
     setHistory(prev => prev.filter(i => i.id !== id));
     if (currentView?.id === id) setCurrentView(null);
     setBatchResults(prev => prev.filter(i => i.id !== id));
-    showToast("Asset Deleted 🗑️");
+
+    try {
+      await dataService.deleteGeneration(id, item.imageUrl);
+      showToast("Asset Deleted 🗑️");
+      // Update profile stats (decrement count)
+      const updatedProfile = await dataService.getUserProfile(session!.user.id);
+      if (updatedProfile) setUserProfile(updatedProfile);
+    } catch (e) {
+      console.error("Failed to delete", e);
+      showToast("Failed to delete asset");
+    }
   };
 
   const handleExport = async (type: ExportType) => {
@@ -236,9 +314,6 @@ function App() {
         await downloadBulk(history, 'all-generations');
       } else if (type === 'BULK_FAVORITES') {
         await downloadBulk(history.filter(i => i.isFavorite), 'favorites');
-      } else if (type === 'BULK_SESSION') {
-        // Just exporting current history as session for now
-        await downloadBulk(history, 'session-export');
       }
       showToast("Export Ready! ✅");
     } catch (e) {
@@ -251,7 +326,6 @@ function App() {
   const filteredHistory = useMemo(() => {
     let result = [...history];
 
-    // Filter
     if (filterState.favoritesOnly) result = result.filter(i => i.isFavorite);
     if (filterState.rarity !== 'ALL') result = result.filter(i => i.rarity === filterState.rarity);
     if (filterState.search) {
@@ -263,7 +337,6 @@ function App() {
       );
     }
 
-    // Sort
     result.sort((a, b) => {
       if (sortOption === 'NEWEST') return b.timestamp - a.timestamp;
       if (sortOption === 'OLDEST') return a.timestamp - b.timestamp;
@@ -278,21 +351,6 @@ function App() {
 
     return result;
   }, [history, filterState, sortOption]);
-
-  // --- Keyboard Shortcuts ---
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (isGenerating || isModalOpen) return;
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-
-      if (e.key.toLowerCase() === 'g') handleGenerateSingle();
-      if (e.key.toLowerCase() === 'b') handleGenerateBatch();
-      if (e.key.toLowerCase() === 'f') setFilterState(prev => ({ ...prev, favoritesOnly: !prev.favoritesOnly }));
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [isGenerating, isModalOpen]);
-
 
   const openModal = (item: GeneratedData) => {
     setModalItem(item);
@@ -310,9 +368,23 @@ function App() {
     }
   };
 
+  // --- Render ---
+
+  if (appLoading) {
+    return (
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+        <Icons.RefreshCw className="w-8 h-8 text-neon-cyan animate-spin" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Auth onLogin={() => {}} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-dark-bg text-white selection:bg-neon-cyan selection:text-black pb-20 font-sans">
-      <Header />
+      <Header userProfile={userProfile} />
 
       {/* Toast Notification */}
       {toastMsg && (
@@ -338,20 +410,11 @@ function App() {
         
         {/* Top Stats */}
         <StatsBar 
-          totalCount={totalGens} 
-          sessionValue={sessionValue} 
-          legendaryCount={legendaryCount}
-          bestDrop={bestDrop}
+          totalCount={userProfile?.totalGenerations || 0} 
+          sessionValue={userProfile?.totalValue || 0} 
+          legendaryCount={userProfile?.legendaryCount || 0}
+          bestDrop={history.length > 0 ? Math.max(...history.map(h => h.ethValue)) : 0}
         />
-
-        {/* Milestone Banner */}
-        {milestoneMsg && (
-          <div className="w-full mb-6 p-4 bg-gradient-to-r from-neon-purple/20 to-neon-cyan/20 border-y border-white/10 text-center animate-pulse">
-            <span className="text-xl font-black italic tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-pink">
-              {milestoneMsg}
-            </span>
-          </div>
-        )}
 
         {/* MAIN GENERATION AREA */}
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
@@ -497,12 +560,7 @@ function App() {
       </main>
 
       <footer className="py-6 text-center text-gray-600 text-[10px] font-mono border-t border-dark-border mt-12">
-        <div className="flex justify-center gap-4 mb-2">
-           <span>G = Generate</span>
-           <span>B = Batch</span>
-           <span>F = Favorites</span>
-        </div>
-        <p>INFINITE NFT CREATOR PRO v3.0 • SYSTEM ACTIVE</p>
+        <p>INFINITE NFT CREATOR PRO v3.0 • SECURE CONNECTION ACTIVE</p>
       </footer>
     </div>
   );

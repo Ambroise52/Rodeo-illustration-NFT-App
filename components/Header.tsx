@@ -1,30 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Icons } from './Icons';
+import { UserProfile } from '../types';
+import { supabase } from '../services/supabaseClient';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  userProfile: UserProfile | null;
+}
+
+const Header: React.FC<HeaderProps> = ({ userProfile }) => {
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
-    <header className="w-full py-6 px-4 md:px-8 border-b border-dark-border bg-black/50 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <header className="w-full py-4 px-4 md:px-8 border-b border-dark-border bg-black/50 backdrop-blur-md sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-dark-card border border-neon-cyan/30 rounded-lg shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-            <Icons.Cpu className="w-8 h-8 text-neon-cyan" />
+            <Icons.Cpu className="w-6 h-6 md:w-8 md:h-8 text-neon-cyan" />
           </div>
-          <div className="text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white">
-              INFINITE <span className="text-neon-cyan">NFT</span> CREATOR <span className="text-xs align-top bg-neon-cyan text-black px-1 rounded font-bold">PRO</span>
+          <div>
+            <h1 className="text-xl md:text-2xl font-black tracking-tighter text-white">
+              INFINITE <span className="text-neon-cyan">NFT</span>
             </h1>
-            <p className="text-gray-400 text-xs md:text-sm font-mono tracking-wide mt-1">
-              GENERATE UNIQUE ASSETS + PERFECT VIDEO PROMPTS
-            </p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-dark-card border border-dark-border text-xs text-gray-400">
-             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-             System Online
-           </span>
-        </div>
+        {userProfile && (
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex items-center gap-3 bg-dark-card hover:bg-white/5 border border-dark-border py-1.5 px-3 rounded-full transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-neon-purple to-neon-cyan flex items-center justify-center text-black font-bold text-xs">
+                {userProfile.username.substring(0, 2).toUpperCase()}
+              </div>
+              <span className="text-sm font-bold text-gray-200 hidden md:block">{userProfile.username}</span>
+              <Icons.ChevronDown className="w-4 h-4 text-gray-500" />
+            </button>
+
+            {showMenu && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-dark-card border border-dark-border rounded-xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
+                 <div className="px-3 py-2 border-b border-white/5 mb-2">
+                   <p className="text-xs text-gray-500 uppercase font-mono">Signed in as</p>
+                   <p className="text-sm font-bold text-white truncate">{userProfile.username}</p>
+                 </div>
+                 <button 
+                   onClick={handleLogout}
+                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                 >
+                   <Icons.X className="w-4 h-4" /> Sign Out
+                 </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
