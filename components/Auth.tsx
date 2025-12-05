@@ -86,11 +86,11 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   return (
     <div className="bg-dark-bg flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <a href="#" className="flex items-center gap-2 self-center font-medium text-white hover:text-neon-cyan transition-colors">
-          <div className="flex size-8 items-center justify-center rounded-md">
-            <Logo className="w-8 h-8" />
+        <a href="#" className="flex flex-col items-center gap-4 self-center font-medium text-white hover:text-neon-cyan transition-colors">
+          <div className="flex items-center justify-center">
+            <Logo className="w-16 h-10" />
           </div>
-          Infinite NFT Creator
+          <span className="text-xl font-bold tracking-tight">Infinite NFT Creator</span>
         </a>
         
         {view === 'LOGIN' ? (
