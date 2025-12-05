@@ -1,10 +1,9 @@
-import { createClerkSupabaseClient, supabase as publicSupabase } from './supabaseClient';
+import { supabase } from './supabaseClient';
 import { GeneratedData, UserProfile } from '../types';
 
 export const dataService = {
   // --- Storage ---
-  async uploadImage(base64Data: string, userId: string, clerkToken: string): Promise<string> {
-    const supabase = createClerkSupabaseClient(clerkToken);
+  async uploadImage(base64Data: string, userId: string): Promise<string> {
     try {
       // Convert base64 to blob
       const res = await fetch(base64Data);
@@ -32,9 +31,7 @@ export const dataService = {
   },
 
   // --- Generations ---
-  async saveGeneration(item: GeneratedData, userId: string, clerkToken: string): Promise<void> {
-    const supabase = createClerkSupabaseClient(clerkToken);
-
+  async saveGeneration(item: GeneratedData, userId: string): Promise<void> {
     // 1. Save to DB
     const { error: insertError } = await supabase
       .from('generations')
@@ -57,8 +54,8 @@ export const dataService = {
 
     if (insertError) throw insertError;
 
-    // 2. Update User Stats
-    // We fetch the current profile first to increment values
+    // 2. Update User Stats Manually
+    // This ensures it works with the basic table structure provided without needing extra SQL functions
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
     
     if (profile) {
@@ -70,9 +67,7 @@ export const dataService = {
     }
   },
 
-  async getHistory(userId: string, clerkToken: string): Promise<GeneratedData[]> {
-    const supabase = createClerkSupabaseClient(clerkToken);
-    
+  async getHistory(userId: string): Promise<GeneratedData[]> {
     const { data, error } = await supabase
       .from('generations')
       .select('*')
@@ -98,8 +93,7 @@ export const dataService = {
     }));
   },
 
-  async toggleFavorite(id: string, isFavorite: boolean, clerkToken: string): Promise<void> {
-    const supabase = createClerkSupabaseClient(clerkToken);
+  async toggleFavorite(id: string, isFavorite: boolean): Promise<void> {
     const { error } = await supabase
       .from('generations')
       .update({ is_favorite: isFavorite })
@@ -108,8 +102,7 @@ export const dataService = {
     if (error) throw error;
   },
 
-  async deleteGeneration(id: string, imageUrl: string, clerkToken: string): Promise<void> {
-    const supabase = createClerkSupabaseClient(clerkToken);
+  async deleteGeneration(id: string, imageUrl: string): Promise<void> {
     // Delete from DB
     const { error: dbError } = await supabase.from('generations').delete().eq('id', id);
     if (dbError) throw dbError;
@@ -127,8 +120,7 @@ export const dataService = {
   },
 
   // --- Profiles ---
-  async getUserProfile(userId: string, clerkToken: string): Promise<UserProfile | null> {
-    const supabase = createClerkSupabaseClient(clerkToken);
+  async getUserProfile(userId: string): Promise<UserProfile | null> {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -144,40 +136,6 @@ export const dataService = {
       totalValue: data.total_value,
       legendaryCount: data.legendary_count,
       createdAt: new Date(data.created_at).getTime()
-    };
-  },
-
-  // Sync Clerk User to Supabase Profile
-  async ensureUserProfile(userId: string, username: string, clerkToken: string): Promise<UserProfile> {
-    const supabase = createClerkSupabaseClient(clerkToken);
-    
-    // Check if exists
-    const existing = await this.getUserProfile(userId, clerkToken);
-    if (existing) return existing;
-
-    // Create new
-    const { error } = await supabase.from('profiles').insert({
-      id: userId,
-      username: username || 'Creator',
-      total_generations: 0,
-      total_value: 0,
-      legendary_count: 0
-    });
-
-    if (error) {
-        // Handle race condition where profile might be created in parallel
-        const retry = await this.getUserProfile(userId, clerkToken);
-        if (retry) return retry;
-        throw error;
-    }
-
-    return {
-      id: userId,
-      username: username || 'Creator',
-      totalGenerations: 0,
-      totalValue: 0,
-      legendaryCount: 0,
-      createdAt: Date.now()
     };
   }
 };

@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Icons } from './Icons';
 import { Logo } from './Logo';
 import { UserProfile } from '../types';
-import { UserButton } from '@clerk/clerk-react';
+import { supabase } from '../services/supabaseClient';
 
 interface HeaderProps {
   userProfile: UserProfile | null;
 }
 
 const Header: React.FC<HeaderProps> = ({ userProfile }) => {
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     <header className="w-full py-4 px-4 md:px-8 border-b border-dark-border bg-black/50 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
@@ -23,24 +30,35 @@ const Header: React.FC<HeaderProps> = ({ userProfile }) => {
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
-          {userProfile && (
-            <div className="hidden md:block text-right">
-              <p className="text-xs text-gray-500 font-mono uppercase">Creator</p>
-              <p className="text-sm font-bold text-white">{userProfile.username}</p>
-            </div>
-          )}
-          
-          <UserButton 
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "w-9 h-9 border-2 border-neon-cyan/50",
-                userButtonPopoverCard: "bg-dark-card border border-dark-border",
-                userButtonPopoverFooter: "hidden"
-              }
-            }}
-          />
-        </div>
+        {userProfile && (
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex items-center gap-3 bg-dark-card hover:bg-white/5 border border-dark-border py-1.5 px-3 rounded-full transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-neon-purple to-neon-cyan flex items-center justify-center text-black font-bold text-xs">
+                {userProfile.username.substring(0, 2).toUpperCase()}
+              </div>
+              <span className="text-sm font-bold text-gray-200 hidden md:block">{userProfile.username}</span>
+              <Icons.ChevronDown className="w-4 h-4 text-gray-500" />
+            </button>
+
+            {showMenu && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-dark-card border border-dark-border rounded-xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
+                 <div className="px-3 py-2 border-b border-white/5 mb-2">
+                   <p className="text-xs text-gray-500 uppercase font-mono">Signed in as</p>
+                   <p className="text-sm font-bold text-white truncate">{userProfile.username}</p>
+                 </div>
+                 <button 
+                   onClick={handleLogout}
+                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                 >
+                   <Icons.X className="w-4 h-4" /> Sign Out
+                 </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
