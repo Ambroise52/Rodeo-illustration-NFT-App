@@ -11,13 +11,11 @@
   "dependencies": {
     "@google/genai": "^1.30.0",
     "@supabase/supabase-js": "2.39.0",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
-    "lucide-react": "0.300.0",
+    "react": "^19.2.0",
+    "lucide-react": "^0.555.0",
+    "react-dom": "^19.2.0",
     "jszip": "3.10.1",
-    "file-saver": "2.0.5",
-    "@clerk/clerk-react": "5.2.0",
-    "@clerk/themes": "2.1.0"
+    "file-saver": "2.0.5"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

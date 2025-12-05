@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { supabase } from './services/supabaseClient';
 import { dataService } from './services/dataService';
-import { useUser, useAuth } from '@clerk/clerk-react';
+import { Session } from '@supabase/supabase-js';
 
 import Header from './components/Header';
 import Auth from './components/Auth';
@@ -20,9 +21,7 @@ import { generateImage } from './services/geminiService';
 import { downloadBulk, downloadPackage } from './utils/exportUtils';
 
 function App() {
-  const { user, isLoaded: isUserLoaded, isSignedIn } = useUser();
-  const { getToken } = useAuth();
-  
+  const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [appLoading, setAppLoading] = useState(true);
 
@@ -46,41 +45,57 @@ function App() {
 
   // --- Auth & Initial Load ---
   useEffect(() => {
-    const initData = async () => {
-      if (isUserLoaded && isSignedIn && user) {
-        try {
-          setAppLoading(true);
-          // Important: Get token for Supabase RLS
-          const token = await getToken({ template: 'supabase' });
-          
-          if (!token) {
-             console.error("Failed to get Clerk Token. Check 'supabase' JWT template in Clerk Dashboard.");
-             setAppLoading(false);
-             return;
-          }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) loadUserData(session);
+      else setAppLoading(false);
+    });
 
-          // Sync Profile to Supabase
-          const username = user.username || user.firstName || 'Creator';
-          const profile = await dataService.ensureUserProfile(user.id, username, token);
-          setUserProfile(profile);
-
-          // Load History
-          const userHistory = await dataService.getHistory(user.id, token);
-          setHistory(userHistory);
-        } catch (e) {
-          console.error("Failed to load user data", e);
-        } finally {
-          setAppLoading(false);
-        }
-      } else if (isUserLoaded && !isSignedIn) {
-        setAppLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) loadUserData(session);
+      else {
         setUserProfile(null);
         setHistory([]);
+        setAppLoading(false);
       }
-    };
+    });
 
-    initData();
-  }, [isUserLoaded, isSignedIn, user, getToken]);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loadUserData = async (currentSession: Session) => {
+    setAppLoading(true);
+    const userId = currentSession.user.id;
+    try {
+      const [profile, userHistory] = await Promise.all([
+        dataService.getUserProfile(userId),
+        dataService.getHistory(userId)
+      ]);
+      
+      // If profile is missing (race condition on signup), construct a temporary one from session
+      if (profile) {
+        setUserProfile(profile);
+      } else {
+        setUserProfile({
+          id: userId,
+          username: currentSession.user.user_metadata?.username || 'Creator',
+          totalGenerations: 0,
+          totalValue: 0,
+          legendaryCount: 0,
+          createdAt: Date.now()
+        });
+      }
+      
+      setHistory(userHistory);
+    } catch (e) {
+      console.error("Failed to load user data", e);
+    } finally {
+      setAppLoading(false);
+    }
+  };
 
   // --- Helpers ---
 
@@ -105,6 +120,7 @@ function App() {
   const getRandomItem = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
   const determineRarity = (genCount: number): RarityTier => {
+    // Basic pseudo-random rarity logic
     const rand = Math.random();
     if (rand < RARITY_CONFIG.LEGENDARY.chance) return 'LEGENDARY';
     if (rand < RARITY_CONFIG.LEGENDARY.chance + RARITY_CONFIG.EPIC.chance) return 'EPIC';
@@ -116,12 +132,6 @@ function App() {
   // --- Generation Logic ---
 
   const createNFTData = async (forcedTraits?: any, strongerStyle: boolean = false): Promise<GeneratedData> => {
-    if (!user) throw new Error("No user");
-    
-    // Get token for this request
-    const token = await getToken({ template: 'supabase' });
-    if (!token) throw new Error("Auth token missing");
-
     const rarity = determineRarity((userProfile?.totalGenerations || 0) + (generationMode === 'BATCH' ? Math.floor(Math.random() * 10) : 0));
     const rarityConfig = RARITY_CONFIG[rarity];
 
@@ -161,7 +171,7 @@ function App() {
     const base64Image = await generateImage(imagePrompt);
     
     // 2. Upload to Storage (Supabase)
-    const publicUrl = await dataService.uploadImage(base64Image, user.id, token);
+    const publicUrl = await dataService.uploadImage(base64Image, session!.user.id);
 
     return {
       id: crypto.randomUUID(), // Client side UUID
@@ -181,26 +191,23 @@ function App() {
   };
 
   const handleGenerateSingle = async (forcedTraits?: any, strongerStyle: boolean = false) => {
-    if (!user) return;
+    if (!session) return;
     setIsGenerating(true);
     setGenerationMode('SINGLE');
     setError(null);
     setBatchResults([]); 
-    
     try {
       const data = await createNFTData(forcedTraits, strongerStyle);
-      const token = await getToken({ template: 'supabase' });
-      if (!token) throw new Error("No token");
-
+      
       // Save to DB
-      await dataService.saveGeneration(data, user.id, token);
+      await dataService.saveGeneration(data, session.user.id);
       
       // Update UI state
       setCurrentView(data);
       setHistory(prev => [data, ...prev]);
       
-      // Refresh user stats
-      const updatedProfile = await dataService.getUserProfile(user.id, token);
+      // Refresh user stats (or optimistic update)
+      const updatedProfile = await dataService.getUserProfile(session.user.id);
       if (updatedProfile) setUserProfile(updatedProfile);
 
       showToast("NFT Generated & Saved! 🎨");
@@ -213,7 +220,7 @@ function App() {
   };
 
   const handleGenerateBatch = async () => {
-    if (!user) return;
+    if (!session) return;
     setIsGenerating(true);
     setGenerationMode('BATCH');
     setBatchProgress(0);
@@ -222,19 +229,16 @@ function App() {
     const newBatch: GeneratedData[] = [];
 
     try {
-      const token = await getToken({ template: 'supabase' });
-      if (!token) throw new Error("No token");
-
       for (let i = 0; i < 3; i++) {
         const data = await createNFTData();
-        await dataService.saveGeneration(data, user.id, token);
+        await dataService.saveGeneration(data, session.user.id);
         newBatch.push(data);
         setBatchProgress(i + 1);
       }
       setBatchResults(newBatch);
       setHistory(prev => [...newBatch, ...prev]);
       
-      const updatedProfile = await dataService.getUserProfile(user.id, token);
+      const updatedProfile = await dataService.getUserProfile(session.user.id);
       if (updatedProfile) setUserProfile(updatedProfile);
 
       showToast("Batch Generation Complete! 🚀");
@@ -264,7 +268,7 @@ function App() {
 
   const toggleFavorite = async (id: string) => {
     const item = history.find(i => i.id === id);
-    if (!item || !user) return;
+    if (!item) return;
     
     const newState = !item.isFavorite;
     
@@ -275,11 +279,8 @@ function App() {
     if (modalItem?.id === id) setModalItem(prev => prev ? { ...prev, isFavorite: newState } : null);
 
     try {
-      const token = await getToken({ template: 'supabase' });
-      if (token) {
-        await dataService.toggleFavorite(id, newState, token);
-        if (newState) showToast("Added to Favorites ⭐");
-      }
+      await dataService.toggleFavorite(id, newState);
+      if (newState) showToast("Added to Favorites ⭐");
     } catch (e) {
        console.error("Failed to toggle favorite", e);
        showToast("Failed to update favorite status");
@@ -288,7 +289,7 @@ function App() {
 
   const deleteItem = async (id: string) => {
     const item = history.find(i => i.id === id);
-    if (!item || !item.imageUrl || !user) return;
+    if (!item || !item.imageUrl) return;
 
     // Optimistic remove
     setHistory(prev => prev.filter(i => i.id !== id));
@@ -296,14 +297,11 @@ function App() {
     setBatchResults(prev => prev.filter(i => i.id !== id));
 
     try {
-      const token = await getToken({ template: 'supabase' });
-      if (token) {
-        await dataService.deleteGeneration(id, item.imageUrl, token);
-        showToast("Asset Deleted 🗑️");
-        // Update profile stats
-        const updatedProfile = await dataService.getUserProfile(user.id, token);
-        if (updatedProfile) setUserProfile(updatedProfile);
-      }
+      await dataService.deleteGeneration(id, item.imageUrl);
+      showToast("Asset Deleted 🗑️");
+      // Update profile stats (decrement count)
+      const updatedProfile = await dataService.getUserProfile(session!.user.id);
+      if (updatedProfile) setUserProfile(updatedProfile);
     } catch (e) {
       console.error("Failed to delete", e);
       showToast("Failed to delete asset");
@@ -373,7 +371,7 @@ function App() {
 
   // --- Render ---
 
-  if (appLoading || (!isUserLoaded)) {
+  if (appLoading) {
     return (
       <div className="min-h-screen bg-dark-bg flex items-center justify-center">
         <Icons.RefreshCw className="w-8 h-8 text-neon-cyan animate-spin" />
@@ -381,8 +379,8 @@ function App() {
     );
   }
 
-  if (!isSignedIn) {
-    return <Auth />;
+  if (!session) {
+    return <Auth onLogin={() => {}} />;
   }
 
   return (
