@@ -19,9 +19,8 @@ const Header: React.FC<HeaderProps> = ({ userProfile }) => {
     <header className="w-full py-4 px-4 md:px-8 border-b border-dark-border bg-black/50 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          {/* Logo Container - Removed box styling for organic SVG look */}
-          <div className="group transition-transform duration-300 hover:scale-105">
-            <Logo className="w-12 h-8 md:w-16 md:h-10 drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]" />
+          <div className="p-1.5 bg-dark-card border border-dark-border rounded-xl shadow-[0_0_15px_rgba(0,240,255,0.05)] group transition-all hover:border-neon-cyan/40 hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]">
+            <Logo className="w-8 h-8 md:w-10 md:h-10 group-hover:scale-105 transition-transform duration-300" />
           </div>
           <div>
             <h1 className="text-xl md:text-2xl font-black tracking-tighter text-white">
