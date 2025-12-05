@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { Icons } from './Icons';
+import { Logo } from './Logo';
 import { TermsOfService, PrivacyPolicy } from './LegalDocs';
 import { 
   Button, 
@@ -86,8 +87,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     <div className="bg-dark-bg flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <a href="#" className="flex items-center gap-2 self-center font-medium text-white hover:text-neon-cyan transition-colors">
-          <div className="bg-neon-cyan text-black flex size-6 items-center justify-center rounded-md">
-            <Icons.Cpu className="size-4" />
+          <div className="flex size-8 items-center justify-center rounded-md">
+            <Logo className="w-8 h-8" />
           </div>
           Infinite NFT Creator
         </a>

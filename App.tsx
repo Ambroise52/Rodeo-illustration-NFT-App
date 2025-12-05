@@ -14,6 +14,7 @@ import FilterBar from './components/FilterBar';
 import DetailsModal from './components/DetailsModal';
 import BatchResult from './components/BatchResult';
 import { Icons } from './components/Icons';
+import { Logo } from './components/Logo';
 import { PROMPT_OPTIONS, APP_CONFIG, ANIMATION_MAPPINGS, RARITY_CONFIG, STYLE_OPTIONS, NEGATIVE_PROMPT } from './constants';
 import { GeneratedData, RarityTier, FilterState, SortOption, ExportType, UserProfile } from './types';
 import { generateImage } from './services/geminiService';
@@ -383,7 +384,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-dark-bg text-white selection:bg-neon-cyan selection:text-black pb-20 font-sans">
+    <div className="min-h-screen flex flex-col bg-dark-bg text-white selection:bg-neon-cyan selection:text-black font-sans">
       <Header userProfile={userProfile} />
 
       {/* Toast Notification */}
@@ -559,8 +560,16 @@ function App() {
 
       </main>
 
-      <footer className="py-6 text-center text-gray-600 text-[10px] font-mono border-t border-dark-border mt-12">
-        <p>INFINITE NFT CREATOR PRO v3.0 • SECURE CONNECTION ACTIVE</p>
+      <footer className="py-8 border-t border-dark-border mt-12 bg-black/40">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+           <div className="flex items-center gap-2">
+              <Logo className="w-6 h-6" />
+              <span className="text-xs font-bold text-gray-400">INFINITE NFT CREATOR PRO</span>
+           </div>
+           <p className="text-[10px] font-mono text-gray-600">
+             © {new Date().getFullYear()} • SECURE CONNECTION ACTIVE
+           </p>
+        </div>
       </footer>
     </div>
   );
