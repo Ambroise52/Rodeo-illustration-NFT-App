@@ -15,6 +15,17 @@ export interface GeneratedData {
   colorScheme?: string;
   effects?: string[];
   isFavorite?: boolean;
+  collectionId?: string;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  description: string;
+  creatorId: string;
+  createdAt: number;
+  previewImages?: string[]; // For UI display
+  tags: string[]; // Keywords for AI context
 }
 
 export interface UserProfile {
@@ -24,6 +35,8 @@ export interface UserProfile {
   totalValue: number;
   legendaryCount: number;
   createdAt: number;
+  avatarUrl?: string;
+  bio?: string;
 }
 
 export type Category = 'CHARACTERS' | 'ACTIONS' | 'BACKGROUNDS' | 'COLORS' | 'EFFECTS';

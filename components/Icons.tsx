@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Sparkles, 
@@ -22,7 +23,10 @@ import {
   Package,
   Grid,
   List,
-  Layers
+  Layers,
+  Bell,
+  User,
+  Plus
 } from 'lucide-react';
 
 export const Icons = {
@@ -48,5 +52,8 @@ export const Icons = {
   Package,
   Grid,
   List,
-  Layers
+  Layers,
+  Bell,
+  User,
+  Plus
 };
