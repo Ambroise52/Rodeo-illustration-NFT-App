@@ -16,7 +16,10 @@ import {
   Textarea,
   Field,
   FieldLabel,
-  FieldDescription
+  FieldDescription,
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon
 } from './UIShared';
 
 interface CollectionsProps {
@@ -189,6 +192,7 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection }) 
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadData = async () => {
     setLoading(true);
@@ -202,6 +206,14 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection }) 
 
   useEffect(() => { loadData(); }, []);
 
+  const filteredCollections = collections.filter(col => {
+    const q = searchQuery.toLowerCase();
+    return (
+      col.name.toLowerCase().includes(q) ||
+      col.tags?.some(tag => tag.toLowerCase().includes(q))
+    );
+  });
+
   if (loading) return <div className="p-12 text-center flex items-center justify-center h-[50vh]"><Icons.RefreshCw className="w-8 h-8 animate-spin mx-auto text-neon-cyan" /></div>;
 
   return (
@@ -211,25 +223,48 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection }) 
           <h2 className="text-3xl font-black text-white tracking-tighter">Explore Collections</h2>
           <p className="text-gray-400">Remix styles from community curated sets.</p>
         </div>
-        <Button onClick={() => setShowCreate(true)} className="bg-neon-cyan text-black hover:bg-white">
-          <Icons.Plus className="w-4 h-4 mr-2" /> Create New
-        </Button>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <InputGroup className="w-full md:w-64">
+             <InputGroupInput 
+                placeholder="Search collections..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+             />
+             <InputGroupAddon>
+                <Icons.Search className="w-4 h-4" />
+             </InputGroupAddon>
+          </InputGroup>
+          <Button onClick={() => setShowCreate(true)} className="bg-neon-cyan text-black hover:bg-white whitespace-nowrap">
+            <Icons.Plus className="w-4 h-4 mr-2" /> Create New
+          </Button>
+        </div>
       </div>
 
-      {collections.length === 0 ? (
+      {filteredCollections.length === 0 ? (
         <Empty>
           <EmptyHeader>
-             <EmptyMedia variant="icon"><Icons.Box className="w-8 h-8" /></EmptyMedia>
-             <EmptyTitle>No Collections Yet</EmptyTitle>
-             <EmptyDescription>Be the first to create a themed collection for others to join.</EmptyDescription>
+             {searchQuery ? (
+               <>
+                 <EmptyMedia variant="icon"><Icons.Search className="w-8 h-8" /></EmptyMedia>
+                 <EmptyTitle>No Matches Found</EmptyTitle>
+                 <EmptyDescription>Try adjusting your search terms.</EmptyDescription>
+               </>
+             ) : (
+               <>
+                 <EmptyMedia variant="icon"><Icons.Box className="w-8 h-8" /></EmptyMedia>
+                 <EmptyTitle>No Collections Yet</EmptyTitle>
+                 <EmptyDescription>Be the first to create a themed collection for others to join.</EmptyDescription>
+                 <EmptyContent>
+                    <Button onClick={() => setShowCreate(true)}>Create Collection</Button>
+                 </EmptyContent>
+               </>
+             )}
           </EmptyHeader>
-          <EmptyContent>
-            <Button onClick={() => setShowCreate(true)}>Create Collection</Button>
-          </EmptyContent>
         </Empty>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {collections.map(col => (
+          {filteredCollections.map(col => (
             <AutoSlideCard 
               key={col.id} 
               collection={col} 
