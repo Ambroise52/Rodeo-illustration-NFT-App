@@ -154,7 +154,28 @@ const SelectContext = React.createContext<{ value?: string; onValueChange?: (v: 
 
 export const Select: React.FC<SelectProps> = ({ value, onValueChange, children }) => {
   const [open, setOpen] = useState(false);
-  return <SelectContext.Provider value={{ value, onValueChange, open, setOpen }}>{children}</SelectContext.Provider>;
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <SelectContext.Provider value={{ value, onValueChange, open, setOpen }}>
+        {children}
+      </SelectContext.Provider>
+    </div>
+  );
 };
 
 export const SelectTrigger: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className, children, ...props }) => {
