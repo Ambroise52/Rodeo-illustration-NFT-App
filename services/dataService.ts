@@ -229,22 +229,45 @@ export const dataService = {
 
     if (error) throw error;
 
-    return data.map(row => ({
-      id: row.id,
-      imagePrompt: row.image_prompt,
-      videoPrompt: row.video_prompt,
-      ethValue: row.eth_value,
-      timestamp: new Date(row.created_at).getTime(),
-      imageUrl: row.image_url,
-      rarity: row.rarity_tier,
-      character: row.character,
-      action: row.action,
-      background: row.background,
-      colorScheme: row.color_scheme,
-      effects: row.effects,
-      isFavorite: row.is_favorite,
-      collectionId: row.collection_id
-    }));
+    // Manually fetch creator profiles for these items to avoid complex joins or missing FKs
+    const userIds = [...new Set(data.map(d => d.user_id))];
+    let profileMap = new Map<string, { username: string, avatarUrl: string }>();
+
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .in('id', userIds);
+      
+      if (profiles) {
+        profiles.forEach(p => {
+          profileMap.set(p.id, { username: p.username, avatarUrl: p.avatar_url });
+        });
+      }
+    }
+
+    return data.map(row => {
+      const profile = profileMap.get(row.user_id);
+      return {
+        id: row.id,
+        imagePrompt: row.image_prompt,
+        videoPrompt: row.video_prompt,
+        ethValue: row.eth_value,
+        timestamp: new Date(row.created_at).getTime(),
+        imageUrl: row.image_url,
+        rarity: row.rarity_tier,
+        character: row.character,
+        action: row.action,
+        background: row.background,
+        colorScheme: row.color_scheme,
+        effects: row.effects,
+        isFavorite: row.is_favorite,
+        collectionId: row.collection_id,
+        creatorId: row.user_id,
+        creatorName: profile?.username || 'Unknown',
+        creatorAvatar: profile?.avatarUrl
+      };
+    });
   },
 
   // --- Collection Access & Requests ---

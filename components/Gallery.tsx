@@ -3,6 +3,7 @@ import { GeneratedData } from '../types';
 import RarityBadge from './RarityBadge';
 import { APP_CONFIG, RARITY_CONFIG } from '../constants';
 import { Icons } from './Icons';
+import { Avatar, AvatarFallback, AvatarImage } from './UIShared';
 
 interface GalleryProps {
   history: GeneratedData[];
@@ -54,6 +55,17 @@ const Gallery: React.FC<GalleryProps> = ({ history, onSelect, selectedId, title 
                  <div className="absolute top-2 right-2 text-neon-pink">
                    <Icons.Heart className="w-3 h-3 fill-current" />
                  </div>
+               )}
+
+               {/* Creator Avatar (Only if creatorName exists, usually in collections) */}
+               {item.creatorName && (
+                  <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full pr-2">
+                    <Avatar className="w-4 h-4">
+                      <AvatarImage src={item.creatorAvatar} />
+                      <AvatarFallback className="text-[8px]">{item.creatorName.substring(0,1).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-[9px] font-bold text-gray-300 max-w-[50px] truncate">{item.creatorName}</span>
+                  </div>
                )}
 
                {/* Rarity Stripe */}

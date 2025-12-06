@@ -95,7 +95,7 @@ const AutoSlideCard: React.FC<{
   return (
     <Card 
       onClick={() => canView ? onView() : null}
-      className={`overflow-hidden group transition-all duration-300 flex flex-col h-full bg-dark-card border border-dark-border ${canView ? 'cursor-pointer hover:border-neon-cyan/50 hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]' : 'cursor-default border-dark-border/50'}`}
+      className={`overflow-hidden group transition-all duration-500 flex flex-col h-full bg-dark-card border border-dark-border ${canView ? 'cursor-pointer hover:border-neon-cyan/50 hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]' : 'cursor-default border-dark-border/50'}`}
     >
       <div className="aspect-[4/3] bg-black/50 relative shrink-0 overflow-hidden">
         {/* Image Layer - Show blurred if locked */}
@@ -103,7 +103,11 @@ const AutoSlideCard: React.FC<{
           <img 
             src={currentImage} 
             alt="Collection Preview" 
-            className={`w-full h-full object-cover transition-all duration-1000 ${isLocked ? 'blur-md opacity-40 scale-110' : 'opacity-100'}`}
+            className={`w-full h-full object-cover transition-transform duration-[2000ms] ease-out ${
+              isLocked 
+                ? 'blur-md opacity-40 scale-110 group-hover:scale-125 group-hover:translate-x-1 group-hover:rotate-1' 
+                : 'opacity-100 group-hover:scale-110'
+            }`}
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-gray-700 gap-2 bg-black/80">
@@ -114,10 +118,10 @@ const AutoSlideCard: React.FC<{
         {/* Dark Overlay for Lock */}
         {isLocked && (
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-4 text-center animate-in fade-in duration-500">
-             <div className="bg-black/60 p-3 rounded-full border border-white/10 mb-2 shadow-xl">
-               <Icons.Lock className="w-6 h-6 text-gray-200" />
+             <div className="bg-black/60 p-4 rounded-full border border-white/10 mb-3 shadow-2xl group-hover:shadow-neon-pink/20 transition-all duration-500 group-hover:scale-110 group-hover:border-neon-pink/30">
+               <Icons.Lock className="w-6 h-6 text-gray-300 group-hover:text-neon-pink group-hover:animate-pulse transition-colors duration-300" />
              </div>
-             <span className="font-mono text-xs uppercase font-bold text-gray-300 tracking-widest bg-black/60 px-3 py-1 rounded-full border border-white/5">
+             <span className="font-mono text-xs uppercase font-bold text-gray-300 tracking-widest bg-black/60 px-3 py-1 rounded-full border border-white/5 group-hover:border-white/20 transition-all">
                Private Collection
              </span>
           </div>

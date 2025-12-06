@@ -17,6 +17,9 @@ export interface GeneratedData {
   effects?: string[];
   isFavorite?: boolean;
   collectionId?: string;
+  creatorId?: string;
+  creatorName?: string;
+  creatorAvatar?: string;
 }
 
 export interface Collection {
