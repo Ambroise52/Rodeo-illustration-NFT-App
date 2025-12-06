@@ -75,11 +75,13 @@ const AutoSlideCard: React.FC<{
     setLoading(true);
     try {
       await dataService.requestCollectionAccess(collection.id, userId);
-      await checkAccess();
+      // Optimistic update to show Pending immediately
+      setAccessStatus({ hasAccess: false, isPending: true });
       alert('Request sent! The creator will be notified.');
     } catch (e) {
       console.error(e);
       alert('Failed to send request');
+      checkAccess(); // Revert on failure
     } finally {
       setLoading(false);
     }
@@ -588,7 +590,7 @@ const CollectionDetailView: React.FC<{
                            <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 to-neon-purple/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                            
                            {/* Avatars */}
-                           <div className="flex -space-x-3 mb-3 relative z-10">
+                           <div className="flex -space-x-2 mb-3 relative z-10">
                                {members.length === 0 ? (
                                    <div className="w-10 h-10 rounded-full bg-white/5 border-2 border-dark-card flex items-center justify-center">
                                        <Icons.User className="w-5 h-5 text-gray-600" />
