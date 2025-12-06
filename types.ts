@@ -1,4 +1,5 @@
 
+
 export type RarityTier = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
 
 export interface GeneratedData {
@@ -26,6 +27,8 @@ export interface Collection {
   createdAt: number;
   previewImages?: string[]; // For UI display
   tags: string[]; // Keywords for AI context
+  isPublic: boolean;
+  memberCount?: number;
 }
 
 export interface UserProfile {
@@ -60,3 +63,24 @@ export interface FilterState {
 }
 
 export type ExportType = 'SINGLE_IMAGE' | 'SINGLE_PROMPT' | 'SINGLE_VIDEO' | 'SINGLE_PACKAGE' | 'BULK_ALL' | 'BULK_FAVORITES' | 'BULK_RARITY' | 'BULK_SESSION';
+
+export interface CollectionRequest {
+  id: string;
+  collectionId: string;
+  userId: string;
+  status: 'PENDING' | 'APPROVED' | 'DENIED';
+  createdAt: number;
+  userName?: string;
+  collectionName?: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'REQUEST_SENT' | 'REQUEST_APPROVED' | 'REQUEST_DENIED';
+  title: string;
+  message: string;
+  collectionId?: string;
+  isRead: boolean;
+  createdAt: number;
+}

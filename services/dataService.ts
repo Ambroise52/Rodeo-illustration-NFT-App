@@ -1,6 +1,7 @@
 
+
 import { supabase } from './supabaseClient';
-import { GeneratedData, UserProfile, Collection } from '../types';
+import { GeneratedData, UserProfile, Collection, CollectionRequest, Notification } from '../types';
 
 export const dataService = {
   // --- Storage ---
@@ -132,45 +133,90 @@ export const dataService = {
         description, 
         creator_id: creatorId, 
         tags,
-        // is_public: isPublic // Uncomment when column is added to DB schema
+        is_public: isPublic
       })
       .select('id')
       .single();
+      
     if (error) throw error;
+    
+    // Auto-add creator as a member
+    await supabase.from('collection_members').insert({
+      collection_id: data.id,
+      user_id: creatorId,
+      role: 'OWNER'
+    });
+    
     return data.id;
   },
 
   async updateCollection(id: string, updates: Partial<Collection>): Promise<void> {
-    const { error } = await supabase.from('collections').update({
-        name: updates.name,
-        description: updates.description,
-        tags: updates.tags
-    }).eq('id', id);
+    const dbUpdates: any = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+    if (updates.isPublic !== undefined) dbUpdates.is_public = updates.isPublic;
+
+    const { error } = await supabase.from('collections').update(dbUpdates).eq('id', id);
     if (error) throw error;
   },
 
-  async getCollections(): Promise<Collection[]> {
-    const { data, error } = await supabase.from('collections').select('*').order('created_at', { ascending: false });
+  async getCollections(userId?: string): Promise<Collection[]> {
+    let query = supabase.from('collections').select('*');
+    
+    // If user is logged in, show public collections + their private collections + collections they're members of
+    if (userId) {
+      // 1. Get IDs of collections where user is a member
+      const { data: memberData } = await supabase
+        .from('collection_members')
+        .select('collection_id')
+        .eq('user_id', userId);
+      
+      const memberIds = memberData?.map(d => d.collection_id) || [];
+      
+      // 2. Build OR filter: is_public OR creator_id=me OR id IN memberIds
+      // Note: Supabase OR syntax needs precise formatting
+      let filter = `is_public.eq.true,creator_id.eq.${userId}`;
+      if (memberIds.length > 0) {
+        // Clean IDs to ensure safe string interpolation
+        filter += `,id.in.(${memberIds.join(',')})`;
+      }
+      
+      query = query.or(filter);
+    } else {
+      // Not logged in - only show public collections
+      query = query.eq('is_public', true);
+    }
+    
+    const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
     
-    // Fetch preview images for each collection (latest 3 items)
+    // Fetch preview images for each collection
     const collectionsWithPreviews = await Promise.all(data.map(async (col) => {
-        const { data: images } = await supabase
-           .from('generations')
-           .select('image_url')
-           .eq('collection_id', col.id)
-           .limit(3)
-           .order('created_at', { ascending: false });
-        
-        return {
-            id: col.id,
-            name: col.name,
-            description: col.description,
-            creatorId: col.creator_id,
-            createdAt: new Date(col.created_at).getTime(),
-            previewImages: images?.map(i => i.image_url) || [],
-            tags: col.tags || []
-        };
+      const { data: images } = await supabase
+        .from('generations')
+        .select('image_url')
+        .eq('collection_id', col.id)
+        .limit(3)
+        .order('created_at', { ascending: false });
+      
+      // Count members
+      const { count } = await supabase
+        .from('collection_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('collection_id', col.id);
+      
+      return {
+        id: col.id,
+        name: col.name,
+        description: col.description,
+        creatorId: col.creator_id,
+        createdAt: new Date(col.created_at).getTime(),
+        previewImages: images?.map(i => i.image_url) || [],
+        tags: col.tags || [],
+        isPublic: col.is_public !== false,
+        memberCount: count || 0
+      };
     }));
 
     return collectionsWithPreviews;
@@ -201,5 +247,213 @@ export const dataService = {
       isFavorite: row.is_favorite,
       collectionId: row.collection_id
     }));
+  },
+
+  // --- Collection Access & Requests ---
+  async checkCollectionAccess(collectionId: string, userId: string): Promise<{ hasAccess: boolean; isPending: boolean }> {
+    // Check if user is creator
+    const { data: collection } = await supabase
+      .from('collections')
+      .select('creator_id, is_public')
+      .eq('id', collectionId)
+      .single();
+    
+    if (!collection) return { hasAccess: false, isPending: false };
+    if (collection.creator_id === userId || collection.is_public) {
+      return { hasAccess: true, isPending: false };
+    }
+    
+    // Check if user is a member
+    const { data: membership } = await supabase
+      .from('collection_members')
+      .select('*')
+      .eq('collection_id', collectionId)
+      .eq('user_id', userId)
+      .maybeSingle(); // Use maybeSingle to avoid errors if not found
+    
+    if (membership) return { hasAccess: true, isPending: false };
+    
+    // Check if user has a pending request
+    const { data: request } = await supabase
+      .from('collection_requests')
+      .select('status')
+      .eq('collection_id', collectionId)
+      .eq('user_id', userId)
+      .maybeSingle(); // Use maybeSingle
+    
+    if (request?.status === 'PENDING') {
+      return { hasAccess: false, isPending: true };
+    }
+    
+    return { hasAccess: false, isPending: false };
+  },
+
+  async requestCollectionAccess(collectionId: string, userId: string): Promise<void> {
+    // Create request
+    const { error: requestError } = await supabase
+      .from('collection_requests')
+      .insert({
+        collection_id: collectionId,
+        user_id: userId,
+        status: 'PENDING'
+      });
+    
+    if (requestError) throw requestError;
+    
+    // Get collection and user info
+    const { data: collection } = await supabase
+      .from('collections')
+      .select('name, creator_id')
+      .eq('id', collectionId)
+      .single();
+    
+    const { data: user } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', userId)
+      .single();
+    
+    // Notify collection creator
+    if (collection?.creator_id) {
+      await supabase.from('notifications').insert({
+        user_id: collection.creator_id,
+        type: 'REQUEST_SENT',
+        title: 'New Join Request',
+        message: `${user?.username || 'A user'} wants to join "${collection.name}"`,
+        collection_id: collectionId,
+        is_read: false
+      });
+    }
+  },
+
+  async getPendingRequests(collectionId: string): Promise<CollectionRequest[]> {
+    // 1. Get requests
+    const { data: requests, error } = await supabase
+      .from('collection_requests')
+      .select('*')
+      .eq('collection_id', collectionId)
+      .eq('status', 'PENDING')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    if (!requests || requests.length === 0) return [];
+
+    // 2. Manually fetch profiles for these users to ensure we get usernames
+    // (Join via foreign key might fail if not explicitly set up in Postgres)
+    const userIds = requests.map(r => r.user_id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username')
+      .in('id', userIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.id, p.username]));
+    
+    return requests.map(r => ({
+      id: r.id,
+      collectionId: r.collection_id,
+      userId: r.user_id,
+      status: r.status as 'PENDING',
+      createdAt: new Date(r.created_at).getTime(),
+      userName: profileMap.get(r.user_id) || 'Unknown User'
+    }));
+  },
+
+  async approveRequest(requestId: string): Promise<void> {
+    // Get request details
+    const { data: request } = await supabase
+      .from('collection_requests')
+      .select('*, collections(name)')
+      .eq('id', requestId)
+      .single();
+    
+    if (!request) throw new Error('Request not found');
+    
+    // Update request status
+    await supabase
+      .from('collection_requests')
+      .update({ status: 'APPROVED' })
+      .eq('id', requestId);
+    
+    // Add user as member
+    await supabase.from('collection_members').insert({
+      collection_id: request.collection_id,
+      user_id: request.user_id,
+      role: 'MEMBER'
+    });
+    
+    // Notify user
+    await supabase.from('notifications').insert({
+      user_id: request.user_id,
+      type: 'REQUEST_APPROVED',
+      title: 'Request Approved!',
+      message: `Your request to join "${(request.collections as any)?.name}" was approved`,
+      collection_id: request.collection_id,
+      is_read: false
+    });
+  },
+
+  async denyRequest(requestId: string): Promise<void> {
+    const { data: request } = await supabase
+      .from('collection_requests')
+      .select('*, collections(name)')
+      .eq('id', requestId)
+      .single();
+    
+    if (!request) throw new Error('Request not found');
+    
+    await supabase
+      .from('collection_requests')
+      .update({ status: 'DENIED' })
+      .eq('id', requestId);
+    
+    // Notify user
+    await supabase.from('notifications').insert({
+      user_id: request.user_id,
+      type: 'REQUEST_DENIED',
+      title: 'Request Denied',
+      message: `Your request to join "${(request.collections as any)?.name}" was denied`,
+      collection_id: request.collection_id,
+      is_read: false
+    });
+  },
+
+  // --- Notifications ---
+  async getNotifications(userId: string): Promise<Notification[]> {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    
+    if (error) throw error;
+    
+    return data.map(n => ({
+      id: n.id,
+      userId: n.user_id,
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      collectionId: n.collection_id,
+      isRead: n.is_read,
+      createdAt: new Date(n.created_at).getTime()
+    }));
+  },
+
+  async markNotificationRead(notificationId: string): Promise<void> {
+    await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', notificationId);
+  },
+
+  async getUnreadCount(userId: string): Promise<number> {
+    const { count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_read', false);
+    
+    return count || 0;
   }
 };

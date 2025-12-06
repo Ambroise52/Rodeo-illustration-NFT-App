@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Icons } from './Icons';
 import { Logo } from './Logo';
 import { UserProfile } from '../types';
 import { supabase } from '../services/supabaseClient';
+import { dataService } from '../services/dataService';
 import { NotificationsPopover } from './Notifications';
 import { Avatar, AvatarFallback, Button } from './UIShared';
 
@@ -16,6 +18,13 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ userProfile, activeTab, onTabChange }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (userProfile) {
+      dataService.getUnreadCount(userProfile.id).then(setUnreadCount);
+    }
+  }, [userProfile]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -61,15 +70,19 @@ const Header: React.FC<HeaderProps> = ({ userProfile, activeTab, onTabChange }) 
              <div className="relative">
                 <button 
                   onClick={() => setShowNotifs(!showNotifs)}
-                  className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                  className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors relative"
                 >
                   <Icons.Bell className="w-5 h-5" />
-                  {/* <span className="absolute top-2 right-2 w-2 h-2 bg-neon-pink rounded-full animate-pulse"></span> */}
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-neon-pink rounded-full text-[10px] font-bold flex items-center justify-center text-white">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </button>
-                {showNotifs && (
+                {showNotifs && userProfile && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowNotifs(false)}></div>
-                    <NotificationsPopover />
+                    <NotificationsPopover userId={userProfile.id} />
                   </>
                 )}
              </div>
