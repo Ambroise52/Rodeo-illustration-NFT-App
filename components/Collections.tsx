@@ -97,7 +97,7 @@ const AutoSlideCard: React.FC<{ collection: Collection; onRemix: () => void }> =
   );
 };
 
-export const CreateCollectionModal: React.FC<{ onClose: () => void; onCreated: () => void; userId: string }> = ({ onClose, onCreated, userId }) => {
+export const CreateCollectionModal: React.FC<{ onClose: () => void; onCreated: (newId: string) => void; userId: string }> = ({ onClose, onCreated, userId }) => {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [currentTag, setCurrentTag] = useState("");
@@ -120,10 +120,11 @@ export const CreateCollectionModal: React.FC<{ onClose: () => void; onCreated: (
     e.preventDefault();
     setLoading(true);
     try {
-      await dataService.createCollection(name, desc, userId, tags);
-      onCreated();
+      const newId = await dataService.createCollection(name, desc, userId, tags);
+      onCreated(newId);
       onClose();
     } catch (e) {
+      console.error(e);
       alert("Failed to create collection");
     } finally {
       setLoading(false);
@@ -131,7 +132,7 @@ export const CreateCollectionModal: React.FC<{ onClose: () => void; onCreated: (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95">
       <Card className="w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">New Collection</h2>
@@ -242,7 +243,7 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection }) 
         <CreateCollectionModal 
           userId={userId} 
           onClose={() => setShowCreate(false)} 
-          onCreated={loadData} 
+          onCreated={() => { loadData(); }} 
         />
       )}
     </div>

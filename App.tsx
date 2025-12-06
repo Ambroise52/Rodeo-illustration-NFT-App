@@ -428,7 +428,14 @@ function App() {
         <CreateCollectionModal 
           userId={session.user.id} 
           onClose={() => setShowCreateCollectionModal(false)}
-          onCreated={() => loadUserData(session)}
+          onCreated={(newId) => {
+             loadUserData(session);
+             if (newId) {
+               setSelectedCollectionId(newId);
+               setActiveTab('generator');
+               showToast("Collection created & selected!");
+             }
+          }}
         />
       )}
 
