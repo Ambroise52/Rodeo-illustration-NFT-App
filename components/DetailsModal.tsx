@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GeneratedData } from '../types';
 import RarityBadge from './RarityBadge';
 import { Icons } from './Icons';
@@ -13,6 +13,7 @@ interface DetailsModalProps {
   onToggleFavorite: (id: string) => void;
   onDelete: (id: string) => void;
   onDownloadPackage: (item: GeneratedData) => void;
+  onRemix: (item: GeneratedData) => void;
 }
 
 const DetailsModal: React.FC<DetailsModalProps> = ({ 
@@ -23,8 +24,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   onPrev,
   onToggleFavorite,
   onDelete,
-  onDownloadPackage
+  onDownloadPackage,
+  onRemix
 }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -39,6 +43,14 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, item, onNext, onPrev, onClose, onToggleFavorite]);
+
+  const handleCopyVideoPrompt = () => {
+    if (item) {
+      navigator.clipboard.writeText(item.videoPrompt);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
 
   if (!isOpen || !item) return null;
 
@@ -97,6 +109,13 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             <h2 className="text-3xl font-black text-white tracking-tighter flex items-center gap-2">
               {item.ethValue.toFixed(4)} <span className="text-neon-cyan">{APP_CONFIG.CURRENCY_SYMBOL}</span>
             </h2>
+            <button
+               onClick={() => onRemix(item)}
+               className="w-full mt-2 py-2 flex items-center justify-center gap-2 bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan hover:text-black rounded transition-all text-xs font-bold"
+             >
+               <Icons.RefreshCw className="w-3 h-3" />
+               Regenerate Variant
+             </button>
           </div>
 
           {/* Traits Grid */}
@@ -118,20 +137,35 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
           {/* Prompts */}
           <div className="space-y-4 flex-1">
              <div className="space-y-2">
+               <div className="flex items-center justify-between">
+                 <h3 className="text-xs font-mono text-neon-purple uppercase flex items-center gap-2">
+                   <Icons.Video className="w-3 h-3" /> Video Prompt
+                 </h3>
+                 <button
+                   onClick={handleCopyVideoPrompt}
+                   className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all duration-200 flex items-center gap-1 ${isCopied ? 'bg-green-500 text-white scale-105' : 'bg-white text-black hover:bg-gray-200 active:scale-95'}`}
+                 >
+                   {isCopied ? (
+                     <>
+                        <Icons.Sparkles className="w-3 h-3" />
+                        COPIED!
+                     </>
+                   ) : (
+                     'COPY'
+                   )}
+                 </button>
+               </div>
+               <div className="p-3 bg-black/30 rounded border border-dark-border text-xs text-gray-400 font-mono max-h-32 overflow-y-auto">
+                 {item.videoPrompt}
+               </div>
+             </div>
+             
+             <div className="space-y-2">
                <h3 className="text-xs font-mono text-neon-pink uppercase flex items-center gap-2">
                  <Icons.Image className="w-3 h-3" /> Image Prompt
                </h3>
                <div className="p-3 bg-black/30 rounded border border-dark-border text-xs text-gray-400 font-mono max-h-32 overflow-y-auto">
                  {item.imagePrompt}
-               </div>
-             </div>
-             
-             <div className="space-y-2">
-               <h3 className="text-xs font-mono text-neon-purple uppercase flex items-center gap-2">
-                 <Icons.Video className="w-3 h-3" /> Video Prompt
-               </h3>
-               <div className="p-3 bg-black/30 rounded border border-dark-border text-xs text-gray-400 font-mono max-h-32 overflow-y-auto">
-                 {item.videoPrompt}
                </div>
              </div>
           </div>

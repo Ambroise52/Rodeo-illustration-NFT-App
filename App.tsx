@@ -264,6 +264,18 @@ function App() {
     }
   };
 
+  const handleRemix = (item: GeneratedData) => {
+    setIsModalOpen(false);
+    const traits = {
+      char: item.character,
+      action: item.action,
+      bg: item.background,
+      colors: item.colorScheme,
+      effects: item.effects || []
+    };
+    handleGenerateSingle(traits);
+  };
+
   // --- Interaction Logic ---
 
   const toggleFavorite = async (id: string) => {
@@ -405,6 +417,7 @@ function App() {
         onToggleFavorite={toggleFavorite}
         onDelete={deleteItem}
         onDownloadPackage={downloadPackage}
+        onRemix={handleRemix}
       />
 
       <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-8 flex flex-col items-center">
