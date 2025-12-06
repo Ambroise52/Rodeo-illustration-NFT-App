@@ -105,6 +105,7 @@ export const CreateCollectionModal: React.FC<{ onClose: () => void; onCreated: (
   const [desc, setDesc] = useState("");
   const [currentTag, setCurrentTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const handleAddTag = (e?: React.FormEvent) => {
@@ -123,7 +124,7 @@ export const CreateCollectionModal: React.FC<{ onClose: () => void; onCreated: (
     e.preventDefault();
     setLoading(true);
     try {
-      const newId = await dataService.createCollection(name, desc, userId, tags);
+      const newId = await dataService.createCollection(name, desc, userId, tags, isPublic);
       onCreated(newId);
       onClose();
     } catch (e) {
@@ -150,6 +151,29 @@ export const CreateCollectionModal: React.FC<{ onClose: () => void; onCreated: (
           <Field>
             <FieldLabel>Description</FieldLabel>
             <Textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="What's the vibe?" />
+          </Field>
+
+          <Field>
+            <FieldLabel>Visibility</FieldLabel>
+            <div className="flex items-center gap-2 mt-1">
+              <button
+                type="button"
+                onClick={() => setIsPublic(true)}
+                className={`flex-1 px-3 py-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-2 ${isPublic ? 'bg-neon-cyan/20 text-neon-cyan border-neon-cyan' : 'bg-transparent border-dark-border text-gray-500 hover:text-white hover:bg-white/5'}`}
+              >
+                <Icons.Globe className="w-4 h-4" /> Public
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPublic(false)}
+                className={`flex-1 px-3 py-2 rounded-lg border text-xs font-bold transition-all flex items-center justify-center gap-2 ${!isPublic ? 'bg-neon-pink/20 text-neon-pink border-neon-pink' : 'bg-transparent border-dark-border text-gray-500 hover:text-white hover:bg-white/5'}`}
+              >
+                <Icons.Lock className="w-4 h-4" /> Private
+              </button>
+            </div>
+            <FieldDescription>
+              {isPublic ? "Anyone can find and remix this collection." : "Only visible to you."}
+            </FieldDescription>
           </Field>
 
           <Field>
@@ -220,7 +244,7 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection }) 
     <div className="w-full animate-in fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h2 className="text-3xl font-black text-white tracking-tighter">Explore Collections</h2>
+          <h2 className="text-3xl font-black text-white tracking-tighter">Global Collections</h2>
           <p className="text-gray-400">Remix styles from community curated sets.</p>
         </div>
         

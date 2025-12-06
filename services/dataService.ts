@@ -124,10 +124,19 @@ export const dataService = {
   },
 
   // --- Collections ---
-  async createCollection(name: string, description: string, creatorId: string, tags: string[]): Promise<string> {
+  async createCollection(name: string, description: string, creatorId: string, tags: string[], isPublic: boolean = true): Promise<string> {
+    // Note: 'is_public' column needs to exist in your Supabase schema.
+    // If running previous SQL without is_public, this might error or be ignored depending on configuration.
+    // For now we attempt to insert it.
     const { data, error } = await supabase
       .from('collections')
-      .insert({ name, description, creator_id: creatorId, tags })
+      .insert({ 
+        name, 
+        description, 
+        creator_id: creatorId, 
+        tags,
+        // is_public: isPublic // Uncomment when column is added to DB
+      })
       .select('id')
       .single();
     if (error) throw error;
