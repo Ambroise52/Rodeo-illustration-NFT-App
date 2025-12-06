@@ -1,5 +1,3 @@
-
-
 import { supabase } from './supabaseClient';
 import { GeneratedData, UserProfile, Collection, CollectionRequest, Notification } from '../types';
 
@@ -324,6 +322,34 @@ export const dataService = {
         is_read: false
       });
     }
+  },
+
+  async getCollectionMembers(collectionId: string): Promise<{id: string, username: string, avatarUrl?: string}[]> {
+    // 1. Get user IDs from members table
+    const { data: members, error } = await supabase
+      .from('collection_members')
+      .select('user_id')
+      .eq('collection_id', collectionId)
+      .limit(5);
+
+    if (error || !members) return [];
+
+    const userIds = members.map(m => m.user_id);
+    if (userIds.length === 0) return [];
+
+    // 2. Fetch profile details manually to handle potential FK issues safely
+    const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .in('id', userIds);
+    
+    if (!profiles) return [];
+
+    return profiles.map(p => ({
+        id: p.id,
+        username: p.username,
+        avatarUrl: p.avatar_url
+    }));
   },
 
   async getPendingRequests(collectionId: string): Promise<CollectionRequest[]> {

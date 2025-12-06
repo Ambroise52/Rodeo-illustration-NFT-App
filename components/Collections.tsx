@@ -22,7 +22,8 @@ import {
   InputGroupInput,
   InputGroupAddon,
   Avatar,
-  AvatarFallback
+  AvatarFallback,
+  AvatarImage
 } from './UIShared';
 
 interface CollectionsProps {
@@ -511,6 +512,7 @@ const CollectionDetailView: React.FC<{
     const [loading, setLoading] = useState(true);
     const [showRequests, setShowRequests] = useState(false);
     const [pendingCount, setPendingCount] = useState(0);
+    const [members, setMembers] = useState<{id: string, username: string, avatarUrl?: string}[]>([]);
 
     const isCreator = collection.creatorId === currentUserId;
 
@@ -518,13 +520,19 @@ const CollectionDetailView: React.FC<{
         const loadItems = async () => {
             setLoading(true);
             try {
+                // Load items
                 const data = await dataService.getCollectionItems(collection.id);
                 setItems(data);
                 
+                // Load pending requests for creator
                 if (isCreator) {
                   const reqs = await dataService.getPendingRequests(collection.id);
                   setPendingCount(reqs.length);
                 }
+
+                // Load members
+                const mems = await dataService.getCollectionMembers(collection.id);
+                setMembers(mems);
             } catch (e) {
                 console.error("Failed to load items", e);
             } finally {
@@ -533,6 +541,12 @@ const CollectionDetailView: React.FC<{
         };
         loadItems();
     }, [collection.id, isCreator, showRequests]); 
+
+    const handleInvite = () => {
+        // Just copy current URL for now as "Invite" action
+        navigator.clipboard.writeText(window.location.href);
+        alert("Collection link copied to clipboard! Share it with your team.");
+    };
 
     return (
         <div className="animate-in fade-in slide-in-from-right-4">
@@ -545,7 +559,8 @@ const CollectionDetailView: React.FC<{
                     {/* Background decoration */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-neon-cyan/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
-                    <div className="relative z-10 max-w-2xl">
+                    {/* Left Info */}
+                    <div className="relative z-10 max-w-xl">
                         <div className="flex items-center gap-3 mb-2">
                              <h1 className="text-4xl font-black text-white tracking-tighter">{collection.name}</h1>
                              {isCreator && (
@@ -565,20 +580,64 @@ const CollectionDetailView: React.FC<{
                         </div>
                     </div>
 
-                    <div className="relative z-10 flex gap-3">
-                        {isCreator && (
-                          <Button onClick={() => setShowRequests(true)} variant="secondary" className="relative">
-                            <Icons.User className="w-4 h-4 mr-2" /> Manage Requests
-                            {pendingCount > 0 && (
-                              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-neon-pink text-[10px] font-bold text-white">
-                                {pendingCount}
-                              </span>
+                    {/* Right Info & Actions */}
+                    <div className="relative z-10 flex flex-col gap-4 items-end min-w-[280px]">
+                        
+                        {/* Team Members Card */}
+                        <div className="bg-dark-card/80 backdrop-blur-md border border-dark-border p-5 rounded-xl flex flex-col items-center text-center w-full shadow-xl relative overflow-hidden group">
+                           <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/5 to-neon-purple/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                           
+                           {/* Avatars */}
+                           <div className="flex -space-x-3 mb-3 relative z-10">
+                               {members.length === 0 ? (
+                                   <div className="w-10 h-10 rounded-full bg-white/5 border-2 border-dark-card flex items-center justify-center">
+                                       <Icons.User className="w-5 h-5 text-gray-600" />
+                                   </div>
+                               ) : (
+                                   members.map((m) => (
+                                       <Avatar key={m.id} className="w-10 h-10 border-2 border-dark-card ring-2 ring-transparent group-hover:ring-neon-cyan/20 transition-all">
+                                           <AvatarImage src={m.avatarUrl} />
+                                           <AvatarFallback className="bg-gray-800 text-gray-400 font-bold">{m.username.substring(0,2).toUpperCase()}</AvatarFallback>
+                                       </Avatar>
+                                   ))
+                               )}
+                               {(collection.memberCount || 0) > members.length && (
+                                   <div className="w-10 h-10 rounded-full bg-dark-card border-2 border-dark-border flex items-center justify-center text-[10px] font-bold text-gray-400 z-10">
+                                       +{ (collection.memberCount || 0) - members.length }
+                                   </div>
+                               )}
+                           </div>
+
+                           <h3 className="font-bold text-white mb-1 relative z-10 text-sm">
+                               {(collection.memberCount || 0) > 1 ? 'Team Members' : 'No Team Members'}
+                           </h3>
+                           <p className="text-xs text-gray-400 mb-4 leading-snug relative z-10 max-w-[200px]">
+                               {(collection.memberCount || 0) > 1 
+                                 ? `${collection.memberCount} creators contributing to this project.` 
+                                 : 'Invite your team to collaborate on this project.'}
+                           </p>
+
+                           <Button size="sm" variant="outline" className="w-full relative z-10 hover:bg-neon-cyan hover:text-black border-dark-border h-8 text-xs font-bold" onClick={handleInvite}>
+                               <Icons.Plus className="w-3 h-3 mr-1" /> Invite Members
+                           </Button>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 w-full justify-end">
+                            {isCreator && (
+                              <Button onClick={() => setShowRequests(true)} variant="secondary" className="relative flex-1">
+                                <Icons.User className="w-4 h-4 mr-2" /> Requests
+                                {pendingCount > 0 && (
+                                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-neon-pink text-[10px] font-bold text-white">
+                                    {pendingCount}
+                                  </span>
+                                )}
+                              </Button>
                             )}
-                          </Button>
-                        )}
-                        <Button onClick={onRemix} className="bg-neon-cyan text-black hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]">
-                            <Icons.Zap className="w-4 h-4 mr-2" /> Remix Style
-                        </Button>
+                            <Button onClick={onRemix} className="bg-neon-cyan text-black hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] flex-1">
+                                <Icons.Zap className="w-4 h-4 mr-2" /> Remix Style
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
