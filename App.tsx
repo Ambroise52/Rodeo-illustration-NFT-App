@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { supabase } from './services/supabaseClient';
 import { dataService } from './services/dataService';
 import { Session } from '@supabase/supabase-js';
@@ -37,6 +37,7 @@ function App() {
   const [generationMode, setGenerationMode] = useState<'SINGLE' | 'BATCH'>('SINGLE');
   const [batchProgress, setBatchProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const generationInProgress = useRef(false);
   
   // Data State
   const [currentView, setCurrentView] = useState<GeneratedData | null>(null);
@@ -185,8 +186,22 @@ function App() {
 
     const ethValue = Math.random() * (rarityConfig.maxEth - rarityConfig.minEth) + rarityConfig.minEth;
     
-    const base64Image = await generateImage(imagePrompt);
-    const publicUrl = await dataService.uploadImage(base64Image, session!.user.id);
+    let base64Image: string;
+    let publicUrl: string;
+
+    try {
+      base64Image = await generateImage(imagePrompt);
+    } catch (error) {
+      console.error("Image generation failed:", error);
+      throw new Error("Failed to generate image. The AI service might be temporarily unavailable. Please try again.");
+    }
+
+    try {
+      publicUrl = await dataService.uploadImage(base64Image, session!.user.id);
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      throw new Error("Failed to upload image to storage. Please check your connection and try again.");
+    }
 
     return {
       id: crypto.randomUUID(),
@@ -207,11 +222,19 @@ function App() {
   };
 
   const handleGenerateSingle = async (forcedTraits?: any, strongerStyle: boolean = false) => {
-    if (!session) return;
+    if (!session || generationInProgress.current) {
+        if (generationInProgress.current) {
+            showToast("Generation already in progress...");
+        }
+        return;
+    }
+    
+    generationInProgress.current = true;
     setIsGenerating(true);
     setGenerationMode('SINGLE');
     setError(null);
     setBatchResults([]); 
+    
     try {
       const data = await createNFTData(forcedTraits, strongerStyle);
       await dataService.saveGeneration(data, session.user.id);
@@ -225,14 +248,16 @@ function App() {
       showToast("NFT Generated & Saved! 🎨");
     } catch (e) {
       console.error(e);
-      setError("Generation failed. Try again.");
+      setError(e instanceof Error ? e.message : "Generation failed. Try again.");
     } finally {
       setIsGenerating(false);
+      generationInProgress.current = false;
     }
   };
 
   const handleGenerateBatch = async () => {
-    if (!session) return;
+    if (!session || generationInProgress.current) return;
+    generationInProgress.current = true;
     setIsGenerating(true);
     setGenerationMode('BATCH');
     setBatchProgress(0);
@@ -260,6 +285,7 @@ function App() {
     } finally {
       setIsGenerating(false);
       setBatchProgress(0);
+      generationInProgress.current = false;
     }
   };
 
@@ -386,12 +412,23 @@ function App() {
   };
 
   const navigateModal = (direction: 'next' | 'prev') => {
-    if (!modalItem) return;
+    if (!modalItem || !filteredHistory || filteredHistory.length === 0) {
+        console.warn("Cannot navigate: no modal item or empty history");
+        return;
+    }
+    
     const idx = filteredHistory.findIndex(i => i.id === modalItem.id);
-    if (idx === -1) return;
-    let newIdx = direction === 'next' ? idx + 1 : idx - 1;
+    if (idx === -1) {
+        console.warn("Current modal item not found in filtered history");
+        return;
+    }
+    
+    const newIdx = direction === 'next' ? idx + 1 : idx - 1;
+    
     if (newIdx >= 0 && newIdx < filteredHistory.length) {
-      setModalItem(filteredHistory[newIdx]);
+        setModalItem(filteredHistory[newIdx]);
+    } else {
+        showToast(direction === 'next' ? "No more items ahead" : "No more items behind");
     }
   };
 
@@ -455,7 +492,11 @@ function App() {
         
         {/* COLLECTIONS TAB */}
         {activeTab === 'collections' && session && (
-          <Collections userId={session.user.id} onRemixCollection={handleRemixCollection} />
+          <Collections 
+            userId={session.user.id} 
+            onRemixCollection={handleRemixCollection} 
+            onSelect={openModal}
+          />
         )}
 
         {/* PROFILE TAB */}
