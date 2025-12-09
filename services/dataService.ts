@@ -348,11 +348,20 @@ export const dataService = {
         user_id: collection.creator_id,
         type: 'REQUEST_SENT',
         title: 'New Join Request',
-        message: `${user?.username || 'Unknown User'} has requested to join ${collection.name}`,
+        message: `${user?.username || 'Unknown User'} has requested access to ${collection.name}`,
         collection_id: collectionId,
         is_read: false
       });
     }
+  },
+
+  async cancelCollectionRequest(collectionId: string, userId: string): Promise<void> {
+      await supabase
+        .from('collection_requests')
+        .delete()
+        .eq('collection_id', collectionId)
+        .eq('user_id', userId)
+        .eq('status', 'PENDING');
   },
 
   async getCollectionMembers(collectionId: string): Promise<{id: string, username: string, avatarUrl?: string}[]> {
@@ -423,6 +432,19 @@ export const dataService = {
       .single();
     
     if (!request) throw new Error('Request not found');
+
+    // Get the current user (the Creator approving the request) to include in the notification
+    const { data: { user } } = await supabase.auth.getUser();
+    let creatorName = 'The creator';
+    
+    if (user) {
+        const { data: creatorProfile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', user.id)
+            .single();
+        if (creatorProfile) creatorName = creatorProfile.username;
+    }
     
     // Update request status
     await supabase
@@ -441,8 +463,8 @@ export const dataService = {
     await supabase.from('notifications').insert({
       user_id: request.user_id,
       type: 'REQUEST_APPROVED',
-      title: 'Request Approved!',
-      message: `Your request to join "${(request.collections as any)?.name}" was approved`,
+      title: 'Request Accepted',
+      message: `${creatorName} has accepted your request to join ${request.collections?.name || 'the collection'}`,
       collection_id: request.collection_id,
       is_read: false
     });
@@ -456,6 +478,19 @@ export const dataService = {
       .single();
     
     if (!request) throw new Error('Request not found');
+
+    // Get the current user (the Creator)
+    const { data: { user } } = await supabase.auth.getUser();
+    let creatorName = 'The creator';
+    
+    if (user) {
+        const { data: creatorProfile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', user.id)
+            .single();
+        if (creatorProfile) creatorName = creatorProfile.username;
+    }
     
     await supabase
       .from('collection_requests')
@@ -466,8 +501,8 @@ export const dataService = {
     await supabase.from('notifications').insert({
       user_id: request.user_id,
       type: 'REQUEST_DENIED',
-      title: 'Request Denied',
-      message: `Your request to join "${(request.collections as any)?.name}" was denied`,
+      title: 'Request Declined',
+      message: `${creatorName} has declined your request to join ${request.collections?.name || 'the collection'}`,
       collection_id: request.collection_id,
       is_read: false
     });

@@ -89,13 +89,27 @@ const AutoSlideCard: React.FC<{
     }
   };
 
+  const handleCancelRequest = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLoading(true);
+    try {
+      await dataService.cancelCollectionRequest(collection.id, userId);
+      setStatus({ isMember: false, isPending: false, isOwner: false });
+      alert('Request cancelled.');
+    } catch (e) {
+      console.error(e);
+      alert('Failed to cancel request');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleJoin = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setLoading(true);
     try {
       await dataService.joinCollection(collection.id, userId);
       setStatus({ isMember: true, isPending: false, isOwner: false });
-      // Reload to update member count visuals instantly if needed, or rely on state
     } catch (e) {
       console.error(e);
       alert('Failed to join collection');
@@ -106,7 +120,10 @@ const AutoSlideCard: React.FC<{
 
   const currentImage = collection.previewImages?.[imgIndex] || null;
   
-  // Locked only if private AND not a member
+  // Locked logic: 
+  // If Public: Not locked (even if not member)
+  // If Private: Locked if NOT Member AND NOT Owner.
+  // Note: If Status is PENDING, isMember is false, so it IS Locked.
   const isLocked = !collection.isPublic && (!status?.isMember && !status?.isOwner);
   const canView = !isLocked;
   
@@ -144,7 +161,7 @@ const AutoSlideCard: React.FC<{
                <Icons.Lock className="w-6 h-6 text-gray-300 group-hover:text-neon-pink group-hover:animate-pulse transition-colors duration-300" />
              </div>
              <span className="font-mono text-xs uppercase font-bold text-gray-300 tracking-widest bg-black/60 px-3 py-1 rounded-full border border-white/5 group-hover:border-white/20 transition-all">
-               Private Collection
+               {status?.isPending ? 'Request Pending' : 'Private Collection'}
              </span>
           </div>
         )}
@@ -160,7 +177,7 @@ const AutoSlideCard: React.FC<{
            </div>
         </div>
 
-        {/* Remix Button - Only if access granted */}
+        {/* Remix Button - Only if access granted (NOT LOCKED) */}
         {!isLocked && (
           <button 
             onClick={(e) => { e.stopPropagation(); onRemix(); }}
@@ -220,8 +237,15 @@ const AutoSlideCard: React.FC<{
              </Button>
            ) : (
              <div className="flex items-center gap-2">
-               {/* 1. VIEW BUTTON (Always visible) */}
-               <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onView(); }}>
+               {/* 1. VIEW BUTTON */}
+               {/* Only active if unlocked. If locked/pending, disabled or hidden */}
+               <Button 
+                 variant="outline" 
+                 size="sm" 
+                 onClick={(e) => { e.stopPropagation(); if(canView) onView(); }}
+                 disabled={!canView}
+                 className={!canView ? "opacity-50 cursor-not-allowed" : ""}
+               >
                  View
                </Button>
                
@@ -240,9 +264,16 @@ const AutoSlideCard: React.FC<{
                         Join
                      </Button>
                    ) : status.isPending ? (
-                     <Button variant="secondary" size="sm" disabled className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
-                       <Icons.RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-                       Pending
+                     <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        onClick={handleCancelRequest}
+                        disabled={loading}
+                        className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30 transition-all group/cancel"
+                     >
+                       {loading ? <Icons.RefreshCw className="w-3 h-3 mr-1 animate-spin" /> : <Icons.X className="w-3 h-3 mr-1" />}
+                       <span className="group-hover/cancel:hidden">Pending</span>
+                       <span className="hidden group-hover/cancel:inline">Cancel</span>
                      </Button>
                    ) : (
                      <Button 
