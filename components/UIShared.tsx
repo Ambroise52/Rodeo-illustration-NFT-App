@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Icons } from "./Icons";
 
@@ -479,7 +480,7 @@ export const PaginationContent = React.forwardRef<HTMLUListElement, React.Compon
   ({ className, ...props }, ref) => (
     <ul
       ref={ref}
-      className={classNames("flex flex-row items-center gap-1", className)}
+      className={classNames("flex flex-row items-center gap-2", className)}
       {...props}
     />
   )
@@ -507,7 +508,12 @@ export const PaginationLink = ({
     aria-current={isActive ? "page" : undefined}
     variant={isActive ? "outline" : "ghost"}
     size={size}
-    className={classNames("w-9 h-9", isActive && "border-neon-cyan text-neon-cyan", className)}
+    className={classNames(
+      "h-9",
+      size === "icon" ? "w-9" : "w-auto px-4",
+      isActive && "border-neon-cyan text-neon-cyan", 
+      className
+    )}
     {...props}
   />
 )
