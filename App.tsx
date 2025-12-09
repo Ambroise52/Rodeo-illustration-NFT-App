@@ -6,6 +6,7 @@ import { Session } from '@supabase/supabase-js';
 
 import Header from './components/Header';
 import Auth from './components/Auth';
+import LandingPage from './components/LandingPage';
 import PreviewArea from './components/PreviewArea';
 import StatsBar from './components/StatsBar';
 import CollapsibleSection from './components/CollapsibleSection';
@@ -46,6 +47,7 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [appLoading, setAppLoading] = useState(true);
+  const [showAuth, setShowAuth] = useState(false); // New state to toggle Auth screen
 
   // Navigation State
   const [activeTab, setActiveTab] = useState<'generator' | 'collections' | 'profile'>('generator');
@@ -91,11 +93,14 @@ function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) loadUserData(session);
-      else {
+      if (session) {
+        loadUserData(session);
+      } else {
+        // Reset state on logout
         setUserProfile(null);
         setHistory([]);
         setAppLoading(false);
+        setShowAuth(false); // Go back to Landing Page
       }
     });
 
@@ -506,8 +511,12 @@ function App() {
     );
   }
 
+  // Determine which view to show for unauthenticated users
   if (!session) {
-    return <Auth onLogin={() => {}} />;
+    if (showAuth) {
+      return <Auth onLogin={() => {}} />;
+    }
+    return <LandingPage onStart={() => setShowAuth(true)} />;
   }
 
   return (

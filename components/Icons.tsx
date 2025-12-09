@@ -34,7 +34,13 @@ import {
   Lock, 
   Settings, 
   Check,
-  Loader2
+  Loader2,
+  PlayCircle,
+  Github,
+  Twitter,
+  Instagram,
+  Youtube,
+  MessageCircle
 } from 'lucide-react';
 
 export const Icons = {
@@ -71,5 +77,11 @@ export const Icons = {
   Lock,
   Settings,
   Check,
-  Loader2
+  Loader2,
+  PlayCircle,
+  Github,
+  Twitter,
+  Instagram,
+  Youtube,
+  MessageCircle
 };
