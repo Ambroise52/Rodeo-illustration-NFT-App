@@ -165,7 +165,7 @@ const AutoSlideCard: React.FC<{
       </div>
 
       <div className="p-4 flex flex-col flex-grow relative z-20">
-        <p className="text-sm text-gray-400 line-clamp-2 mb-3 h-[40px]">{collection.description || "No description provided."}</p>
+        <p className="text-sm text-gray-400 mb-3 break-words">{collection.description || "No description provided."}</p>
         
         {collection.tags && collection.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-4">
