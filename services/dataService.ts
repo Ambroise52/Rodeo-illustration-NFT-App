@@ -271,45 +271,53 @@ export const dataService = {
   },
 
   // --- Collection Access & Requests ---
-  async checkCollectionAccess(collectionId: string, userId: string): Promise<{ hasAccess: boolean; isPending: boolean }> {
-    // Check if user is creator
-    const { data: collection } = await supabase
-      .from('collections')
-      .select('creator_id, is_public')
-      .eq('id', collectionId)
-      .single();
-    
-    if (!collection) return { hasAccess: false, isPending: false };
-    if (collection.creator_id === userId || collection.is_public) {
-      return { hasAccess: true, isPending: false };
-    }
-    
-    // Check if user is a member
-    const { data: membership } = await supabase
+  async joinCollection(collectionId: string, userId: string): Promise<void> {
+    // Safety check: Is user already a member?
+    const { data: existing } = await supabase
       .from('collection_members')
-      .select('*')
+      .select('id')
       .eq('collection_id', collectionId)
       .eq('user_id', userId)
-      .maybeSingle(); 
-    
-    if (membership) return { hasAccess: true, isPending: false };
-    
-    // Check if user has a pending request
-    const { data: request } = await supabase
-      .from('collection_requests')
-      .select('status')
-      .eq('collection_id', collectionId)
-      .eq('user_id', userId)
-      .maybeSingle(); 
-    
-    if (request?.status === 'PENDING') {
-      return { hasAccess: false, isPending: true };
-    }
-    
-    return { hasAccess: false, isPending: false };
+      .maybeSingle();
+
+    if (existing) return; // Already a member, do nothing
+
+    const { error } = await supabase.from('collection_members').insert({
+      collection_id: collectionId,
+      user_id: userId,
+      role: 'MEMBER'
+    });
+    if (error) throw error;
+  },
+
+  async getCollectionStatus(collectionId: string, userId: string): Promise<{ isMember: boolean; isPending: boolean; isOwner: boolean }> {
+      // Check owner
+      const { data: col } = await supabase.from('collections').select('creator_id').eq('id', collectionId).single();
+      if (col && col.creator_id === userId) return { isMember: true, isPending: false, isOwner: true };
+
+      // Check member
+      const { data: member } = await supabase.from('collection_members').select('user_id').eq('collection_id', collectionId).eq('user_id', userId).maybeSingle();
+      if (member) return { isMember: true, isPending: false, isOwner: false };
+
+      // Check pending
+      const { data: req } = await supabase.from('collection_requests').select('status').eq('collection_id', collectionId).eq('user_id', userId).eq('status', 'PENDING').maybeSingle();
+      if (req) return { isMember: false, isPending: true, isOwner: false };
+
+      return { isMember: false, isPending: false, isOwner: false };
   },
 
   async requestCollectionAccess(collectionId: string, userId: string): Promise<void> {
+    // Safety check: Is there already a pending request?
+    const { data: existing } = await supabase
+      .from('collection_requests')
+      .select('id')
+      .eq('collection_id', collectionId)
+      .eq('user_id', userId)
+      .eq('status', 'PENDING')
+      .maybeSingle();
+
+    if (existing) return; // Request already pending
+
     // Create request
     const { error: requestError } = await supabase
       .from('collection_requests')

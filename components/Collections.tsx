@@ -48,7 +48,7 @@ const AutoSlideCard: React.FC<{
   userId: string;
 }> = ({ collection, onRemix, onView, userId }) => {
   const [imgIndex, setImgIndex] = useState(0);
-  const [accessStatus, setAccessStatus] = useState<{ hasAccess: boolean; isPending: boolean } | null>(null);
+  const [status, setStatus] = useState<{ isMember: boolean; isPending: boolean; isOwner: boolean } | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -61,21 +61,15 @@ const AutoSlideCard: React.FC<{
   }, [collection.previewImages]);
 
   useEffect(() => {
-    checkAccess();
-  }, [collection.id, userId, collection.isPublic]);
+    checkStatus();
+  }, [collection.id, userId]);
 
-  const checkAccess = async () => {
-    // If user is creator, they always have access
-    if (collection.creatorId === userId) {
-      setAccessStatus({ hasAccess: true, isPending: false });
-      return;
-    }
-
-    if (!collection.isPublic) {
-      const status = await dataService.checkCollectionAccess(collection.id, userId);
-      setAccessStatus(status);
-    } else {
-      setAccessStatus({ hasAccess: true, isPending: false });
+  const checkStatus = async () => {
+    try {
+      const s = await dataService.getCollectionStatus(collection.id, userId);
+      setStatus(s);
+    } catch (e) {
+      console.error("Failed to check status", e);
     }
   };
 
@@ -84,21 +78,36 @@ const AutoSlideCard: React.FC<{
     setLoading(true);
     try {
       await dataService.requestCollectionAccess(collection.id, userId);
-      // Optimistic update to show Pending immediately
-      setAccessStatus({ hasAccess: false, isPending: true });
+      setStatus({ isMember: false, isPending: true, isOwner: false });
       alert('Request sent! The creator will be notified.');
     } catch (e) {
       console.error(e);
       alert('Failed to send request');
-      checkAccess(); // Revert on failure
+      checkStatus();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoin = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLoading(true);
+    try {
+      await dataService.joinCollection(collection.id, userId);
+      setStatus({ isMember: true, isPending: false, isOwner: false });
+      // Reload to update member count visuals instantly if needed, or rely on state
+    } catch (e) {
+      console.error(e);
+      alert('Failed to join collection');
     } finally {
       setLoading(false);
     }
   };
 
   const currentImage = collection.previewImages?.[imgIndex] || null;
-  // Locked if private AND we don't have access
-  const isLocked = !collection.isPublic && (!accessStatus || !accessStatus.hasAccess);
+  
+  // Locked only if private AND not a member
+  const isLocked = !collection.isPublic && (!status?.isMember && !status?.isOwner);
   const canView = !isLocked;
   
   const displayedMembers = collection.memberPreviews || [];
@@ -149,7 +158,6 @@ const AutoSlideCard: React.FC<{
              <h3 className="text-xl font-bold text-white drop-shadow-md">{collection.name}</h3>
              {!collection.isPublic && !isLocked && <Icons.Lock className="w-4 h-4 text-neon-pink" />}
            </div>
-           {/* Member count removed from here, moving to footer stack */}
         </div>
 
         {/* Remix Button - Only if access granted */}
@@ -205,25 +213,52 @@ const AutoSlideCard: React.FC<{
              )}
            </div>
            
-           {accessStatus === null ? (
+           {status === null ? (
              <Button variant="secondary" size="sm" disabled className="opacity-70">
                <Icons.RefreshCw className="w-3 h-3 mr-1 animate-spin" />
                <span className="text-[10px]">Loading...</span>
              </Button>
-           ) : accessStatus.hasAccess ? (
-             <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onView(); }}>
-               View
-             </Button>
-           ) : accessStatus.isPending ? (
-             <Button variant="secondary" size="sm" disabled className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
-               <Icons.RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-               Pending
-             </Button>
            ) : (
-             <Button variant="default" size="sm" onClick={handleRequestAccess} disabled={loading} className="bg-white hover:bg-neon-cyan hover:text-black border-none text-black font-bold">
-               {loading ? <Icons.RefreshCw className="w-3 h-3 animate-spin" /> : <Icons.Lock className="w-3 h-3 mr-1" />}
-               Request Access
-             </Button>
+             <div className="flex items-center gap-2">
+               {/* 1. VIEW BUTTON (Always visible) */}
+               <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onView(); }}>
+                 View
+               </Button>
+               
+               {/* 2. JOIN / REQUEST BUTTON (Conditionally visible) */}
+               {!status.isMember && !status.isOwner && (
+                 <>
+                   {collection.isPublic ? (
+                     <Button 
+                       variant="default" 
+                       size="sm" 
+                       onClick={handleJoin} 
+                       disabled={loading} 
+                       className="bg-white hover:bg-neon-cyan hover:text-black border-none text-black font-bold"
+                     >
+                        {loading ? <Icons.RefreshCw className="w-3 h-3 animate-spin" /> : <Icons.Plus className="w-3 h-3 mr-1" />}
+                        Join
+                     </Button>
+                   ) : status.isPending ? (
+                     <Button variant="secondary" size="sm" disabled className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
+                       <Icons.RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                       Pending
+                     </Button>
+                   ) : (
+                     <Button 
+                       variant="default" 
+                       size="sm" 
+                       onClick={handleRequestAccess} 
+                       disabled={loading} 
+                       className="bg-white hover:bg-neon-pink hover:text-white border-none text-black font-bold"
+                     >
+                       {loading ? <Icons.RefreshCw className="w-3 h-3 animate-spin" /> : <Icons.Lock className="w-3 h-3 mr-1" />}
+                       Request Access
+                     </Button>
+                   )}
+                 </>
+               )}
+             </div>
            )}
         </div>
       </div>
