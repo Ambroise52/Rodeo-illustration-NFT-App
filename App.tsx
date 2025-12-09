@@ -17,6 +17,7 @@ import BatchResult from './components/BatchResult';
 import Collections, { CreateCollectionModal } from './components/Collections';
 import ProfileSettings from './components/ProfileSettings';
 import { DownloadProgress } from './components/DownloadProgress';
+import { RemixOverlay } from './components/RemixOverlay';
 
 import { Icons } from './components/Icons';
 import { Logo } from './components/Logo';
@@ -49,6 +50,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<'generator' | 'collections' | 'profile'>('generator');
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRemixing, setIsRemixing] = useState(false);
   const [generationMode, setGenerationMode] = useState<'SINGLE' | 'BATCH'>('SINGLE');
   const [highDetailMode, setHighDetailMode] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
@@ -327,11 +329,16 @@ function App() {
 
   const handleRemixCollection = async (collection: Collection) => {
     setActiveTab('generator');
-    showToast(`Remixing ${collection.name}...`);
-    // Logic: Set the collection ID so subsequent generations use its tags
     setSelectedCollectionId(collection.id);
-    // Trigger generation immediately
-    handleGenerateSingle();
+    setIsRemixing(true);
+    try {
+      // Trigger generation immediately and await it
+      await handleGenerateSingle();
+    } catch (e) {
+      console.error("Remix failed", e);
+    } finally {
+      setIsRemixing(false);
+    }
   };
 
   const handleRegenerateStronger = () => {
@@ -399,7 +406,9 @@ function App() {
   };
 
   const handleExport = async (type: ExportType) => {
-    const filename = type === 'BULK_ALL' ? 'all-generations' : 'favorites';
+    const label = type === 'BULK_ALL' ? 'All-Generations' : 'Favorites';
+    const filename = `Olly AI NFTs-${label}-${Date.now()}`;
+    
     setDownloadState({ active: true, progress: 0, filename });
     
     try {
@@ -417,7 +426,8 @@ function App() {
   };
 
   const handleDownloadPackage = async (item: GeneratedData) => {
-    setDownloadState({ active: true, progress: 0, filename: `nft-${item.id}` });
+    const filename = `Olly AI NFTs-${item.id}`;
+    setDownloadState({ active: true, progress: 0, filename });
     try {
       await downloadPackage(item, (p) => setDownloadState(prev => ({...prev, progress: p})));
       showToast("Downloaded! 📥");
@@ -519,6 +529,11 @@ function App() {
           filename={downloadState.filename} 
           progress={downloadState.progress} 
         />
+      )}
+
+      {/* Remix Overlay */}
+      {isRemixing && (
+        <RemixOverlay onCancel={() => {/* Optional cancel logic */}} />
       )}
 
       {showCreateCollectionModal && session && (
@@ -684,7 +699,7 @@ function App() {
 
                   {!batchResults.length || currentView ? (
                     <PreviewArea 
-                      isGenerating={isGenerating && generationMode === 'SINGLE'} 
+                      isGenerating={isGenerating && generationMode === 'SINGLE' && !isRemixing} 
                       hasGenerated={!!currentView} 
                       imageUrl={currentView?.imageUrl}
                       onRegenerateStronger={currentView && !isGenerating ? handleRegenerateStronger : undefined}

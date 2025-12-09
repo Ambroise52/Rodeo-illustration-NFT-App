@@ -109,7 +109,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             {downloading && (
                <div className="absolute inset-0 z-30 flex items-end justify-center pb-8 px-6 bg-black/60 backdrop-blur-sm rounded-xl animate-in fade-in">
                   <DownloadProgress 
-                    filename={`nft-${item.id.substring(0,8)}.zip`} 
+                    filename={`Olly AI NFTs-${item.id}.zip`} 
                     progress={progress} 
                     className="w-full max-w-sm"
                   />

@@ -30,7 +30,8 @@ const PreviewArea: React.FC<PreviewAreaProps> = ({
       
       const link = document.createElement('a');
       link.href = imageUrl;
-      link.download = `olly-${Date.now()}.png`;
+      // Consistent unique naming
+      link.download = `Olly AI NFTs-${Date.now()}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

@@ -32,14 +32,16 @@ export const createMetadata = (item: GeneratedData) => {
 
 export const downloadPackage = async (item: GeneratedData, onProgress?: (percent: number) => void) => {
   const zip = new JSZip();
-  const baseName = `nft-${item.id}`;
+  // New Naming Convention
+  const downloadName = `Olly AI NFTs-${item.id}`;
+  const internalPrefix = `Olly-NFT-${item.id}`;
 
   // Add Metadata
-  zip.file(`${baseName}-metadata.json`, createMetadata(item));
+  zip.file(`${internalPrefix}-metadata.json`, createMetadata(item));
   
   // Add Prompts
-  zip.file(`${baseName}-image-prompt.txt`, item.imagePrompt);
-  zip.file(`${baseName}-video-prompt.txt`, item.videoPrompt);
+  zip.file(`${internalPrefix}-image-prompt.txt`, item.imagePrompt);
+  zip.file(`${internalPrefix}-video-prompt.txt`, item.videoPrompt);
 
   // Add Image
   if (item.imageUrl) {
@@ -47,7 +49,7 @@ export const downloadPackage = async (item: GeneratedData, onProgress?: (percent
       if (onProgress) onProgress(10);
       const response = await fetch(item.imageUrl);
       const blob = await response.blob();
-      zip.file(`${baseName}-image.png`, blob);
+      zip.file(`${internalPrefix}-image.png`, blob);
       if (onProgress) onProgress(50);
     } catch (e) {
       console.error("Failed to fetch image for zip", e);
@@ -59,7 +61,7 @@ export const downloadPackage = async (item: GeneratedData, onProgress?: (percent
   });
   
   if (onProgress) onProgress(100);
-  saveAs(content, `${baseName}-package.zip`);
+  saveAs(content, `${downloadName}.zip`);
 };
 
 export const downloadBulk = async (items: GeneratedData[], zipName: string, onProgress?: (percent: number) => void) => {
@@ -68,7 +70,7 @@ export const downloadBulk = async (items: GeneratedData[], zipName: string, onPr
   let processedItems = 0;
   
   for (const item of items) {
-    const folder = zip.folder(`nft-${item.id}`);
+    const folder = zip.folder(`Olly-NFT-${item.id}`);
     if (folder) {
       folder.file(`metadata.json`, createMetadata(item));
       folder.file(`image-prompt.txt`, item.imagePrompt);

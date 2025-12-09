@@ -119,6 +119,89 @@ export const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes
 );
 CardContent.displayName = "CardContent";
 
+export const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={classNames("flex items-center p-6 pt-0", className)} {...props} />
+  )
+);
+CardFooter.displayName = "CardFooter";
+
+// --- Tabs ---
+const TabsContext = React.createContext<{ value: string; onValueChange: (v: string) => void }>({ value: '', onValueChange: () => {} });
+
+export const Tabs = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { defaultValue: string }>(
+  ({ defaultValue, className, children, ...props }, ref) => {
+    const [value, setValue] = useState(defaultValue);
+    return (
+      <TabsContext.Provider value={{ value, onValueChange: setValue }}>
+        <div ref={ref} className={classNames("w-full", className)} {...props}>
+          {children}
+        </div>
+      </TabsContext.Provider>
+    );
+  }
+);
+Tabs.displayName = "Tabs";
+
+export const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={classNames(
+        "inline-flex h-10 items-center justify-center rounded-md bg-black/40 p-1 text-gray-500 border border-dark-border",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+TabsList.displayName = "TabsList";
+
+export const TabsTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { value: string }>(
+  ({ className, value, ...props }, ref) => {
+    const { value: selectedValue, onValueChange } = React.useContext(TabsContext);
+    const isSelected = selectedValue === value;
+    return (
+      <button
+        ref={ref}
+        type="button"
+        role="tab"
+        aria-selected={isSelected}
+        onClick={() => onValueChange(value)}
+        className={classNames(
+          "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          isSelected ? "bg-dark-card text-white shadow-sm" : "hover:bg-white/5 hover:text-gray-300",
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+TabsTrigger.displayName = "TabsTrigger";
+
+export const TabsContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { value: string }>(
+  ({ className, value, children, ...props }, ref) => {
+    const { value: selectedValue } = React.useContext(TabsContext);
+    if (selectedValue !== value) return null;
+    return (
+      <div
+        ref={ref}
+        role="tabpanel"
+        className={classNames(
+          "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 animate-in fade-in slide-in-from-bottom-2",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+TabsContent.displayName = "TabsContent";
+
+
 // --- Input & Textarea ---
 export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, type, ...props }, ref) => {
@@ -416,16 +499,7 @@ export const FieldSeparator = React.forwardRef<HTMLDivElement, React.HTMLAttribu
       ref={ref}
       className={classNames("relative flex items-center justify-center my-6 w-full", className)}
       {...props}
-    >
-      <div className="absolute inset-0 flex items-center">
-        <span className="w-full border-t border-dark-border" />
-      </div>
-      {children && (
-        <div className="relative bg-dark-bg px-2 text-xs uppercase text-gray-500 font-mono">
-          {children}
-        </div>
-      )}
-    </div>
+    />
   )
 );
 FieldSeparator.displayName = "FieldSeparator";

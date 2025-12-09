@@ -7,17 +7,21 @@ import {
   Button, 
   Input, 
   Textarea, 
-  Field, 
-  FieldContent, 
-  FieldLabel, 
-  FieldDescription, 
-  FieldGroup, 
-  FieldSet, 
-  FieldLegend, 
-  FieldSeparator,
   Avatar,
   AvatarImage,
-  AvatarFallback
+  AvatarFallback,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  Label,
+  Checkbox
 } from './UIShared';
 import { Icons } from './Icons';
 
@@ -123,58 +127,90 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
           </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <FieldSet>
-          <FieldLegend>Edit Profile Details</FieldLegend>
-          <FieldDescription className="mb-6">
-            Update your public profile information on Olly.
-          </FieldDescription>
-          
-          <FieldGroup>
-            <Field orientation="responsive">
-              <FieldContent>
-                <FieldLabel htmlFor="username">Username</FieldLabel>
-                <FieldDescription>
-                   This is your public display name.
-                </FieldDescription>
-              </FieldContent>
-              <Input 
-                id="username" 
-                value={username} 
-                onChange={e => setUsername(e.target.value)} 
-                className="max-w-md"
-              />
-            </Field>
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="account">Account</TabsTrigger>
+        </TabsList>
+        <TabsContent value="profile">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Details</CardTitle>
+              <CardDescription>
+                Make changes to your public profile here. Click save when you're done.
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSubmit}>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <Label htmlFor="username">Username</Label>
+                  <Input 
+                    id="username" 
+                    value={username} 
+                    onChange={e => setUsername(e.target.value)} 
+                  />
+                  <p className="text-[0.8rem] text-gray-500">This is your public display name.</p>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea 
+                    id="bio" 
+                    value={bio} 
+                    onChange={e => setBio(e.target.value)} 
+                    className="min-h-[100px] resize-none"
+                    maxLength={160}
+                  />
+                  <p className="text-[0.8rem] text-gray-500">Write a short description about yourself (max 160 chars).</p>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" disabled={saving}>
+                  {saving ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Save Changes'}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </TabsContent>
+        <TabsContent value="account">
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Settings</CardTitle>
+              <CardDescription>
+                Manage your account preferences and view your account ID.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1">
+                <Label htmlFor="userId">User ID</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    id="userId" 
+                    value={profile.id} 
+                    readOnly 
+                    className="bg-black/20 text-gray-500" 
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => navigator.clipboard.writeText(profile.id)}
+                  >
+                    Copy
+                  </Button>
+                </div>
+                <p className="text-[0.8rem] text-gray-500">Your unique Olly ID.</p>
+              </div>
 
-            <FieldSeparator />
-
-            <Field orientation="responsive">
-               <FieldContent>
-                 <FieldLabel htmlFor="bio">Bio</FieldLabel>
-                 <FieldDescription>
-                   Write a short description about yourself (max 160 chars).
-                 </FieldDescription>
-               </FieldContent>
-               <Textarea 
-                 id="bio" 
-                 value={bio} 
-                 onChange={e => setBio(e.target.value)} 
-                 className="max-w-md min-h-[100px] resize-none"
-                 maxLength={160}
-               />
-            </Field>
-
-            <FieldSeparator>Actions</FieldSeparator>
-
-            <div className="flex justify-end gap-4">
-              <Button type="button" variant="ghost">Cancel</Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Save Changes'}
-              </Button>
-            </div>
-          </FieldGroup>
-        </FieldSet>
-      </form>
+              <div className="flex items-center justify-between p-4 border border-dark-border rounded-lg bg-black/20">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Notifications</Label>
+                  <p className="text-[0.8rem] text-gray-500">Receive alerts about collection requests.</p>
+                </div>
+                <Checkbox checked={true} disabled />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
