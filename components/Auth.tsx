@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { Icons } from './Icons';
@@ -80,8 +81,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   };
 
   // Render Legal Pages
-  if (view === 'TERMS') return <TermsOfService onBack={() => setView('SIGNUP')} />;
-  if (view === 'PRIVACY') return <PrivacyPolicy onBack={() => setView('SIGNUP')} />;
+  if (view === 'TERMS') return <TermsOfService onBack={() => setView('LOGIN')} />;
+  if (view === 'PRIVACY') return <PrivacyPolicy onBack={() => setView('LOGIN')} />;
 
   return (
     <div className="bg-dark-bg flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
@@ -220,8 +221,8 @@ function LoginForm({ className, email, setEmail, password, setPassword, onSubmit
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <button type="button" onClick={onTerms} className="hover:text-white underline underline-offset-4">Terms of Service</button>{" "}
-        and <button type="button" onClick={onPrivacy} className="hover:text-white underline underline-offset-4">Privacy Policy</button>.
+        By clicking continue, you agree to our <button type="button" onClick={onTerms} className="hover:text-white underline underline-offset-4 relative z-10 cursor-pointer">Terms of Service</button>{" "}
+        and <button type="button" onClick={onPrivacy} className="hover:text-white underline underline-offset-4 relative z-10 cursor-pointer">Privacy Policy</button>.
       </FieldDescription>
     </div>
   );
@@ -338,8 +339,8 @@ function SignupForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <button type="button" onClick={onTerms} className="hover:text-white underline underline-offset-4">Terms of Service</button>{" "}
-        and <button type="button" onClick={onPrivacy} className="hover:text-white underline underline-offset-4">Privacy Policy</button>.
+        By clicking continue, you agree to our <button type="button" onClick={onTerms} className="hover:text-white underline underline-offset-4 relative z-10 cursor-pointer">Terms of Service</button>{" "}
+        and <button type="button" onClick={onPrivacy} className="hover:text-white underline underline-offset-4 relative z-10 cursor-pointer">Privacy Policy</button>.
       </FieldDescription>
     </div>
   );

@@ -127,7 +127,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
         <FieldSet>
           <FieldLegend>Edit Profile Details</FieldLegend>
           <FieldDescription className="mb-6">
-            Update your public profile information.
+            Update your public profile information on Olly.
           </FieldDescription>
           
           <FieldGroup>

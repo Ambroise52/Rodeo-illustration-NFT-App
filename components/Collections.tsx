@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Collection, GeneratedData, CollectionRequest } from '../types';
 import { dataService } from '../services/dataService';
@@ -23,7 +22,8 @@ import {
   InputGroupAddon,
   Avatar,
   AvatarFallback,
-  AvatarImage
+  AvatarImage,
+  Kbd
 } from './UIShared';
 
 interface CollectionsProps {
@@ -258,8 +258,8 @@ export const ManageRequestsModal: React.FC<{ collectionId: string; onClose: () =
           ) : (
             <div className="space-y-4">
               {requests.map(req => (
-                <div key={req.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-dark-border">
-                  <div className="flex items-center gap-3">
+                <div key={req.id} className="flex flex-col sm:flex-row items-center justify-between p-3 bg-white/5 rounded-lg border border-dark-border gap-4">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
                     <Avatar className="h-8 w-8">
                        <AvatarFallback>{req.userName?.substring(0, 2).toUpperCase() || '??'}</AvatarFallback>
                     </Avatar>
@@ -268,21 +268,13 @@ export const ManageRequestsModal: React.FC<{ collectionId: string; onClose: () =
                       <p className="text-[10px] text-gray-500">{new Date(req.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleAction(req.id, 'approve')}
-                      className="p-2 bg-green-500/10 hover:bg-green-500/20 text-green-500 rounded-md transition-colors"
-                      title="Approve"
-                    >
-                      <Icons.Sparkles className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleAction(req.id, 'deny')}
-                      className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-md transition-colors"
-                      title="Deny"
-                    >
-                      <Icons.X className="w-4 h-4" />
-                    </button>
+                  <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto justify-end">
+                    <Button variant="outline" size="sm" className="pr-2 bg-green-500/10 hover:bg-green-500/20 text-green-500 border-green-500/20 h-8" onClick={() => handleAction(req.id, 'approve')}>
+                      Accept <Kbd className="bg-green-500/20 text-green-300 border-green-500/20">⏎</Kbd>
+                    </Button>
+                    <Button variant="outline" size="sm" className="pr-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20 h-8" onClick={() => handleAction(req.id, 'deny')}>
+                      Cancel <Kbd className="bg-red-500/20 text-red-300 border-red-500/20">Esc</Kbd>
+                    </Button>
                   </div>
                 </div>
               ))}

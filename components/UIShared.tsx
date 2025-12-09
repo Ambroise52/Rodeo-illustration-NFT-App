@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Icons } from "./Icons";
 
@@ -45,6 +44,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 Button.displayName = "Button";
+
+// --- Kbd ---
+export const Kbd = ({ children, className }: { children?: React.ReactNode; className?: string }) => (
+  <kbd className={classNames("pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-white/20 bg-white/10 px-1.5 font-mono text-[10px] font-medium text-gray-400 opacity-100", className)}>
+    {children}
+  </kbd>
+);
 
 // --- Card ---
 export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -148,7 +154,7 @@ InputGroupAddon.displayName = "InputGroupAddon";
 interface SelectProps {
   value?: string;
   onValueChange?: (value: string) => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 const SelectContext = React.createContext<{ value?: string; onValueChange?: (v: string) => void; open: boolean; setOpen: (v: boolean) => void }>({ open: false, setOpen: () => {} });
 
@@ -198,7 +204,7 @@ export const SelectValue: React.FC<{ placeholder?: string }> = ({ placeholder })
   return <span className="pointer-events-none block truncate">{value || placeholder}</span>;
 };
 
-export const SelectContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SelectContent: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { open } = React.useContext(SelectContext);
   if (!open) return null;
   return (
@@ -208,7 +214,7 @@ export const SelectContent: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
-export const SelectItem: React.FC<{ value: string; children: React.ReactNode; className?: string }> = ({ value, children, className }) => {
+export const SelectItem: React.FC<{ value: string; children?: React.ReactNode; className?: string }> = ({ value, children, className }) => {
   const { onValueChange, setOpen } = React.useContext(SelectContext);
   return (
     <div 
@@ -239,7 +245,7 @@ export const DropdownMenu = ({ children }: { children?: React.ReactNode }) => {
   }, [open]);
 
   return (
-    <div ref={ref} className="relative inline-block w-full">
+    <div ref={ref} className="relative inline-block w-full text-left">
       <SelectContext.Provider value={{ open, setOpen, value: '', onValueChange: () => {} }}>
         {children}
       </SelectContext.Provider>
@@ -271,12 +277,13 @@ export const DropdownMenuContent = ({ className, align, children }: { className?
   );
 };
 
-export const DropdownMenuItem = ({ className, onClick, children }: { className?: string, onClick?: () => void, children?: React.ReactNode }) => {
+export const DropdownMenuItem: React.FC<React.HTMLAttributes<HTMLDivElement> & { key?: React.Key }> = ({ className, onClick, children, ...props }) => {
     const { setOpen } = React.useContext(SelectContext);
     return (
         <div 
-            onClick={(e) => { onClick?.(); setOpen(false); e.stopPropagation(); }}
+            onClick={(e) => { onClick?.(e); setOpen(false); e.stopPropagation(); }}
             className={classNames("relative flex cursor-pointer select-none items-center rounded-sm text-sm outline-none transition-colors hover:bg-white/10 focus:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className)}
+            {...props}
         >
             {children}
         </div>

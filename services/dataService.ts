@@ -1,3 +1,4 @@
+
 import { supabase } from './supabaseClient';
 import { GeneratedData, UserProfile, Collection, CollectionRequest, Notification } from '../types';
 
@@ -320,7 +321,7 @@ export const dataService = {
         user_id: collection.creator_id,
         type: 'REQUEST_SENT',
         title: 'New Join Request',
-        message: `${user?.username || 'A user'} wants to join "${collection.name}"`,
+        message: `${user?.username || 'Unknown User'} has requested to join ${collection.name}`,
         collection_id: collectionId,
         is_read: false
       });

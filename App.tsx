@@ -49,6 +49,7 @@ function App() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationMode, setGenerationMode] = useState<'SINGLE' | 'BATCH'>('SINGLE');
+  const [highDetailMode, setHighDetailMode] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const generationInProgress = useRef(false);
@@ -180,7 +181,17 @@ function App() {
     const charDetail = getRandomItem(STYLE_OPTIONS.CHAR_DETAILS);
     const bgSimplicity = getRandomItem(STYLE_OPTIONS.BG_SIMPLICITIES);
     const quality = getRandomItem(STYLE_OPTIONS.QUALITY_BOOSTERS);
-    const strongerSuffix = strongerStyle ? "NO OUTLINES, SHAPES ONLY, PURE VECTOR, SMOOTH GEOMETRY, MINIMALIST, NO BORDERS, " : "";
+    
+    // High Detail Mode Logic
+    const qualityPrefix = strongerStyle 
+      ? "masterpiece, best quality, ultra-detailed, 8k resolution, sharp focus, perfectly rendered, " 
+      : "";
+    const styleSuffix = strongerStyle 
+      ? "NO OUTLINES, SHAPES ONLY, PURE VECTOR, SMOOTH GEOMETRY, MINIMALIST, NO BORDERS, " 
+      : "";
+    const extraNegative = strongerStyle 
+      ? ", blur, low quality, pixelated, fuzzy, noise, artifacts, distortion" 
+      : "";
 
     // -- Collection Logic --
     // Find selected collection to inject tags
@@ -192,7 +203,7 @@ function App() {
         }
     }
 
-    const imagePrompt = `${char} ${action}, modern flat illustration, smooth geometric shapes with no outlines, clean vector aesthetic, limited color palette with ${colors}, overlapping layered shapes, minimalist contemporary style, simple clean design, shapes defined by color contrast, set against ${bg}, soft matte finish, professional digital illustration, behance style, ${effectsString}, ${shapeStyle}, ${colorApp}, ${lineWork}, ${composition}, ${charDetail}, ${bgSimplicity}, ${quality}, smooth organic forms, playful composition, no black outlines, no borders, 8K quality${collectionPromptSuffix}. ${strongerSuffix}Exclude: ${NEGATIVE_PROMPT}`;
+    const imagePrompt = `${qualityPrefix}${char} ${action}, modern flat illustration, smooth geometric shapes with no outlines, clean vector aesthetic, limited color palette with ${colors}, overlapping layered shapes, minimalist contemporary style, simple clean design, shapes defined by color contrast, set against ${bg}, soft matte finish, professional digital illustration, behance style, ${effectsString}, ${shapeStyle}, ${colorApp}, ${lineWork}, ${composition}, ${charDetail}, ${bgSimplicity}, ${quality}, smooth organic forms, playful composition, no black outlines, no borders, 8K quality${collectionPromptSuffix}. ${styleSuffix}Exclude: ${NEGATIVE_PROMPT}${extraNegative}`;
 
     const actionDetails = (ANIMATION_MAPPINGS.ACTIONS as any)[action] || { desc: "move dynamically", vibe: "fluid" };
     const bgMotion = (ANIMATION_MAPPINGS.BACKGROUNDS as any)[bg] || "move gently";
@@ -250,7 +261,9 @@ function App() {
     setBatchResults([]); 
     
     try {
-      const data = await createNFTData(forcedTraits, strongerStyle);
+      // Use forced strongerStyle if provided (e.g. from Remix), otherwise use state
+      const effectiveStrongerStyle = strongerStyle || highDetailMode;
+      const data = await createNFTData(forcedTraits, effectiveStrongerStyle);
       await dataService.saveGeneration(data, session.user.id);
       
       setCurrentView(data);
@@ -281,7 +294,8 @@ function App() {
 
     try {
       for (let i = 0; i < 3; i++) {
-        const data = await createNFTData();
+        // Apply high detail mode to batch as well
+        const data = await createNFTData(undefined, highDetailMode);
         await dataService.saveGeneration(data, session.user.id);
         newBatch.push(data);
         setBatchProgress(i + 1);
@@ -321,6 +335,7 @@ function App() {
         colors: currentView.colorScheme,
         effects: []
       };
+      // Explicitly pass true for strongerStyle
       handleGenerateSingle(traits, true);
     }
   };
@@ -546,7 +561,7 @@ function App() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="w-[300px] bg-dark-card border-dark-border" align="start">
-                        <DropdownMenuItem onClick={() => setSelectedCollectionId('none')}>
+                        <DropdownMenuItem onClick={() => setSelectedCollectionId('none')} className="p-0">
                            <Item size="sm" className="w-full p-2">
                               <ItemMedia>
                                 <div className="size-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
@@ -562,7 +577,7 @@ function App() {
                         
                         <div className="my-1 h-px bg-white/10" />
                         
-                        <DropdownMenuItem onClick={() => setShowCreateCollectionModal(true)}>
+                        <DropdownMenuItem onClick={() => setShowCreateCollectionModal(true)} className="p-0">
                             <Item size="sm" className="w-full p-2">
                                 <ItemMedia>
                                     <div className="size-8 rounded-full bg-neon-cyan/20 flex items-center justify-center border border-neon-cyan/50">
@@ -579,7 +594,7 @@ function App() {
                         <div className="my-1 h-px bg-white/10" />
 
                         {userCollections.map((col) => (
-                          <DropdownMenuItem key={col.id} onClick={() => setSelectedCollectionId(col.id)}>
+                          <DropdownMenuItem key={col.id} onClick={() => setSelectedCollectionId(col.id)} className="p-0">
                              <Item size="sm" className="w-full p-2">
                                 <ItemMedia>
                                    <Avatar className="size-8">
@@ -600,10 +615,22 @@ function App() {
                     </DropdownMenu>
                   </div>
 
+                  {/* High Detail Toggle */}
+                  <div className="flex items-center justify-between mb-3 px-1">
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Generation Mode</span>
+                      <button 
+                        onClick={() => setHighDetailMode(!highDetailMode)}
+                        className={`flex items-center gap-2 text-[10px] font-bold px-3 py-1.5 rounded-full transition-all border ${highDetailMode ? 'bg-neon-purple/20 text-neon-purple border-neon-purple shadow-[0_0_10px_rgba(189,0,255,0.3)]' : 'bg-black/40 text-gray-500 border-dark-border hover:border-gray-400'}`}
+                      >
+                        <Icons.Sparkles className={`w-3 h-3 ${highDetailMode ? 'fill-current' : ''}`} />
+                        High Detail
+                      </button>
+                  </div>
+
                   {/* Generation Buttons */}
                   <div className="flex gap-2 mb-6">
                     <button
-                      onClick={() => handleGenerateSingle()}
+                      onClick={() => handleGenerateSingle(undefined, highDetailMode)}
                       disabled={isGenerating}
                       className="flex-1 py-4 bg-neon-cyan text-black font-black text-lg tracking-wider hover:bg-white hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-[0_0_15px_rgba(0,240,255,0.3)]"
                     >
