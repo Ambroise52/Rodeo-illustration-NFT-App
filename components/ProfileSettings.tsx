@@ -22,7 +22,13 @@ import {
   CardContent,
   CardFooter,
   Label,
-  Checkbox
+  Checkbox,
+  Switch,
+  FieldGroup,
+  Field,
+  FieldContent,
+  FieldLabel,
+  FieldDescription
 } from './UIShared';
 import { Icons } from './Icons';
 
@@ -40,6 +46,9 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
   const [currentPass, setCurrentPass] = useState('');
   const [newPass, setNewPass] = useState('');
   const [passLoading, setPassLoading] = useState(false);
+  
+  // Security State
+  const [twoFactor, setTwoFactor] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -124,6 +133,12 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
       } finally {
           setSaving(false);
       }
+  };
+
+  const handleSecuritySave = () => {
+      // Logic to actually save 2FA pref would go here
+      // For now we just alert
+      alert(`Security preference saved: 2FA is ${twoFactor ? 'Enabled' : 'Disabled'}`);
   };
 
   return (
@@ -223,77 +238,110 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
           </Card>
         </TabsContent>
         <TabsContent value="account">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Settings</CardTitle>
-              <CardDescription>
-                Manage your account preferences and view your account ID.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1">
-                <Label htmlFor="userId">User ID</Label>
-                <div className="flex gap-2">
-                  <Input 
-                    id="userId" 
-                    value={profile.id} 
-                    readOnly 
-                    className="bg-black/20 text-gray-500" 
-                  />
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => navigator.clipboard.writeText(profile.id)}
-                  >
-                    Copy
-                  </Button>
-                </div>
-                <p className="text-[0.8rem] text-gray-500">Your unique Olly ID.</p>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border border-dark-border rounded-lg bg-black/20">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Notifications</Label>
-                  <p className="text-[0.8rem] text-gray-500">Receive alerts about collection requests.</p>
-                </div>
-                <Checkbox checked={true} disabled />
-              </div>
-
-              {/* Password Change Section */}
-              <div className="pt-6 border-t border-dark-border mt-6">
-                <div className="mb-4">
-                  <h3 className="text-lg font-bold text-white">Password</h3>
-                  <p className="text-sm text-gray-500">Change your password here. After saving, you'll be logged out.</p>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <Label htmlFor="currentPassword">Current password</Label>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Settings</CardTitle>
+                <CardDescription>
+                  Manage your account preferences and view your account ID.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <Label htmlFor="userId">User ID</Label>
+                  <div className="flex gap-2">
                     <Input 
-                        type="password" 
-                        id="currentPassword" 
-                        value={currentPass} 
-                        onChange={(e) => setCurrentPass(e.target.value)} 
+                      id="userId" 
+                      value={profile.id} 
+                      readOnly 
+                      className="bg-black/20 text-gray-500" 
                     />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => navigator.clipboard.writeText(profile.id)}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                  <p className="text-[0.8rem] text-gray-500">Your unique Olly ID.</p>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border border-dark-border rounded-lg bg-black/20">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Notifications</Label>
+                    <p className="text-[0.8rem] text-gray-500">Receive alerts about collection requests.</p>
+                  </div>
+                  <Checkbox checked={true} disabled />
+                </div>
+
+                {/* Password Change Section */}
+                <div className="pt-6 border-t border-dark-border mt-6">
+                  <div className="mb-4">
+                    <h3 className="text-lg font-bold text-white">Password</h3>
+                    <p className="text-sm text-gray-500">Change your password here. After saving, you'll be logged out.</p>
                   </div>
                   
-                  <div className="space-y-1">
-                    <Label htmlFor="newPassword">New password</Label>
-                    <Input 
-                        type="password" 
-                        id="newPassword" 
-                        value={newPass} 
-                        onChange={(e) => setNewPass(e.target.value)} 
-                    />
-                  </div>
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="currentPassword">Current password</Label>
+                      <Input 
+                          type="password" 
+                          id="currentPassword" 
+                          value={currentPass} 
+                          onChange={(e) => setCurrentPass(e.target.value)} 
+                      />
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <Label htmlFor="newPassword">New password</Label>
+                      <Input 
+                          type="password" 
+                          id="newPassword" 
+                          value={newPass} 
+                          onChange={(e) => setNewPass(e.target.value)} 
+                      />
+                    </div>
 
-                  <Button type="button" onClick={handlePasswordUpdate} disabled={passLoading}>
-                     {passLoading ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Save password'}
-                  </Button>
+                    <Button type="button" onClick={handlePasswordUpdate} disabled={passLoading}>
+                      {passLoading ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Save password'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Security Settings Card (2FA) */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Security Settings</CardTitle>
+                <CardDescription>
+                  Manage your account security preferences.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FieldGroup>
+                  <Field orientation="horizontal">
+                    <FieldContent>
+                      <FieldLabel>Multi-factor authentication</FieldLabel>
+                      <FieldDescription>
+                        Enable multi-factor authentication to secure your account.
+                      </FieldDescription>
+                    </FieldContent>
+                    <Switch
+                      checked={twoFactor}
+                      onCheckedChange={setTwoFactor}
+                    />
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+              <CardFooter>
+                <Button type="button" onClick={handleSecuritySave}>
+                  Save
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

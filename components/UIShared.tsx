@@ -258,6 +258,33 @@ export const Checkbox = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttr
 );
 Checkbox.displayName = "Checkbox";
 
+// --- Switch ---
+export const Switch = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { checked?: boolean; onCheckedChange?: (checked: boolean) => void }>(
+  ({ className, checked, onCheckedChange, ...props }, ref) => (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      ref={ref}
+      onClick={() => onCheckedChange?.(!checked)}
+      className={classNames(
+        "peer inline-flex h-[24px] w-[44px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
+        checked ? "bg-neon-cyan" : "bg-white/10",
+        className
+      )}
+      {...props}
+    >
+      <span
+        className={classNames(
+          "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform",
+          checked ? "translate-x-5 text-black" : "translate-x-0"
+        )}
+      />
+    </button>
+  )
+);
+Switch.displayName = "Switch";
+
 // --- Label ---
 export const Label = React.forwardRef<HTMLLabelElement, React.LabelHTMLAttributes<HTMLLabelElement>>(
   ({ className, ...props }, ref) => (
@@ -461,7 +488,7 @@ FieldGroup.displayName = "FieldGroup";
 
 export const Field = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { orientation?: 'vertical' | 'horizontal' | 'responsive' }>(
   ({ className, orientation = 'vertical', ...props }, ref) => {
-    const orientationClass = orientation === 'horizontal' ? 'flex-row items-center gap-4' 
+    const orientationClass = orientation === 'horizontal' ? 'flex-row items-center justify-between gap-4' 
       : orientation === 'responsive' ? 'flex flex-col md:flex-row md:items-start md:gap-8' 
       : 'flex-col gap-2';
     return (
@@ -492,6 +519,18 @@ export const FieldDescription = React.forwardRef<HTMLParagraphElement, React.HTM
   )
 );
 FieldDescription.displayName = "FieldDescription";
+
+export const FieldError = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement> & { errors?: any[] }>(
+  ({ className, errors, ...props }, ref) => {
+    if (!errors || errors.length === 0) return null;
+    return (
+      <p ref={ref} className={classNames("text-xs font-medium text-red-500", className)} {...props}>
+        {errors.join(', ')}
+      </p>
+    );
+  }
+);
+FieldError.displayName = "FieldError";
 
 export const FieldSeparator = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => (
