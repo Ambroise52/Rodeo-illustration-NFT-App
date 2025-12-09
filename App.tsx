@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { supabase } from './services/supabaseClient';
 import { dataService } from './services/dataService';
@@ -677,7 +676,7 @@ function App() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
            <div className="flex items-center gap-2">
               <Logo className="w-6 h-6" />
-              <span className="text-xs font-bold text-gray-400">INFINITE NFT CREATOR PRO</span>
+              <span className="text-xs font-bold text-gray-400">OLLY</span>
            </div>
            <p className="text-[10px] font-mono text-gray-600">
              © {new Date().getFullYear()} • SECURE CONNECTION ACTIVE

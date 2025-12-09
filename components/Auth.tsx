@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { Icons } from './Icons';
@@ -91,7 +90,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           <div className="flex items-center justify-center">
             <Logo className="w-16 h-10" />
           </div>
-          <span className="text-xl font-bold tracking-tight">Infinite NFT Creator</span>
+          <span className="text-xl font-bold tracking-tight">Olly</span>
         </a>
         
         {view === 'LOGIN' ? (
@@ -105,6 +104,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             onGoogle={handleGoogleLogin}
             loading={loading}
             error={error}
+            onTerms={() => setView('TERMS')}
+            onPrivacy={() => setView('PRIVACY')}
           />
         ) : (
           <SignupForm 
@@ -141,9 +142,11 @@ interface LoginProps {
   onGoogle: () => void;
   loading: boolean;
   error: string | null;
+  onTerms: () => void;
+  onPrivacy: () => void;
 }
 
-function LoginForm({ className, email, setEmail, password, setPassword, onSubmit, onSwitch, onGoogle, loading, error, ...props }: LoginProps & React.ComponentProps<"div">) {
+function LoginForm({ className, email, setEmail, password, setPassword, onSubmit, onSwitch, onGoogle, loading, error, onTerms, onPrivacy, ...props }: LoginProps & React.ComponentProps<"div">) {
   return (
     <div className={`flex flex-col gap-6 ${className || ''}`} {...props}>
       <Card>
@@ -217,8 +220,8 @@ function LoginForm({ className, email, setEmail, password, setPassword, onSubmit
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <span className="text-gray-400">Terms of Service</span>{" "}
-        and <span className="text-gray-400">Privacy Policy</span>.
+        By clicking continue, you agree to our <button type="button" onClick={onTerms} className="hover:text-white underline underline-offset-4">Terms of Service</button>{" "}
+        and <button type="button" onClick={onPrivacy} className="hover:text-white underline underline-offset-4">Privacy Policy</button>.
       </FieldDescription>
     </div>
   );

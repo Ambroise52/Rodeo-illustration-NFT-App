@@ -23,7 +23,7 @@ const PreviewArea: React.FC<PreviewAreaProps> = ({
     if (imageUrl) {
       const link = document.createElement('a');
       link.href = imageUrl;
-      link.download = `infinite-nft-${Date.now()}.png`;
+      link.download = `olly-${Date.now()}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

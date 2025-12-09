@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Icons } from './Icons';
 
 interface LegalPageProps {
@@ -31,7 +31,7 @@ export const TermsOfService: React.FC<{ onBack: () => void }> = ({ onBack }) => 
     <p>Last updated: {new Date().toLocaleDateString()}</p>
     
     <h3>1. Acceptance of Terms</h3>
-    <p>By accessing and using Infinite NFT Creator ("the App"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the App.</p>
+    <p>By accessing and using Olly ("the App"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the App.</p>
 
     <h3>2. Description of Service</h3>
     <p>The App uses Artificial Intelligence to generate digital artwork and animation prompts based on user inputs. Users can store, view, and export these generations.</p>

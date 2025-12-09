@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Icons } from './Icons';
 import { Logo } from './Logo';
@@ -39,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ userProfile, activeTab, onTabChange }) 
                <Logo className="w-10 h-8 md:w-12 md:h-8" />
             </div>
             <span className="hidden md:block font-black tracking-tighter text-white text-lg">
-              INFINITE <span className="text-neon-cyan">NFT</span>
+              OLLY
             </span>
           </div>
 

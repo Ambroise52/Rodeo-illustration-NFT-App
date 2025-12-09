@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export const Logo: React.FC<{ className?: string }> = ({ className }) => {
   return (
@@ -7,7 +7,7 @@ export const Logo: React.FC<{ className?: string }> = ({ className }) => {
       fill="none" 
       xmlns="http://www.w3.org/2000/svg" 
       className={className}
-      aria-label="Infinite NFT Creator Logo"
+      aria-label="Olly Logo"
     >
       <defs>
         <linearGradient id="blue_grad" x1="0" y1="30" x2="60" y2="30" gradientUnits="userSpaceOnUse">

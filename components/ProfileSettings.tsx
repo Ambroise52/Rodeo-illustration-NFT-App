@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { dataService } from '../services/dataService';
@@ -49,7 +48,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
         <FieldSet>
           <FieldLegend>Public Profile</FieldLegend>
           <FieldDescription className="mb-6">
-            Manage how others see you on Infinite NFT Creator.
+            Manage how others see you on Olly.
           </FieldDescription>
           
           <FieldGroup>
