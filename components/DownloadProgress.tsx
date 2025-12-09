@@ -1,6 +1,6 @@
-
 import React from 'react';
-import { Button, Item, ItemContent, ItemTitle, ItemDescription, ItemFooter, ItemMedia, ItemActions, Progress, Spinner } from './UIShared';
+import { Button, Item, ItemContent, ItemTitle, ItemDescription, ItemFooter, ItemMedia, ItemActions, Spinner } from './UIShared';
+import { Progress } from "@heroui/react";
 
 interface DownloadProgressProps {
   filename: string;
@@ -29,7 +29,7 @@ export const DownloadProgress: React.FC<DownloadProgressProps> = ({ filename, pr
             </ItemActions>
           )}
           <ItemFooter>
-            <Progress value={progress} />
+            <Progress value={progress} aria-label="Downloading..." size="sm" color="primary" className="w-full" />
           </ItemFooter>
         </Item>
       </div>

@@ -25,6 +25,7 @@ import { PROMPT_OPTIONS, APP_CONFIG, ANIMATION_MAPPINGS, RARITY_CONFIG, STYLE_OP
 import { GeneratedData, RarityTier, FilterState, SortOption, ExportType, UserProfile, Collection } from './types';
 import { generateImage } from './services/geminiService';
 import { downloadBulk, downloadPackage } from './utils/exportUtils';
+import { Progress } from "@heroui/react";
 import { 
     Button,
     DropdownMenu, 
@@ -692,9 +693,13 @@ function App() {
                   </div>
 
                   {isGenerating && generationMode === 'BATCH' && (
-                    <div className="w-full bg-dark-card rounded-full h-2 mb-4 overflow-hidden border border-dark-border">
-                      <div className="h-full bg-neon-pink transition-all duration-300" style={{ width: `${(batchProgress / 3) * 100}%` }}></div>
-                    </div>
+                    <Progress 
+                      aria-label="Generating Batch..." 
+                      value={(batchProgress / 3) * 100} 
+                      className="mb-4" 
+                      size="sm"
+                      color="secondary"
+                    />
                   )}
 
                   {!batchResults.length || currentView ? (

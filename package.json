@@ -15,7 +15,9 @@
     "lucide-react": "^0.555.0",
     "react-dom": "^19.2.0",
     "jszip": "3.10.1",
-    "file-saver": "2.0.5"
+    "file-saver": "2.0.5",
+    "@heroui/react": "latest",
+    "framer-motion": "10.16.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

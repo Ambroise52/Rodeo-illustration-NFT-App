@@ -1,6 +1,6 @@
-
 import React from 'react';
-import { Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Spinner } from './UIShared';
+import { Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from './UIShared';
+import { Progress } from "@heroui/react";
 
 interface RemixOverlayProps {
   onCancel?: () => void;
@@ -12,8 +12,8 @@ export const RemixOverlay: React.FC<RemixOverlayProps> = ({ onCancel }) => {
        <div className="w-full max-w-md mx-4 bg-dark-card border border-dark-border rounded-xl shadow-2xl overflow-hidden">
         <Empty className="w-full border-none bg-transparent p-6">
           <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Spinner />
+            <EmptyMedia variant="icon" className="mb-4">
+              <Progress isIndeterminate aria-label="Processing..." className="max-w-[200px]" size="sm" />
             </EmptyMedia>
             <EmptyTitle>Processing your request</EmptyTitle>
             <EmptyDescription>
