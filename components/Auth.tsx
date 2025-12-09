@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { Icons } from './Icons';
@@ -16,7 +17,9 @@ import {
   Field, 
   FieldLabel, 
   FieldDescription, 
-  FieldSeparator 
+  FieldSeparator,
+  Checkbox,
+  Label
 } from './AuthShared';
 
 interface AuthProps {
@@ -256,6 +259,17 @@ function SignupForm({
   loading, error,
   ...props 
 }: SignupProps & React.ComponentProps<"div">) {
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const handleSignupSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!termsAccepted) {
+        alert("Please accept the Terms of Service and Privacy Policy to continue.");
+        return;
+    }
+    onSubmit(e);
+  };
+
   return (
     <div className={`flex flex-col gap-6 ${className || ''}`} {...props}>
       <Card>
@@ -266,7 +280,7 @@ function SignupForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={onSubmit}>
+          <form onSubmit={handleSignupSubmit}>
             <FieldGroup>
               {error && (
                 <div className="p-3 rounded-md bg-red-500/10 border border-red-500/30 text-red-200 text-xs flex items-center gap-2">
@@ -326,6 +340,18 @@ function SignupForm({
                   Must be at least 6 characters long.
                 </FieldDescription>
               </Field>
+              
+              <div className="flex items-center space-x-2 py-2">
+                <Checkbox 
+                   id="terms" 
+                   checked={termsAccepted} 
+                   onCheckedChange={setTermsAccepted} 
+                />
+                <Label htmlFor="terms" className="text-xs text-gray-400">
+                  I accept the <button type="button" onClick={onTerms} className="text-neon-cyan hover:underline">Terms of Service</button> and <button type="button" onClick={onPrivacy} className="text-neon-cyan hover:underline">Privacy Policy</button>
+                </Label>
+              </div>
+
               <Field>
                 <Button type="submit" disabled={loading} className={loading ? "opacity-70 cursor-wait" : ""}>
                    {loading ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : "Create Account"}
@@ -338,10 +364,6 @@ function SignupForm({
           </form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <button type="button" onClick={onTerms} className="hover:text-white underline underline-offset-4 relative z-10 cursor-pointer">Terms of Service</button>{" "}
-        and <button type="button" onClick={onPrivacy} className="hover:text-white underline underline-offset-4 relative z-10 cursor-pointer">Privacy Policy</button>.
-      </FieldDescription>
     </div>
   );
 }

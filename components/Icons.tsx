@@ -29,7 +29,8 @@ import {
   Plus,
   Globe,
   Lock,
-  Settings
+  Settings,
+  Check
 } from 'lucide-react';
 
 export const Icons = {
@@ -61,5 +62,6 @@ export const Icons = {
   Plus,
   Globe,
   Lock,
-  Settings
+  Settings,
+  Check
 };
