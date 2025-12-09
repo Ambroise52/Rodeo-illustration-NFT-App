@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from 'react';
 import { Collection, GeneratedData, CollectionRequest } from '../types';
 import { dataService } from '../services/dataService';
@@ -98,6 +100,10 @@ const AutoSlideCard: React.FC<{
   // Locked if private AND we don't have access
   const isLocked = !collection.isPublic && (!accessStatus || !accessStatus.hasAccess);
   const canView = !isLocked;
+  
+  const displayedMembers = collection.memberPreviews || [];
+  const totalMemberCount = collection.memberCount || 0;
+  const remainingMembers = totalMemberCount - displayedMembers.length;
 
   return (
     <Card 
@@ -143,10 +149,7 @@ const AutoSlideCard: React.FC<{
              <h3 className="text-xl font-bold text-white drop-shadow-md">{collection.name}</h3>
              {!collection.isPublic && !isLocked && <Icons.Lock className="w-4 h-4 text-neon-pink" />}
            </div>
-           <p className="text-xs text-gray-400 font-medium drop-shadow-md flex items-center gap-1">
-             <Icons.User className="w-3 h-3" />
-             {collection.memberCount || 0} members
-           </p>
+           {/* Member count removed from here, moving to footer stack */}
         </div>
 
         {/* Remix Button - Only if access granted */}
@@ -178,10 +181,29 @@ const AutoSlideCard: React.FC<{
         )}
 
         <div className="mt-auto flex justify-between items-center pt-3 border-t border-dark-border">
-           <span className="text-[10px] uppercase font-bold text-gray-500 truncate max-w-[100px] flex items-center gap-1">
-             <div className="w-2 h-2 rounded-full bg-gray-600"></div>
-             {collection.creatorId === userId ? 'You' : `Creator`}
-           </span>
+           
+           {/* Member Stack */}
+           <div className="flex items-center">
+             <div className="flex -space-x-2 mr-2">
+               {displayedMembers.length > 0 ? (
+                 displayedMembers.map((m, i) => (
+                   <Avatar key={i} className="inline-block h-6 w-6 rounded-full ring-2 ring-dark-card border-none bg-dark-card">
+                     <AvatarImage src={m.avatarUrl} />
+                     <AvatarFallback className="bg-gray-800 text-[8px]">{m.username.substring(0,1).toUpperCase()}</AvatarFallback>
+                   </Avatar>
+                 ))
+               ) : (
+                 <div className="h-6 w-6 rounded-full bg-gray-800 ring-2 ring-dark-card flex items-center justify-center">
+                   <Icons.User className="w-3 h-3 text-gray-500" />
+                 </div>
+               )}
+             </div>
+             {remainingMembers > 0 ? (
+               <span className="text-xs text-gray-500 font-medium">+ {remainingMembers} members</span>
+             ) : (
+               <span className="text-xs text-gray-500 font-medium">{displayedMembers.length > 0 ? 'Members' : 'New'}</span>
+             )}
+           </div>
            
            {accessStatus === null ? (
              <Button variant="secondary" size="sm" disabled className="opacity-70">

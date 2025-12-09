@@ -1,4 +1,5 @@
 
+
 import { supabase } from './supabaseClient';
 import { GeneratedData, UserProfile, Collection, CollectionRequest, Notification } from '../types';
 
@@ -162,7 +163,6 @@ export const dataService = {
 
   async getCollections(userId?: string): Promise<Collection[]> {
     // We want to show ALL collections so users can discover private ones and request access.
-    // The previous logic filtered private ones out, preventing the "Request Access" flow.
     let query = supabase.from('collections').select('*');
     
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -171,7 +171,6 @@ export const dataService = {
     // Fetch preview images for each collection
     const collectionsWithPreviews = await Promise.all(data.map(async (col) => {
       // NOTE: If RLS blocks reading generations for private collections, images might be empty.
-      // This is expected security behavior. The UI will show a placeholder/lock.
       const { data: images } = await supabase
         .from('generations')
         .select('image_url')
@@ -184,6 +183,25 @@ export const dataService = {
         .from('collection_members')
         .select('*', { count: 'exact', head: true })
         .eq('collection_id', col.id);
+
+      // Fetch member previews (avatars)
+      const { data: members } = await supabase
+        .from('collection_members')
+        .select('user_id')
+        .eq('collection_id', col.id)
+        .limit(3);
+      
+      let memberPreviews: { username: string; avatarUrl?: string }[] = [];
+      if (members && members.length > 0) {
+         const ids = members.map(m => m.user_id);
+         const { data: profiles } = await supabase.from('profiles').select('username, avatar_url').in('id', ids);
+         if (profiles) {
+           memberPreviews = profiles.map(p => ({
+             username: p.username,
+             avatarUrl: p.avatar_url
+           }));
+         }
+      }
       
       return {
         id: col.id,
@@ -194,7 +212,8 @@ export const dataService = {
         previewImages: images?.map(i => i.image_url) || [],
         tags: col.tags || [],
         isPublic: col.is_public !== false,
-        memberCount: count || 0
+        memberCount: count || 0,
+        memberPreviews: memberPreviews
       };
     }));
 

@@ -32,6 +32,7 @@ export interface Collection {
   tags: string[]; // Keywords for AI context
   isPublic: boolean;
   memberCount?: number;
+  memberPreviews?: { username: string; avatarUrl?: string }[];
 }
 
 export interface UserProfile {
