@@ -23,7 +23,14 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-  Kbd
+  Kbd,
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis
 } from './UIShared';
 
 interface CollectionsProps {
@@ -669,12 +676,15 @@ const CollectionDetailView: React.FC<{
     );
 };
 
+const ITEMS_PER_PAGE = 9;
+
 const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection, onSelect }) => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Navigation State
   const [view, setView] = useState<'LIST' | 'DETAIL'>('LIST');
@@ -714,6 +724,23 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection, on
       col.tags?.some(tag => tag.toLowerCase().includes(q))
     );
   });
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const totalPages = Math.ceil(filteredCollections.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentCollections = filteredCollections.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+      // Optional: Scroll to top of list
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   if (loading && view === 'LIST') return <div className="p-12 text-center flex items-center justify-center h-[50vh]"><Icons.RefreshCw className="w-8 h-8 animate-spin mx-auto text-neon-cyan" /></div>;
 
@@ -766,8 +793,8 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection, on
                 </EmptyHeader>
                 </Empty>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCollections.map(col => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {currentCollections.map(col => (
                     <AutoSlideCard 
                     key={col.id} 
                     collection={col} 
@@ -777,6 +804,56 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection, on
                     />
                 ))}
                 </div>
+            )}
+
+            {totalPages > 1 && (
+              <Pagination className="mb-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => handlePageChange(currentPage - 1)} 
+                      disabled={currentPage === 1}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 || 
+                      page === totalPages || 
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink 
+                            onClick={() => handlePageChange(page)}
+                            isActive={currentPage === page}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    if (
+                      page === currentPage - 2 || 
+                      page === currentPage + 2
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => handlePageChange(currentPage + 1)} 
+                      disabled={currentPage === totalPages}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
           </>
       ) : (
