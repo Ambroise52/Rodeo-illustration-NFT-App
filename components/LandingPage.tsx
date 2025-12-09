@@ -27,6 +27,14 @@ interface LandingPageProps {
   onStart: () => void;
 }
 
+interface Job {
+  role: string;
+  dept: string;
+  loc: string;
+  description: string;
+  requirements: string[];
+}
+
 // --- Shared Components ---
 
 const PageHeader: React.FC<{ title: string; subtitle: string; badge?: string }> = ({ title, subtitle, badge }) => (
@@ -389,31 +397,129 @@ const AboutView = () => (
   </motion.div>
 );
 
-const CareersView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-5xl mx-auto px-6 pb-24 pt-24">
-    <div className="text-center mb-16">
-      <h1 className="text-4xl font-bold mb-4">Join the Team</h1>
-      <p className="text-gray-400">Help us build the future of creative tools.</p>
-    </div>
+const JobCard: React.FC<{ job: Job }> = ({ job }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-    <div className="space-y-4">
-      {[
-        { role: "Senior React Engineer", dept: "Engineering", loc: "Remote" },
-        { role: "AI Research Scientist", dept: "R&D", loc: "San Francisco / Remote" },
-        { role: "Product Designer", dept: "Design", loc: "London / Remote" },
-        { role: "Community Manager", dept: "Marketing", loc: "Remote" },
-      ].map((job, i) => (
-        <div key={i} className="flex items-center justify-between p-6 bg-[#111] border border-white/10 rounded-xl hover:border-neon-cyan/50 transition-colors group cursor-pointer">
-           <div>
-             <h3 className="font-bold text-white group-hover:text-neon-cyan transition-colors">{job.role}</h3>
-             <p className="text-sm text-gray-500">{job.dept} • {job.loc}</p>
-           </div>
-           <Icons.ArrowRight className="w-5 h-5 text-gray-500 group-hover:text-neon-cyan group-hover:translate-x-1 transition-all" />
+  return (
+    <div className={`bg-[#111] border border-white/10 rounded-xl overflow-hidden transition-all duration-300 ${isOpen ? 'border-neon-cyan/50 shadow-[0_0_15px_rgba(0,240,255,0.1)]' : 'hover:border-white/30'}`}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-6 text-left"
+      >
+        <div>
+           <h3 className={`font-bold text-lg transition-colors ${isOpen ? 'text-neon-cyan' : 'text-white'}`}>{job.role}</h3>
+           <p className="text-sm text-gray-500">{job.dept} • {job.loc}</p>
         </div>
-      ))}
+        <div className={`p-2 rounded-full transition-all duration-300 ${isOpen ? 'bg-neon-cyan text-black rotate-90' : 'bg-white/5 text-gray-400'}`}>
+          <Icons.ChevronRight className="w-5 h-5" />
+        </div>
+      </button>
+      
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="px-6 pb-6 pt-0 border-t border-white/5">
+               <div className="pt-6">
+                 <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-wider">Role Overview</h4>
+                 <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                   {job.description}
+                 </p>
+                 
+                 <h4 className="text-sm font-bold text-white mb-2 uppercase tracking-wider">Requirements</h4>
+                 <ul className="space-y-2 mb-8">
+                   {job.requirements.map((req, i) => (
+                     <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
+                       <Icons.Check className="w-4 h-4 text-neon-cyan mt-0.5 shrink-0" />
+                       {req}
+                     </li>
+                   ))}
+                 </ul>
+                 
+                 <Button className="w-full sm:w-auto bg-white text-black hover:bg-neon-cyan hover:text-black font-bold border-none">
+                   Apply for this Role
+                 </Button>
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  </motion.div>
-);
+  );
+};
+
+const CareersView = () => {
+  const jobs: Job[] = [
+    { 
+      role: "Senior React Engineer", 
+      dept: "Engineering", 
+      loc: "Remote",
+      description: "Lead the frontend development of Olly's web platform. You'll architect complex UI interactions, optimize rendering performance for generative art previews, and collaborate closely with our AI team to integrate new model capabilities.",
+      requirements: [
+        "5+ years production experience with React & TypeScript",
+        "Expertise in state management and performance tuning",
+        "Experience with WebGL or Canvas manipulation is a huge plus",
+        "Passion for generative art and creative tools"
+      ]
+    },
+    { 
+      role: "AI Research Scientist", 
+      dept: "R&D", 
+      loc: "San Francisco / Remote",
+      description: "Push the boundaries of generative models. You will research and train novel diffusion models and LLMs specifically tailored for vector-style geometric art and animation consistency.",
+      requirements: [
+        "PhD or MS in Computer Science, AI, or related field",
+        "Strong publication record in generative AI (NeurIPS, ICML, CVPR)",
+        "Proficiency in PyTorch and distributed training",
+        "Experience with LoRA and model fine-tuning techniques"
+      ]
+    },
+    { 
+      role: "Product Designer", 
+      dept: "Design", 
+      loc: "London / Remote",
+      description: "Define the user experience for the next generation of creative tools. You will design intuitive interfaces that make powerful AI capabilities accessible to everyone, from hobbyists to professional artists.",
+      requirements: [
+        "Strong portfolio showcasing web application design",
+        "Mastery of Figma and prototyping tools",
+        "Experience designing for complex creative workflows",
+        "Ability to conduct user research and usability testing"
+      ]
+    },
+    { 
+      role: "Community Manager", 
+      dept: "Marketing", 
+      loc: "Remote",
+      description: "Be the voice of Olly. You will grow and nurture our vibrant community of artists and collectors on Discord and Twitter, manage events, and gather feedback to shape our roadmap.",
+      requirements: [
+        "3+ years experience in community management (Web3/Gaming preferred)",
+        "Deep understanding of Discord community dynamics",
+        "Excellent written communication and storytelling skills",
+        "Passion for digital art and NFTs"
+      ]
+    },
+  ];
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-4xl mx-auto px-6 pb-24 pt-24">
+      <div className="text-center mb-16">
+        <h1 className="text-4xl font-bold mb-4">Join the Team</h1>
+        <p className="text-gray-400">Help us build the future of creative tools.</p>
+      </div>
+
+      <div className="space-y-4">
+        {jobs.map((job, i) => (
+          <JobCard key={i} job={job} />
+        ))}
+      </div>
+    </motion.div>
+  );
+};
 
 const ContactView = () => (
   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-3xl mx-auto px-6 pb-24 pt-24">
