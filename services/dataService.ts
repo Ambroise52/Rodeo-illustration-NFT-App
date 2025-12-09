@@ -23,6 +23,22 @@ export const dataService = {
     }
   },
 
+  async uploadVideo(videoBlob: Blob, userId: string): Promise<string> {
+    try {
+      const fileName = `${userId}/${Date.now()}.mp4`;
+      const { data, error } = await supabase.storage
+        .from('generations')
+        .upload(fileName, videoBlob, { contentType: 'video/mp4', upsert: true });
+
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('generations').getPublicUrl(fileName);
+      return publicUrl;
+    } catch (error) {
+      console.error('Video Upload failed:', error);
+      throw error;
+    }
+  },
+
   // --- Generations ---
   async saveGeneration(item: GeneratedData, userId: string): Promise<void> {
     const { error: insertError } = await supabase
@@ -31,6 +47,7 @@ export const dataService = {
         id: item.id,
         user_id: userId,
         image_url: item.imageUrl,
+        video_url: item.videoUrl, // Save video URL if present
         image_prompt: item.imagePrompt,
         video_prompt: item.videoPrompt,
         character: item.character,
@@ -57,6 +74,14 @@ export const dataService = {
     }
   },
 
+  async saveVideoUrl(id: string, videoUrl: string): Promise<void> {
+    const { error } = await supabase
+      .from('generations')
+      .update({ video_url: videoUrl })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
   async getHistory(userId: string): Promise<GeneratedData[]> {
     const { data, error } = await supabase
       .from('generations')
@@ -73,6 +98,7 @@ export const dataService = {
       ethValue: row.eth_value,
       timestamp: new Date(row.created_at).getTime(),
       imageUrl: row.image_url,
+      videoUrl: row.video_url,
       rarity: row.rarity_tier,
       character: row.character,
       action: row.action,
@@ -255,6 +281,7 @@ export const dataService = {
         ethValue: row.eth_value,
         timestamp: new Date(row.created_at).getTime(),
         imageUrl: row.image_url,
+        videoUrl: row.video_url,
         rarity: row.rarity_tier,
         character: row.character,
         action: row.action,

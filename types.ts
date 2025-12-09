@@ -9,6 +9,7 @@ export interface GeneratedData {
   ethValue: number;
   timestamp: number;
   imageUrl?: string;
+  videoUrl?: string;
   rarity: RarityTier;
   character: string;
   action: string;

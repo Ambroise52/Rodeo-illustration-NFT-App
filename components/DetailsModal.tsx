@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState } from 'react';
 import { GeneratedData } from '../types';
 import RarityBadge from './RarityBadge';
@@ -6,6 +7,9 @@ import { Icons } from './Icons';
 import { APP_CONFIG } from '../constants';
 import { downloadPackage } from '../utils/exportUtils';
 import { DownloadProgress } from './DownloadProgress';
+import { generateVideo } from '../services/geminiService';
+import { dataService } from '../services/dataService';
+import { Spinner, Button, Tabs, TabsList, TabsTrigger, TabsContent } from './UIShared';
 
 interface DetailsModalProps {
   item: GeneratedData | null;
@@ -31,6 +35,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   const [isCopied, setIsCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
+  
+  // Video State
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
+  const [activeMedia, setActiveMedia] = useState<'image' | 'video'>('image');
+  const [localVideoUrl, setLocalVideoUrl] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -51,6 +60,9 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
     // Reset state when item changes
     setDownloading(false);
     setProgress(0);
+    setIsGeneratingVideo(false);
+    setLocalVideoUrl(item?.videoUrl);
+    setActiveMedia(item?.videoUrl ? 'video' : 'image');
   }, [item]);
 
   const handleCopyVideoPrompt = () => {
@@ -70,10 +82,38 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
     } catch (e) {
       console.error("Download failed", e);
     } finally {
-      // Small delay to show completion before hiding
       setTimeout(() => {
         setDownloading(false);
       }, 1000);
+    }
+  };
+
+  const handleGenerateVideo = async () => {
+    if (!item || !item.imageUrl) return;
+    setIsGeneratingVideo(true);
+    try {
+      const videoBlob = await generateVideo(item.imageUrl, item.videoPrompt);
+      
+      // Upload to storage
+      // Note: In a real app we'd get the current user ID properly. 
+      // Here assuming we can get it from item.creatorId or session context if passed.
+      // Fallback to item.creatorId or just 'anon' if not available in this scope, 
+      // but usually we'd pass user session. 
+      // For now, using item.creatorId assuming user owns the item they are modifying
+      const publicUrl = await dataService.uploadVideo(videoBlob, item.creatorId || 'temp');
+      
+      // Save URL to DB
+      await dataService.saveVideoUrl(item.id, publicUrl);
+      
+      // Update local state
+      setLocalVideoUrl(publicUrl);
+      setActiveMedia('video');
+      item.videoUrl = publicUrl; // Optimistic update
+    } catch (e) {
+      console.error("Video generation failed:", e);
+      alert("Video generation failed. Please try again.");
+    } finally {
+      setIsGeneratingVideo(false);
     }
   };
 
@@ -97,13 +137,57 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
 
       <div className="w-full max-w-6xl h-[90vh] flex flex-col md:flex-row gap-8 p-4 md:p-8 relative">
         
-        {/* Left: Image */}
-        <div className="flex-1 flex items-center justify-center relative bg-dark-card/50 rounded-2xl border border-dark-border p-2 overflow-hidden">
-            <img 
-              src={item.imageUrl} 
-              alt={item.imagePrompt} 
-              className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" 
-            />
+        {/* Left: Media Preview */}
+        <div className="flex-1 flex flex-col items-center justify-center relative bg-dark-card/50 rounded-2xl border border-dark-border p-2 overflow-hidden">
+            
+            {/* Tabs for switching media if video exists */}
+            {(localVideoUrl || isGeneratingVideo) && (
+               <div className="absolute top-4 left-4 z-30">
+                 <div className="flex bg-black/60 rounded-lg p-1 border border-white/10">
+                   <button 
+                     onClick={() => setActiveMedia('image')}
+                     className={`px-3 py-1 rounded text-xs font-bold transition-all ${activeMedia === 'image' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+                   >
+                     Image
+                   </button>
+                   <button 
+                     onClick={() => setActiveMedia('video')}
+                     className={`px-3 py-1 rounded text-xs font-bold transition-all ${activeMedia === 'video' ? 'bg-neon-purple text-white' : 'text-gray-400 hover:text-white'}`}
+                   >
+                     Video
+                   </button>
+                 </div>
+               </div>
+            )}
+
+            <div className="relative w-full h-full flex items-center justify-center">
+                {activeMedia === 'image' && (
+                  <img 
+                    src={item.imageUrl} 
+                    alt={item.imagePrompt} 
+                    className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" 
+                  />
+                )}
+
+                {activeMedia === 'video' && (
+                  isGeneratingVideo ? (
+                    <div className="flex flex-col items-center gap-4">
+                       <Spinner className="w-12 h-12 text-neon-purple" />
+                       <p className="text-neon-purple font-mono animate-pulse">RENDERING VIDEO (VEO 3.1)...</p>
+                    </div>
+                  ) : localVideoUrl ? (
+                    <video 
+                      src={localVideoUrl} 
+                      controls 
+                      autoPlay 
+                      loop 
+                      className="max-w-full max-h-full rounded-xl shadow-2xl border border-white/10"
+                    />
+                  ) : (
+                    <div className="text-gray-500">No video available</div>
+                  )
+                )}
+            </div>
             
             {/* Download Progress Overlay */}
             {downloading && (
@@ -117,7 +201,7 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             )}
 
             {/* Quick Actions Overlay */}
-            {!downloading && (
+            {!downloading && !isGeneratingVideo && (
               <div className="absolute bottom-6 flex gap-3 z-20">
                  <button 
                   onClick={() => onToggleFavorite(item.id)}
@@ -148,13 +232,33 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
             <h2 className="text-3xl font-black text-white tracking-tighter flex items-center gap-2">
               {item.ethValue.toFixed(4)} <span className="text-neon-cyan">{APP_CONFIG.CURRENCY_SYMBOL}</span>
             </h2>
-            <button
-               onClick={() => onRemix(item)}
-               className="w-full mt-2 py-2 flex items-center justify-center gap-2 bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan hover:text-black rounded transition-all text-xs font-bold"
-             >
-               <Icons.RefreshCw className="w-3 h-3" />
-               Regenerate Variant
-             </button>
+            
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <button
+                 onClick={() => onRemix(item)}
+                 className="py-2 flex items-center justify-center gap-2 bg-neon-cyan/10 border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan hover:text-black rounded transition-all text-xs font-bold"
+               >
+                 <Icons.RefreshCw className="w-3 h-3" />
+                 Variant
+               </button>
+               
+               <button
+                  onClick={handleGenerateVideo}
+                  disabled={isGeneratingVideo || !!localVideoUrl}
+                  className={`py-2 flex items-center justify-center gap-2 border rounded transition-all text-xs font-bold ${
+                    localVideoUrl 
+                      ? 'bg-neon-purple/20 border-neon-purple text-neon-purple cursor-default'
+                      : 'bg-neon-purple text-white border-neon-purple hover:bg-purple-600'
+                  }`}
+               >
+                 {isGeneratingVideo ? (
+                   <Spinner className="w-3 h-3 text-white" />
+                 ) : (
+                   <Icons.Video className="w-3 h-3" />
+                 )}
+                 {localVideoUrl ? 'Video Ready' : 'Animate (Video)'}
+               </button>
+            </div>
           </div>
 
           {/* Traits Grid */}
