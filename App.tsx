@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { supabase } from './services/supabaseClient';
 import { dataService } from './services/dataService';
@@ -22,7 +23,21 @@ import { PROMPT_OPTIONS, APP_CONFIG, ANIMATION_MAPPINGS, RARITY_CONFIG, STYLE_OP
 import { GeneratedData, RarityTier, FilterState, SortOption, ExportType, UserProfile, Collection } from './types';
 import { generateImage } from './services/geminiService';
 import { downloadBulk, downloadPackage } from './utils/exportUtils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/UIShared';
+import { 
+    Button,
+    DropdownMenu, 
+    DropdownMenuTrigger, 
+    DropdownMenuContent, 
+    DropdownMenuItem,
+    Item,
+    ItemContent,
+    ItemMedia,
+    ItemTitle,
+    ItemDescription,
+    Avatar,
+    AvatarImage,
+    AvatarFallback
+} from './components/UIShared';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -521,29 +536,68 @@ function App() {
                 <div className="sticky top-24">
                   {/* Collection Selector */}
                   <div className="mb-4">
-                    <Select 
-                      value={selectedCollectionId} 
-                      onValueChange={(val) => {
-                        if (val === 'create_new') {
-                          setShowCreateCollectionModal(true);
-                        } else {
-                          setSelectedCollectionId(val);
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Add to Collection..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                         <SelectItem value="none">No Collection</SelectItem>
-                         <div className="my-1 h-px bg-white/10" />
-                         <SelectItem value="create_new" className="text-neon-cyan font-bold">+ Create New Collection</SelectItem>
-                         <div className="my-1 h-px bg-white/10" />
-                         {userCollections.map(c => (
-                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                         ))}
-                      </SelectContent>
-                    </Select>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full justify-between bg-black/40 border-dark-border text-white hover:bg-white/10 h-12">
+                          {selectedCollectionId !== 'none' 
+                            ? (userCollections.find(c => c.id === selectedCollectionId)?.name || "Choose Collection")
+                            : "Choose Collection"}
+                          <Icons.ChevronDown className="w-4 h-4 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-[300px] bg-dark-card border-dark-border" align="start">
+                        <DropdownMenuItem onClick={() => setSelectedCollectionId('none')}>
+                           <Item size="sm" className="w-full p-2">
+                              <ItemMedia>
+                                <div className="size-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700">
+                                   <Icons.Box className="w-4 h-4 text-gray-400" />
+                                </div>
+                              </ItemMedia>
+                              <ItemContent className="gap-0.5">
+                                 <ItemTitle>No Collection</ItemTitle>
+                                 <ItemDescription>Generate freely</ItemDescription>
+                              </ItemContent>
+                           </Item>
+                        </DropdownMenuItem>
+                        
+                        <div className="my-1 h-px bg-white/10" />
+                        
+                        <DropdownMenuItem onClick={() => setShowCreateCollectionModal(true)}>
+                            <Item size="sm" className="w-full p-2">
+                                <ItemMedia>
+                                    <div className="size-8 rounded-full bg-neon-cyan/20 flex items-center justify-center border border-neon-cyan/50">
+                                        <Icons.Plus className="w-4 h-4 text-neon-cyan" />
+                                    </div>
+                                </ItemMedia>
+                                <ItemContent className="gap-0.5">
+                                    <ItemTitle className="text-neon-cyan">Create New</ItemTitle>
+                                    <ItemDescription>Start a new collection</ItemDescription>
+                                </ItemContent>
+                            </Item>
+                        </DropdownMenuItem>
+
+                        <div className="my-1 h-px bg-white/10" />
+
+                        {userCollections.map((col) => (
+                          <DropdownMenuItem key={col.id} onClick={() => setSelectedCollectionId(col.id)}>
+                             <Item size="sm" className="w-full p-2">
+                                <ItemMedia>
+                                   <Avatar className="size-8">
+                                      <AvatarImage src={col.previewImages?.[0]} />
+                                      <AvatarFallback className="bg-gray-800 text-xs">{col.name.substring(0,2).toUpperCase()}</AvatarFallback>
+                                   </Avatar>
+                                </ItemMedia>
+                                <ItemContent className="gap-0.5">
+                                   <ItemTitle>{col.name}</ItemTitle>
+                                   <ItemDescription>
+                                     {col.tags?.length ? `#${col.tags[0]}` : 'No tags'} • {col.memberCount || 1} members
+                                   </ItemDescription>
+                                </ItemContent>
+                             </Item>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
 
                   {/* Generation Buttons */}

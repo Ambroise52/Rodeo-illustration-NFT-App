@@ -223,24 +223,94 @@ export const SelectItem: React.FC<{ value: string; children: React.ReactNode; cl
   );
 };
 
+// --- Dropdown Menu (New) ---
+export const DropdownMenu = ({ children }: { children?: React.ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative inline-block w-full">
+      <SelectContext.Provider value={{ open, setOpen, value: '', onValueChange: () => {} }}>
+        {children}
+      </SelectContext.Provider>
+    </div>
+  );
+};
+
+export const DropdownMenuTrigger = ({ asChild, children }: { asChild?: boolean, children?: React.ReactNode }) => {
+  const { open, setOpen } = React.useContext(SelectContext);
+  if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement<any>, {
+          onClick: (e: React.MouseEvent) => {
+              children.props.onClick?.(e);
+              setOpen(!open);
+          }
+      });
+  }
+  return <button onClick={() => setOpen(!open)}>{children}</button>;
+};
+
+export const DropdownMenuContent = ({ className, align, children }: { className?: string, align?: 'end' | 'start', children?: React.ReactNode }) => {
+  const { open } = React.useContext(SelectContext);
+  if (!open) return null;
+  const alignClass = align === 'end' ? 'right-0' : 'left-0';
+  return (
+    <div className={classNames("absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-md border border-dark-border bg-dark-card text-white shadow-xl animate-in fade-in-80", alignClass, className)}>
+      <div className="p-1 max-h-80 overflow-y-auto custom-scrollbar">{children}</div>
+    </div>
+  );
+};
+
+export const DropdownMenuItem = ({ className, onClick, children }: { className?: string, onClick?: () => void, children?: React.ReactNode }) => {
+    const { setOpen } = React.useContext(SelectContext);
+    return (
+        <div 
+            onClick={(e) => { onClick?.(); setOpen(false); e.stopPropagation(); }}
+            className={classNames("relative flex cursor-pointer select-none items-center rounded-sm text-sm outline-none transition-colors hover:bg-white/10 focus:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className)}
+        >
+            {children}
+        </div>
+    );
+};
+
+// --- Item Components (New) ---
+export const Item = ({ size, className, children }: { size?: string, className?: string, children?: React.ReactNode }) => (
+    <div className={classNames("flex items-center gap-3", className)}>{children}</div>
+);
+export const ItemMedia = ({ children }: { children?: React.ReactNode }) => <div className="flex-shrink-0">{children}</div>;
+export const ItemContent = ({ className, children }: { className?: string, children?: React.ReactNode }) => <div className={classNames("flex flex-col min-w-0 text-left", className)}>{children}</div>;
+export const ItemTitle = ({ className, children }: { className?: string, children?: React.ReactNode }) => <div className={classNames("text-sm font-bold truncate text-white", className)}>{children}</div>;
+export const ItemDescription = ({ className, children }: { className?: string, children?: React.ReactNode }) => <div className={classNames("text-xs text-gray-400 truncate", className)}>{children}</div>;
+
+
 // --- Avatar ---
 export const Avatar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={classNames("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)} {...props} />
+    <div ref={ref} className={classNames("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full bg-white/10", className)} {...props} />
   )
 );
 Avatar.displayName = "Avatar";
 
 export const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
   ({ className, ...props }, ref) => (
-    <img ref={ref} className={classNames("aspect-square h-full w-full", className)} {...props} />
+    <img ref={ref} className={classNames("aspect-square h-full w-full object-cover", className)} {...props} />
   )
 );
 AvatarImage.displayName = "AvatarImage";
 
 export const AvatarFallback = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={classNames("flex h-full w-full items-center justify-center rounded-full bg-white/10", className)} {...props} />
+    <div ref={ref} className={classNames("flex h-full w-full items-center justify-center rounded-full bg-white/10 text-white", className)} {...props} />
   )
 );
 AvatarFallback.displayName = "AvatarFallback";
