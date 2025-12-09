@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { UserProfile } from '../types';
 import { dataService } from '../services/dataService';
+import { supabase } from '../services/supabaseClient';
 import { APP_CONFIG } from '../constants';
 import { 
   Button, 
@@ -34,6 +35,12 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
   const [username, setUsername] = useState(profile.username);
   const [bio, setBio] = useState(profile.bio || '');
   const [saving, setSaving] = useState(false);
+  
+  // Password Change State
+  const [currentPass, setCurrentPass] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [passLoading, setPassLoading] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +55,50 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
       alert('Failed to update profile');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (!currentPass || !newPass) {
+        alert("Please fill in both password fields.");
+        return;
+    }
+    if (newPass.length < 6) {
+        alert("New password must be at least 6 characters long.");
+        return;
+    }
+
+    setPassLoading(true);
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || !user.email) throw new Error("User not found");
+
+        // Verify current password by re-authenticating
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: user.email,
+            password: currentPass
+        });
+
+        if (signInError) {
+            throw new Error("Incorrect current password.");
+        }
+
+        // Update password
+        const { error: updateError } = await supabase.auth.updateUser({ 
+            password: newPass 
+        });
+
+        if (updateError) throw updateError;
+
+        alert("Password updated successfully! Logging out...");
+        await supabase.auth.signOut();
+    } catch (err: any) {
+        console.error(err);
+        alert(err.message || "Failed to update password");
+    } finally {
+        setPassLoading(false);
+        setCurrentPass('');
+        setNewPass('');
     }
   };
 
@@ -206,6 +257,40 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ profile, onUpdate }) 
                   <p className="text-[0.8rem] text-gray-500">Receive alerts about collection requests.</p>
                 </div>
                 <Checkbox checked={true} disabled />
+              </div>
+
+              {/* Password Change Section */}
+              <div className="pt-6 border-t border-dark-border mt-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-white">Password</h3>
+                  <p className="text-sm text-gray-500">Change your password here. After saving, you'll be logged out.</p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="currentPassword">Current password</Label>
+                    <Input 
+                        type="password" 
+                        id="currentPassword" 
+                        value={currentPass} 
+                        onChange={(e) => setCurrentPass(e.target.value)} 
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label htmlFor="newPassword">New password</Label>
+                    <Input 
+                        type="password" 
+                        id="newPassword" 
+                        value={newPass} 
+                        onChange={(e) => setNewPass(e.target.value)} 
+                    />
+                  </div>
+
+                  <Button type="button" onClick={handlePasswordUpdate} disabled={passLoading}>
+                     {passLoading ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Save password'}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
