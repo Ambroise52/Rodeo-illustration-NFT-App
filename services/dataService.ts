@@ -160,37 +160,17 @@ export const dataService = {
   },
 
   async getCollections(userId?: string): Promise<Collection[]> {
+    // We want to show ALL collections so users can discover private ones and request access.
+    // The previous logic filtered private ones out, preventing the "Request Access" flow.
     let query = supabase.from('collections').select('*');
-    
-    // If user is logged in, show public collections + their private collections + collections they're members of
-    if (userId) {
-      // 1. Get IDs of collections where user is a member
-      const { data: memberData } = await supabase
-        .from('collection_members')
-        .select('collection_id')
-        .eq('user_id', userId);
-      
-      const memberIds = memberData?.map(d => d.collection_id) || [];
-      
-      // 2. Build OR filter: is_public OR creator_id=me OR id IN memberIds
-      // Note: Supabase OR syntax needs precise formatting
-      let filter = `is_public.eq.true,creator_id.eq.${userId}`;
-      if (memberIds.length > 0) {
-        // Clean IDs to ensure safe string interpolation
-        filter += `,id.in.(${memberIds.join(',')})`;
-      }
-      
-      query = query.or(filter);
-    } else {
-      // Not logged in - only show public collections
-      query = query.eq('is_public', true);
-    }
     
     const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
     
     // Fetch preview images for each collection
     const collectionsWithPreviews = await Promise.all(data.map(async (col) => {
+      // NOTE: If RLS blocks reading generations for private collections, images might be empty.
+      // This is expected security behavior. The UI will show a placeholder/lock.
       const { data: images } = await supabase
         .from('generations')
         .select('image_url')
@@ -290,7 +270,7 @@ export const dataService = {
       .select('*')
       .eq('collection_id', collectionId)
       .eq('user_id', userId)
-      .maybeSingle(); // Use maybeSingle to avoid errors if not found
+      .maybeSingle(); 
     
     if (membership) return { hasAccess: true, isPending: false };
     
@@ -300,7 +280,7 @@ export const dataService = {
       .select('status')
       .eq('collection_id', collectionId)
       .eq('user_id', userId)
-      .maybeSingle(); // Use maybeSingle
+      .maybeSingle(); 
     
     if (request?.status === 'PENDING') {
       return { hasAccess: false, isPending: true };
@@ -360,7 +340,7 @@ export const dataService = {
     const userIds = members.map(m => m.user_id);
     if (userIds.length === 0) return [];
 
-    // 2. Fetch profile details manually to handle potential FK issues safely
+    // 2. Fetch profile details manually
     const { data: profiles } = await supabase
         .from('profiles')
         .select('id, username, avatar_url')
@@ -387,8 +367,7 @@ export const dataService = {
     if (error) throw error;
     if (!requests || requests.length === 0) return [];
 
-    // 2. Manually fetch profiles for these users to ensure we get usernames
-    // (Join via foreign key might fail if not explicitly set up in Postgres)
+    // 2. Manually fetch profiles
     const userIds = requests.map(r => r.user_id);
     const { data: profiles } = await supabase
       .from('profiles')

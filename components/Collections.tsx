@@ -571,7 +571,7 @@ const CollectionDetailView: React.FC<{
                              <h1 className="text-4xl font-black text-white tracking-tighter">{collection.name}</h1>
                              {isCreator && (
                                  <button onClick={onUpdateClick} className="p-2 text-gray-500 hover:text-white transition-colors" title="Edit Collection">
-                                     <Icons.RefreshCw className="w-4 h-4" />
+                                     <Icons.Settings className="w-5 h-5" />
                                  </button>
                              )}
                              {!collection.isPublic && <Icons.Lock className="w-6 h-6 text-neon-pink" />}
@@ -808,7 +808,7 @@ const Collections: React.FC<CollectionsProps> = ({ userId, onRemixCollection, on
         />
       )}
 
-      {showEdit && selectedCollection && (
+      {showEdit && selectedCollection && selectedCollection.creatorId === userId && (
           <EditCollectionModal 
             collection={selectedCollection}
             onClose={() => setShowEdit(false)}

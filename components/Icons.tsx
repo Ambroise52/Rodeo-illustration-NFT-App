@@ -28,7 +28,8 @@ import {
   User, 
   Plus,
   Globe,
-  Lock
+  Lock,
+  Settings
 } from 'lucide-react';
 
 export const Icons = {
@@ -59,5 +60,6 @@ export const Icons = {
   User,
   Plus,
   Globe,
-  Lock
+  Lock,
+  Settings
 };
