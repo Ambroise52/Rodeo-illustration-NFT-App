@@ -514,7 +514,7 @@ function App() {
   // Determine which view to show for unauthenticated users
   if (!session) {
     if (showAuth) {
-      return <Auth onLogin={() => {}} />;
+      return <Auth onLogin={() => {}} onBack={() => setShowAuth(false)} />;
     }
     return <LandingPage onStart={() => setShowAuth(true)} />;
   }

@@ -12,7 +12,7 @@ type PageType =
   | 'FEATURES' 
   | 'PRICING' 
   | 'ROADMAP' 
-  | 'SHOWCASE' 
+  | 'COLLECTIONS' 
   | 'DOCS' 
   | 'API' 
   | 'COMMUNITY' 
@@ -35,18 +35,158 @@ interface Job {
   requirements: string[];
 }
 
+// --- Background Animation Component ---
+const GeometricBackground = () => {
+  return (
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none bg-[#050505]">
+      
+      {/* 1. Perspective Grid (Floor) */}
+      <div className="absolute inset-0 flex items-center justify-center perspective-[1000px] opacity-40">
+        <motion.div 
+          className="w-[200vw] h-[200vh] origin-top"
+          style={{ 
+            backgroundImage: 'linear-gradient(to right, rgba(0, 240, 255, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 240, 255, 0.1) 1px, transparent 1px)',
+            backgroundSize: '80px 80px',
+            transform: 'rotateX(60deg) translateY(-100px) translateZ(-200px)',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 40%, transparent 90%)'
+          }}
+          animate={{ backgroundPosition: ['0px 0px', '0px 80px'] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+
+      {/* 2. Ambient Gradient Orbs */}
+      <motion.div 
+        className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-neon-purple/20 rounded-full blur-[120px] mix-blend-screen"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div 
+        className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-neon-cyan/10 rounded-full blur-[120px] mix-blend-screen"
+        animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* 3. Animated SVG Geometry */}
+      <motion.svg 
+        className="absolute inset-0 w-full h-full"
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        transition={{ duration: 2 }}
+      >
+        <defs>
+          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00F0FF" stopOpacity="0" />
+            <stop offset="50%" stopColor="#00F0FF" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#00F0FF" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#BD00FF" stopOpacity="0" />
+            <stop offset="50%" stopColor="#BD00FF" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#BD00FF" stopOpacity="0" />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Floating Hexagon */}
+        <motion.path
+           d="M50,100 L93,75 L93,25 L50,0 L7,25 L7,75 Z"
+           fill="none"
+           stroke="#00F0FF"
+           strokeWidth="1.5"
+           filter="url(#glow)"
+           className="opacity-40"
+           initial={{ x: '10vw', y: '20vh', rotate: 0, scale: 2 }}
+           animate={{ 
+             y: ['20vh', '25vh', '20vh'], 
+             rotate: 360 
+           }}
+           transition={{ 
+             y: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+             rotate: { duration: 60, repeat: Infinity, ease: "linear" }
+           }}
+        />
+
+        {/* Large Triangle Outline */}
+        <motion.polygon
+           points="150,20 280,250 20,250"
+           fill="none"
+           stroke="#FF0099"
+           strokeWidth="1"
+           filter="url(#glow)"
+           className="opacity-30"
+           initial={{ x: '80vw', y: '60vh', rotate: 180, scale: 3 }}
+           animate={{ 
+             rotate: -360,
+             scale: [3, 3.1, 3]
+           }}
+           transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
+        />
+
+        {/* Connecting Lines (Data Streams) */}
+        <motion.line 
+          x1="0" y1="40%" x2="100%" y2="60%" 
+          stroke="url(#lineGrad)" 
+          strokeWidth="2" 
+          initial={{ strokeDasharray: "10, 40", strokeDashoffset: 0 }}
+          animate={{ strokeDashoffset: 1000 }}
+          transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+        />
+
+         <motion.line 
+          x1="70%" y1="0" x2="30%" y2="100%" 
+          stroke="url(#lineGrad2)" 
+          strokeWidth="2" 
+          initial={{ strokeDasharray: "20, 60", strokeDashoffset: 0 }}
+          animate={{ strokeDashoffset: -1000 }}
+          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+        />
+
+        {/* Random Particles */}
+        {[...Array(15)].map((_, i) => (
+           <motion.circle
+             key={i}
+             r={Math.random() * 2 + 1}
+             fill={i % 2 === 0 ? "#00F0FF" : "#FF0099"}
+             filter="url(#glow)"
+             initial={{ 
+               cx: Math.random() * 100 + "%", 
+               cy: Math.random() * 100 + "%", 
+               opacity: 0 
+             }}
+             animate={{ 
+               cy: [null, Math.random() * 100 + "%"],
+               opacity: [0, 0.6, 0]
+             }}
+             transition={{ 
+               duration: Math.random() * 10 + 10, 
+               repeat: Infinity, 
+               ease: "linear" 
+             }}
+           />
+        ))}
+      </motion.svg>
+    </div>
+  );
+};
+
 // --- Shared Components ---
 
 const PageHeader: React.FC<{ title: string; subtitle: string; badge?: string }> = ({ title, subtitle, badge }) => (
-  <div className="pt-32 pb-16 px-6 text-center relative overflow-hidden">
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-neon-cyan/5 rounded-full blur-[100px] -z-10"></div>
+  <div className="pt-32 pb-16 px-4 md:px-6 text-center relative overflow-hidden z-10">
     {badge && (
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-6 mx-auto">
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-6 mx-auto backdrop-blur-md">
         <Icons.Sparkles className="w-3 h-3" />
         <span>{badge}</span>
       </div>
     )}
-    <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 text-white">{title}</h1>
+    <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 text-white drop-shadow-lg">{title}</h1>
     <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
   </div>
 );
@@ -54,7 +194,7 @@ const PageHeader: React.FC<{ title: string; subtitle: string; badge?: string }> 
 // --- Sub-Pages ---
 
 const FeaturesView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
     <PageHeader title="Powerful Features" subtitle="Everything you need to create, manage, and scale your NFT collections using state-of-the-art AI." badge="Version 2.0 Live" />
     
     <div className="grid md:grid-cols-2 gap-16 items-center mb-24">
@@ -100,7 +240,7 @@ const FeaturesView = () => (
          { icon: Icons.Lock, title: "IP Protection", desc: "You own 100% of the commercial rights to your generations." },
          { icon: Icons.Sparkles, title: "Style Tuning", desc: "Fine-tune aesthetic parameters for consistent brand look." }
        ].map((feat, i) => (
-         <div key={i} className="p-6 bg-white/5 rounded-xl border border-white/5 hover:border-white/20 transition-all">
+         <div key={i} className="p-6 bg-white/5 rounded-xl border border-white/5 hover:border-white/20 transition-all backdrop-blur-sm">
             <feat.icon className="w-8 h-8 text-gray-400 mb-4" />
             <h3 className="font-bold text-lg mb-2">{feat.title}</h3>
             <p className="text-sm text-gray-400">{feat.desc}</p>
@@ -111,12 +251,12 @@ const FeaturesView = () => (
 );
 
 const PricingView = ({ onStart }: { onStart: () => void }) => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
     <PageHeader title="Simple Pricing" subtitle="Start for free, upgrade as you scale. No hidden fees or gas costs." />
     
     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
       {/* Free Tier */}
-      <div className="bg-[#111] border border-white/10 rounded-2xl p-8 flex flex-col relative group hover:border-white/30 transition-all">
+      <div className="bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 flex flex-col relative group hover:border-white/30 transition-all">
         <h3 className="text-xl font-bold text-gray-300 mb-2">Explorer</h3>
         <div className="text-4xl font-black text-white mb-6">$0<span className="text-sm font-normal text-gray-500">/mo</span></div>
         <p className="text-sm text-gray-400 mb-8">Perfect for hobbyists and first-time creators.</p>
@@ -129,7 +269,7 @@ const PricingView = ({ onStart }: { onStart: () => void }) => (
       </div>
 
       {/* Pro Tier */}
-      <div className="bg-black border border-neon-cyan rounded-2xl p-8 flex flex-col relative transform md:-translate-y-4 shadow-[0_0_30px_rgba(0,240,255,0.1)]">
+      <div className="bg-black/80 backdrop-blur-sm border border-neon-cyan rounded-2xl p-8 flex flex-col relative transform md:-translate-y-4 shadow-[0_0_30px_rgba(0,240,255,0.1)]">
         <div className="absolute top-0 center-0 w-full text-center -translate-y-1/2">
            <span className="bg-neon-cyan text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Most Popular</span>
         </div>
@@ -145,7 +285,7 @@ const PricingView = ({ onStart }: { onStart: () => void }) => (
       </div>
 
       {/* Enterprise Tier */}
-      <div className="bg-[#111] border border-white/10 rounded-2xl p-8 flex flex-col relative group hover:border-white/30 transition-all">
+      <div className="bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 flex flex-col relative group hover:border-white/30 transition-all">
         <h3 className="text-xl font-bold text-gray-300 mb-2">Agency</h3>
         <div className="text-4xl font-black text-white mb-6">$99<span className="text-sm font-normal text-gray-500">/mo</span></div>
         <p className="text-sm text-gray-400 mb-8">For large teams and high-volume API access.</p>
@@ -161,7 +301,7 @@ const PricingView = ({ onStart }: { onStart: () => void }) => (
 );
 
 const RoadmapView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-4xl mx-auto px-6 pb-24">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-4xl mx-auto px-6 pb-24 relative z-10">
     <PageHeader title="Product Roadmap" subtitle="Our vision for the future of AI-generated collectibles." badge="2025 Vision" />
     
     <div className="space-y-12 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/20 before:to-transparent">
@@ -175,7 +315,7 @@ const RoadmapView = () => (
           <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-[#050505] shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 text-xs font-bold z-10">
             {i + 1}
           </div>
-          <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-[#111] p-6 rounded-xl border border-white/10 hover:border-white/30 transition-all">
+          <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-[#111]/80 backdrop-blur-sm p-6 rounded-xl border border-white/10 hover:border-white/30 transition-all">
             <div className={`flex items-center justify-between mb-2 ${item.color}`}>
               <span className="font-bold">{item.q}</span>
               <span className="text-[10px] uppercase tracking-widest bg-white/5 px-2 py-1 rounded border border-white/10">{item.status}</span>
@@ -189,34 +329,110 @@ const RoadmapView = () => (
   </motion.div>
 );
 
-const ShowcaseView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24">
-    <PageHeader title="Community Showcase" subtitle="Discover trending collections created by Olly artists." />
-    
-    <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-      {[...Array(12)].map((_, i) => (
-        <div key={i} className="break-inside-avoid relative group rounded-xl overflow-hidden cursor-pointer">
-          <img 
-            src={`https://picsum.photos/seed/${i * 123}/400/${300 + (i % 3) * 100}`} 
-            alt="Showcase item" 
-            className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-            <p className="text-white font-bold text-sm">Cosmic Drifter #{i + 100}</p>
-            <p className="text-gray-400 text-xs">by @artist{i}</p>
+const CollectionsView = ({ onStart }: { onStart: () => void }) => {
+  const collections = [
+    {
+      title: "Cyberpunk Apes",
+      desc: "A collection of 10,000 unique cybernetically enhanced primates ruling the digital underworld.",
+      img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=800&auto=format&fit=crop",
+      count: "10k",
+      avatars: ["A", "B", "C"]
+    },
+    {
+      title: "Neon Samurai",
+      desc: "Warriors of the future. High fidelity vector art with glow effects.",
+      img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop",
+      count: "5.5k",
+      avatars: ["D", "E"]
+    },
+    {
+      title: "Abstract Geometry",
+      desc: "Pure shapes and colors. Mathematical perfection in NFT form.",
+      img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
+      count: "1.2k",
+      avatars: ["F", "G", "H"]
+    },
+    {
+      title: "Vaporwave Glitch",
+      desc: "Retro-futuristic aesthetics meeting modern generative noise algorithms.",
+      img: "https://images.unsplash.com/photo-1620121692029-d088224ddc74?q=80&w=800&auto=format&fit=crop",
+      count: "8.9k",
+      avatars: ["I", "J"]
+    },
+    {
+      title: "Cosmic Entities",
+      desc: "Beings from another dimension. ethereal, floating, and majestic.",
+      img: "https://images.unsplash.com/photo-1634152962476-4b8a00e1915c?q=80&w=800&auto=format&fit=crop",
+      count: "333",
+      avatars: ["K", "L", "M", "N"]
+    },
+    {
+      title: "Pixel Punks 3.0",
+      desc: "The next evolution of pixel art. 3D depth with 8-bit charm.",
+      img: "https://images.unsplash.com/photo-1633412802994-5c058f151b66?q=80&w=800&auto=format&fit=crop",
+      count: "20k",
+      avatars: ["O", "P"]
+    }
+  ];
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
+      <PageHeader title="Trending Collections" subtitle="Discover premier collections created by top artists using Olly." />
+      
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {collections.map((col, i) => (
+          <div 
+            key={i} 
+            onClick={onStart}
+            className="group cursor-pointer bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-neon-cyan/50 hover:shadow-[0_0_30px_rgba(0,240,255,0.1)] transition-all duration-300 flex flex-col h-full"
+          >
+            {/* Image Area */}
+            <div className="aspect-[4/3] relative overflow-hidden">
+              <img 
+                src={col.img} 
+                alt={col.title} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent opacity-60"></div>
+              
+              <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+                <Icons.Layers className="w-3 h-3 text-neon-cyan" />
+                <span className="text-xs font-bold text-white">{col.count}</span>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="p-6 flex flex-col flex-grow">
+              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-neon-cyan transition-colors">{col.title}</h3>
+              <p className="text-gray-400 text-sm mb-6 line-clamp-2">{col.desc}</p>
+              
+              <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+                <div className="flex -space-x-3">
+                  {col.avatars.map((letter, idx) => (
+                    <div key={idx} className="w-8 h-8 rounded-full bg-gray-800 border-2 border-[#111] flex items-center justify-center text-[10px] font-bold text-gray-400">
+                      {letter}
+                    </div>
+                  ))}
+                </div>
+                <button className="text-xs font-bold text-white group-hover:text-neon-cyan transition-colors flex items-center gap-1">
+                  View <Icons.ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-    
-    <div className="mt-12 text-center">
-      <Button variant="outline" className="border-white/20 hover:bg-white/10">Load More</Button>
-    </div>
-  </motion.div>
-);
+        ))}
+      </div>
+
+      <div className="mt-16 text-center">
+         <p className="text-gray-400 mb-4">Want to launch your own collection?</p>
+         <Button onClick={onStart} className="bg-neon-cyan text-black hover:bg-white border-none">Start Creating</Button>
+      </div>
+    </motion.div>
+  );
+};
 
 const DocumentationView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 grid md:grid-cols-4 gap-12 pt-24">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 grid md:grid-cols-4 gap-12 pt-24 relative z-10">
     <div className="hidden md:block space-y-2 border-r border-white/5 pr-8">
       <h3 className="font-bold text-white mb-4">Getting Started</h3>
       {["Introduction", "Quick Start", "Prompt Guide", "Exporting", "Video Generation"].map(item => (
@@ -231,7 +447,7 @@ const DocumentationView = () => (
       <h1>Introduction to Olly</h1>
       <p className="lead text-xl text-gray-400">Olly is the first AI-powered NFT generation platform designed specifically for vector-style geometric art.</p>
       
-      <div className="p-6 bg-[#111] border-l-4 border-neon-cyan rounded-r-xl my-8">
+      <div className="p-6 bg-[#111]/80 backdrop-blur-sm border-l-4 border-neon-cyan rounded-r-xl my-8">
         <h4 className="text-neon-cyan font-bold mb-2">Note for V2 Users</h4>
         <p className="text-sm m-0">We have upgraded our core engine to Gemini 2.5 Flash. Prompts from V1 may generate slightly different (higher quality) results.</p>
       </div>
@@ -268,7 +484,7 @@ const DocumentationView = () => (
 );
 
 const ApiView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-5xl mx-auto px-6 pb-24 pt-24">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-5xl mx-auto px-6 pb-24 pt-24 relative z-10">
     <div className="flex items-center justify-between mb-8">
        <h1 className="text-4xl font-bold">API Reference</h1>
        <div className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded text-xs font-mono font-bold">v2.1 Stable</div>
@@ -284,7 +500,7 @@ const ApiView = () => (
         </div>
         <p className="text-sm text-gray-400">Generate a new image based on provided prompt parameters.</p>
         
-        <div className="bg-[#111] rounded-xl border border-white/10 overflow-hidden">
+        <div className="bg-[#111]/80 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
             <span className="text-xs text-gray-500">cURL Request</span>
             <button className="text-xs text-neon-cyan hover:text-white">Copy</button>
@@ -315,11 +531,11 @@ const ApiView = () => (
 );
 
 const CommunityView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
     <PageHeader title="Join the Community" subtitle="Connect with 50,000+ creators, developers, and collectors." />
     
     <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
-       <a href="#" className="p-8 bg-[#5865F2]/10 border border-[#5865F2]/20 hover:bg-[#5865F2]/20 hover:border-[#5865F2] rounded-2xl group transition-all text-center">
+       <a href="#" className="p-8 bg-[#5865F2]/10 border border-[#5865F2]/20 hover:bg-[#5865F2]/20 hover:border-[#5865F2] rounded-2xl group transition-all text-center backdrop-blur-sm">
           <div className="w-16 h-16 bg-[#5865F2] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
              <Icons.MessageCircle className="w-8 h-8 text-white" />
           </div>
@@ -328,7 +544,7 @@ const CommunityView = () => (
           <p className="text-gray-400 text-sm">Live workshops, feedback channels, and community challenges.</p>
        </a>
 
-       <a href="#" className="p-8 bg-[#1DA1F2]/10 border border-[#1DA1F2]/20 hover:bg-[#1DA1F2]/20 hover:border-[#1DA1F2] rounded-2xl group transition-all text-center">
+       <a href="#" className="p-8 bg-[#1DA1F2]/10 border border-[#1DA1F2]/20 hover:bg-[#1DA1F2]/20 hover:border-[#1DA1F2] rounded-2xl group transition-all text-center backdrop-blur-sm">
           <div className="w-16 h-16 bg-[#1DA1F2] rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
              <Icons.Twitter className="w-8 h-8 text-white" />
           </div>
@@ -338,7 +554,7 @@ const CommunityView = () => (
        </a>
     </div>
 
-    <div className="bg-[#111] border border-white/10 rounded-2xl p-8 md:p-12 text-center max-w-4xl mx-auto">
+    <div className="bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 md:p-12 text-center max-w-4xl mx-auto">
        <h3 className="text-2xl font-bold text-white mb-4">Become an Olly Ambassador</h3>
        <p className="text-gray-400 mb-8 max-w-xl mx-auto">Earn rewards, get early access to features, and help shape the future of the platform.</p>
        <Button variant="outline" className="border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-black">Apply Now</Button>
@@ -347,7 +563,7 @@ const CommunityView = () => (
 );
 
 const SupportView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-3xl mx-auto px-6 pb-24 pt-24">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-3xl mx-auto px-6 pb-24 pt-24 relative z-10">
     <h1 className="text-4xl font-bold mb-8 text-center">How can we help?</h1>
     <div className="relative mb-12">
        <Icons.Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-500" />
@@ -361,7 +577,7 @@ const SupportView = () => (
         { q: "What is the daily generation limit?", a: "Explorer users get 50 gens/day. Studio and Agency users have unlimited generations." },
         { q: "How do I report a bug?", a: "Please join our Discord and post in the #bug-reports channel, or email support@olly.ai." }
       ].map((faq, i) => (
-        <div key={i} className="bg-white/5 border border-white/5 rounded-xl p-6">
+        <div key={i} className="bg-white/5 border border-white/5 rounded-xl p-6 backdrop-blur-sm">
           <h3 className="font-bold text-white mb-2">{faq.q}</h3>
           <p className="text-sm text-gray-400">{faq.a}</p>
         </div>
@@ -376,7 +592,7 @@ const SupportView = () => (
 );
 
 const AboutView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
     <PageHeader title="About Olly" subtitle="We're on a mission to democratize digital art creation through ethical AI." />
     
     <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
@@ -401,7 +617,7 @@ const JobCard: React.FC<{ job: Job }> = ({ job }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className={`bg-[#111] border border-white/10 rounded-xl overflow-hidden transition-all duration-300 ${isOpen ? 'border-neon-cyan/50 shadow-[0_0_15px_rgba(0,240,255,0.1)]' : 'hover:border-white/30'}`}>
+    <div className={`bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden transition-all duration-300 ${isOpen ? 'border-neon-cyan/50 shadow-[0_0_15px_rgba(0,240,255,0.1)]' : 'hover:border-white/30'}`}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-6 text-left"
@@ -506,7 +722,7 @@ const CareersView = () => {
   ];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-4xl mx-auto px-6 pb-24 pt-24">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-4xl mx-auto px-6 pb-24 pt-24 relative z-10">
       <div className="text-center mb-16">
         <h1 className="text-4xl font-bold mb-4">Join the Team</h1>
         <p className="text-gray-400">Help us build the future of creative tools.</p>
@@ -522,8 +738,8 @@ const CareersView = () => {
 };
 
 const ContactView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-3xl mx-auto px-6 pb-24 pt-24">
-    <div className="bg-[#111] border border-white/10 rounded-2xl p-8 md:p-12">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-3xl mx-auto px-6 pb-24 pt-24 relative z-10">
+    <div className="bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 md:p-12">
       <h2 className="text-3xl font-bold mb-8 text-center">Get in Touch</h2>
       <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
         <div className="grid md:grid-cols-2 gap-6">
@@ -563,20 +779,18 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10">
       {/* HERO SECTION */}
       <header className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-neon-purple/20 rounded-full blur-[120px] -z-10 opacity-30 animate-pulse-slow"></div>
-        <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-neon-cyan/10 rounded-full blur-[120px] -z-10 opacity-20"></div>
-
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+        
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-20">
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="text-center lg:text-left">
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-6">
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-6 backdrop-blur-md">
               <Icons.Sparkles className="w-3 h-3" />
               <span>v2.0 Now Live with Gemini 2.5 Flash</span>
             </motion.div>
             
-            <motion.h1 variants={itemVariants} className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1.1] mb-6">
+            <motion.h1 variants={itemVariants} className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1.1] mb-6 drop-shadow-2xl">
               Generate <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-neon-purple">NFT Art</span> with AI in Seconds
             </motion.h1>
             
@@ -588,7 +802,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
               <Button onClick={onStart} className="w-full sm:w-auto px-8 py-6 text-lg bg-neon-cyan text-black hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] font-black">
                 Start Creating Free
               </Button>
-              <Button onClick={() => onNav('SHOWCASE')} variant="outline" className="w-full sm:w-auto px-8 py-6 text-lg border-white/20 hover:bg-white/10 gap-2">
+              <Button onClick={() => onNav('COLLECTIONS')} variant="outline" className="w-full sm:w-auto px-8 py-6 text-lg border-white/20 hover:bg-white/10 gap-2 backdrop-blur-md">
                 <Icons.PlayCircle className="w-5 h-5" /> View Gallery
               </Button>
             </motion.div>
@@ -600,7 +814,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.8, rotate: 5 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="relative hidden lg:block">
-            <motion.div variants={floatVariants} animate="animate" className="relative z-10 grid grid-cols-2 gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm rotate-[-5deg] hover:rotate-0 transition-all duration-500">
+            <motion.div variants={floatVariants} animate="animate" className="relative z-10 grid grid-cols-2 gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm rotate-[-5deg] hover:rotate-0 transition-all duration-500 shadow-2xl">
               {[
                 { color: "from-purple-500 to-indigo-600", badge: "LEGENDARY", tierColor: "bg-yellow-500" },
                 { color: "from-neon-cyan to-blue-600", badge: "EPIC", tierColor: "bg-purple-500" },
@@ -621,7 +835,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
 
       {/* FEATURES PREVIEW */}
       <section className="py-24 relative">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-black mb-6">Everything You Need to <span className="text-neon-pink">Dominate</span></h2>
             <p className="text-gray-400 max-w-2xl mx-auto">Comprehensive tools built for the next generation of digital artists.</p>
@@ -632,7 +846,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
               { icon: Icons.Video, title: "Instant Video Prompts", desc: "Get optimized Meta AI-ready animation prompts automatically.", color: "text-neon-purple" },
               { icon: Icons.Sparkles, title: "Rarity System", desc: "Built-in legendary-to-common tier system with ETH valuations.", color: "text-yellow-400" }
             ].map((feature, idx) => (
-              <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-[#111] border border-[#222] p-8 rounded-2xl group hover:border-white/20 transition-all">
+              <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-[#111]/80 backdrop-blur-sm border border-[#222] p-8 rounded-2xl group hover:border-white/20 transition-all">
                 <div className={`p-3 rounded-lg bg-white/5 w-fit mb-6 ${feature.color}`}><feature.icon className="w-6 h-6" /></div>
                 <h3 className="text-xl font-bold mb-3 text-white">{feature.title}</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">{feature.desc}</p>
@@ -674,7 +888,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       case 'FEATURES': return <FeaturesView />;
       case 'PRICING': return <PricingView onStart={onStart} />;
       case 'ROADMAP': return <RoadmapView />;
-      case 'SHOWCASE': return <ShowcaseView />;
+      case 'COLLECTIONS': return <CollectionsView onStart={onStart} />;
       case 'DOCS': return <DocumentationView />;
       case 'API': return <ApiView />;
       case 'COMMUNITY': return <CommunityView />;
@@ -689,27 +903,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-neon-cyan selection:text-black overflow-x-hidden">
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-neon-cyan selection:text-black overflow-x-hidden relative">
       
+      {/* Background Animation */}
+      <GeometricBackground />
+
       {/* NAVBAR */}
       <nav className="fixed top-0 w-full z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <button onClick={() => handleNav('HOME')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Logo className="w-12 h-8" />
-            <span className="font-black text-xl tracking-tighter">OLLY</span>
+            <span className="font-black text-xl tracking-tighter hidden sm:block">OLLY</span>
           </button>
           
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
+          <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-gray-400">
             <button onClick={() => handleNav('FEATURES')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'FEATURES' ? 'text-white' : ''}`}>Features</button>
             <button onClick={() => handleNav('PRICING')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'PRICING' ? 'text-white' : ''}`}>Pricing</button>
-            <button onClick={() => handleNav('SHOWCASE')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'SHOWCASE' ? 'text-white' : ''}`}>Gallery</button>
+            <button onClick={() => handleNav('COLLECTIONS')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'COLLECTIONS' ? 'text-white' : ''}`}>Collections</button>
             <button onClick={() => handleNav('ROADMAP')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'ROADMAP' ? 'text-white' : ''}`}>Roadmap</button>
           </div>
           
           <div className="flex items-center gap-4">
-            <button onClick={onStart} className="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
+            <button onClick={onStart} className="text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
             <Button onClick={onStart} className="bg-neon-cyan text-black hover:bg-white border-none font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-              Start Creating
+              Start <span className="hidden sm:inline">&nbsp;Creating</span>
             </Button>
           </div>
         </div>
@@ -721,10 +938,35 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       </AnimatePresence>
 
       {/* FOOTER */}
-      <footer className="bg-[#020202] border-t border-white/5 pt-20 pb-10">
+      <footer className="bg-[#020202]/90 border-t border-white/5 pt-20 pb-10 relative z-10 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1 md:col-span-1">
+          
+          {/* Newsletter Subscription */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-16 mb-16 border-b border-white/5 bg-gradient-to-r from-neon-cyan/5 to-transparent p-8 rounded-2xl border border-white/5 backdrop-blur-sm">
+             <div className="flex-1 text-center md:text-left">
+               <h3 className="text-2xl font-black text-white mb-2">Don't Miss a Drop</h3>
+               <p className="text-gray-400 max-w-md">Join 50,000+ creators receiving the latest AI art trends and platform updates.</p>
+             </div>
+             <form className="w-full md:w-auto flex flex-col sm:flex-row gap-3" onSubmit={(e) => { e.preventDefault(); alert("Thanks for subscribing! 🚀"); }}>
+               <div className="relative w-full sm:w-80">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    <Icons.MessageCircle className="w-4 h-4" />
+                  </div>
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email address" 
+                    className="w-full bg-[#050505] border border-white/20 rounded-lg pl-10 pr-4 py-3 text-white focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan outline-none transition-all placeholder:text-gray-600"
+                    required
+                  />
+               </div>
+               <Button className="bg-neon-cyan text-black hover:bg-white hover:scale-105 transition-all font-bold h-auto py-3 shadow-[0_0_15px_rgba(0,240,255,0.3)] border-none">
+                 Subscribe
+               </Button>
+             </form>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-6 cursor-pointer" onClick={() => handleNav('HOME')}>
                 <Logo className="w-8 h-6" />
                 <span className="font-bold text-lg">OLLY</span>
@@ -740,7 +982,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                 <li><button onClick={() => handleNav('FEATURES')} className="hover:text-neon-cyan transition-colors">Features</button></li>
                 <li><button onClick={() => handleNav('PRICING')} className="hover:text-neon-cyan transition-colors">Pricing</button></li>
                 <li><button onClick={() => handleNav('ROADMAP')} className="hover:text-neon-cyan transition-colors">Roadmap</button></li>
-                <li><button onClick={() => handleNav('SHOWCASE')} className="hover:text-neon-cyan transition-colors">Showcase</button></li>
+                <li><button onClick={() => handleNav('COLLECTIONS')} className="hover:text-neon-cyan transition-colors">Collections</button></li>
               </ul>
             </div>
             <div>
