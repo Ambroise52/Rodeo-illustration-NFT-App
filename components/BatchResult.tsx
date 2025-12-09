@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GeneratedData } from '../types';
 import RarityBadge from './RarityBadge';

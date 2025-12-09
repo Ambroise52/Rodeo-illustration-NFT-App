@@ -7,11 +7,11 @@ import {
   Video, 
   ChevronDown, 
   ChevronUp, 
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  RefreshCw,
-  Cpu,
+  ChevronLeft, 
+  ChevronRight, 
+  MoreHorizontal, 
+  RefreshCw, 
+  Cpu, 
   Download, 
   Heart, 
   Star, 
@@ -29,11 +29,12 @@ import {
   Layers, 
   Bell, 
   User, 
-  Plus,
-  Globe,
-  Lock,
-  Settings,
-  Check
+  Plus, 
+  Globe, 
+  Lock, 
+  Settings, 
+  Check,
+  Loader2
 } from 'lucide-react';
 
 export const Icons = {
@@ -69,5 +70,6 @@ export const Icons = {
   Globe,
   Lock,
   Settings,
-  Check
+  Check,
+  Loader2
 };

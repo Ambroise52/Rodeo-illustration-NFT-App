@@ -16,6 +16,7 @@ import DetailsModal from './components/DetailsModal';
 import BatchResult from './components/BatchResult';
 import Collections, { CreateCollectionModal } from './components/Collections';
 import ProfileSettings from './components/ProfileSettings';
+import { DownloadProgress } from './components/DownloadProgress';
 
 import { Icons } from './components/Icons';
 import { Logo } from './components/Logo';
@@ -69,6 +70,13 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videoPromptCopied, setVideoPromptCopied] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // Download State
+  const [downloadState, setDownloadState] = useState({
+    active: false,
+    progress: 0,
+    filename: ''
+  });
 
   // --- Auth & Initial Load ---
   useEffect(() => {
@@ -391,16 +399,32 @@ function App() {
   };
 
   const handleExport = async (type: ExportType) => {
-    showToast("Preparing Export... 📦");
+    const filename = type === 'BULK_ALL' ? 'all-generations' : 'favorites';
+    setDownloadState({ active: true, progress: 0, filename });
+    
     try {
       if (type === 'BULK_ALL') {
-        await downloadBulk(history, 'all-generations');
+        await downloadBulk(history, filename, (p) => setDownloadState(prev => ({...prev, progress: p})));
       } else if (type === 'BULK_FAVORITES') {
-        await downloadBulk(history.filter(i => i.isFavorite), 'favorites');
+        await downloadBulk(history.filter(i => i.isFavorite), filename, (p) => setDownloadState(prev => ({...prev, progress: p})));
       }
       showToast("Export Ready! ✅");
     } catch (e) {
       showToast("Export Failed ❌");
+    } finally {
+      setDownloadState({ active: false, progress: 0, filename: '' });
+    }
+  };
+
+  const handleDownloadPackage = async (item: GeneratedData) => {
+    setDownloadState({ active: true, progress: 0, filename: `nft-${item.id}` });
+    try {
+      await downloadPackage(item, (p) => setDownloadState(prev => ({...prev, progress: p})));
+      showToast("Downloaded! 📥");
+    } catch (e) {
+      showToast("Download Failed ❌");
+    } finally {
+      setDownloadState({ active: false, progress: 0, filename: '' });
     }
   };
 
@@ -490,6 +514,13 @@ function App() {
         </div>
       )}
 
+      {downloadState.active && (
+        <DownloadProgress 
+          filename={downloadState.filename} 
+          progress={downloadState.progress} 
+        />
+      )}
+
       {showCreateCollectionModal && session && (
         <CreateCollectionModal 
           userId={session.user.id} 
@@ -513,7 +544,6 @@ function App() {
         onPrev={() => navigateModal('prev')}
         onToggleFavorite={toggleFavorite}
         onDelete={deleteItem}
-        onDownloadPackage={downloadPackage}
         onRemix={handleRemix}
       />
 
@@ -677,7 +707,7 @@ function App() {
                     results={batchResults} 
                     onSelect={openModal}
                     onToggleFavorite={toggleFavorite}
-                    onDownload={downloadPackage}
+                    onDownload={handleDownloadPackage}
                   />
                 )}
 

@@ -46,6 +46,32 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
+// --- Spinner ---
+export const Spinner = ({ className }: { className?: string }) => (
+  <Icons.Loader2 className={classNames("h-5 w-5 animate-spin text-neon-cyan", className)} />
+);
+
+// --- Progress ---
+export const Progress = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { value?: number | null }
+>(({ className, value, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={classNames(
+      "relative h-2 w-full overflow-hidden rounded-full bg-white/10",
+      className
+    )}
+    {...props}
+  >
+    <div
+      className="h-full w-full flex-1 bg-neon-cyan transition-all duration-300 ease-in-out"
+      style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+    />
+  </div>
+))
+Progress.displayName = "Progress"
+
 // --- Kbd ---
 export const Kbd = ({ children, className }: { children?: React.ReactNode; className?: string }) => (
   <kbd className={classNames("pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-white/20 bg-white/10 px-1.5 font-mono text-[10px] font-medium text-gray-400 opacity-100", className)}>
@@ -188,7 +214,7 @@ export const InputGroupAddon = React.forwardRef<HTMLDivElement, React.HTMLAttrib
 InputGroupAddon.displayName = "InputGroupAddon";
 
 
-// --- Select (Custom Implementation) ---
+// --- Select & Dropdown Context ---
 interface SelectProps {
   value?: string;
   onValueChange?: (value: string) => void;
@@ -196,78 +222,6 @@ interface SelectProps {
 }
 const SelectContext = React.createContext<{ value?: string; onValueChange?: (v: string) => void; open: boolean; setOpen: (v: boolean) => void }>({ open: false, setOpen: () => {} });
 
-export const Select: React.FC<SelectProps> = ({ value, onValueChange, children }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    
-    if (open) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <SelectContext.Provider value={{ value, onValueChange, open, setOpen }}>
-        {children}
-      </SelectContext.Provider>
-    </div>
-  );
-};
-
-export const SelectTrigger: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className, children, ...props }) => {
-  const { open, setOpen } = React.useContext(SelectContext);
-  return (
-    <button 
-      type="button"
-      onClick={() => setOpen(!open)}
-      className={classNames("flex h-10 w-full items-center justify-between rounded-md border border-dark-border bg-black/40 px-3 py-2 text-sm text-white ring-offset-background placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-neon-cyan disabled:cursor-not-allowed disabled:opacity-50", className)}
-      {...props}
-    >
-      {children}
-      <Icons.ChevronDown className="h-4 w-4 opacity-50" />
-    </button>
-  );
-};
-
-export const SelectValue: React.FC<{ placeholder?: string }> = ({ placeholder }) => {
-  const { value } = React.useContext(SelectContext);
-  return <span className="pointer-events-none block truncate">{value || placeholder}</span>;
-};
-
-export const SelectContent: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const { open } = React.useContext(SelectContext);
-  if (!open) return null;
-  return (
-    <div className="absolute z-50 min-w-[8rem] overflow-hidden rounded-md border border-dark-border bg-dark-card text-white shadow-md animate-in fade-in-80 mt-1 w-full max-w-[var(--radix-select-trigger-width)]">
-      <div className="p-1 max-h-60 overflow-y-auto">{children}</div>
-    </div>
-  );
-};
-
-export const SelectItem: React.FC<{ value: string; children?: React.ReactNode; className?: string }> = ({ value, children, className }) => {
-  const { onValueChange, setOpen } = React.useContext(SelectContext);
-  return (
-    <div 
-      onClick={() => { onValueChange?.(value); setOpen(false); }}
-      className={classNames("relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-white/10 hover:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50", className)}
-    >
-      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-        {/* Check icon could go here if selected */}
-      </span>
-      {children}
-    </div>
-  );
-};
-
-// --- Dropdown Menu (New) ---
 export const DropdownMenu = ({ children }: { children?: React.ReactNode }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -328,14 +282,38 @@ export const DropdownMenuItem: React.FC<React.HTMLAttributes<HTMLDivElement> & {
     );
 };
 
-// --- Item Components (New) ---
-export const Item = ({ size, className, children }: { size?: string, className?: string, children?: React.ReactNode }) => (
-    <div className={classNames("flex items-center gap-3", className)}>{children}</div>
+// --- Item Components ---
+export const Item = ({ variant, size, className, children }: { variant?: 'default' | 'outline', size?: string, className?: string, children?: React.ReactNode }) => {
+    const variantClass = variant === 'outline' 
+        ? "border border-dark-border bg-dark-card rounded-xl p-4 flex-wrap" 
+        : "";
+    return (
+        <div className={classNames("flex items-center gap-3", variantClass, className)}>{children}</div>
+    );
+};
+
+export const ItemMedia = ({ variant, children }: { variant?: 'default' | 'icon', children?: React.ReactNode }) => {
+  const variantClass = variant === 'icon' 
+      ? "bg-white/5 p-3 rounded-lg flex items-center justify-center" 
+      : "";
+  return <div className={classNames("flex-shrink-0", variantClass)}>{children}</div>;
+};
+
+export const ItemContent = ({ className, children }: { className?: string, children?: React.ReactNode }) => (
+    <div className={classNames("flex flex-col min-w-0 text-left", className)}>{children}</div>
 );
-export const ItemMedia = ({ children }: { children?: React.ReactNode }) => <div className="flex-shrink-0">{children}</div>;
-export const ItemContent = ({ className, children }: { className?: string, children?: React.ReactNode }) => <div className={classNames("flex flex-col min-w-0 text-left", className)}>{children}</div>;
-export const ItemTitle = ({ className, children }: { className?: string, children?: React.ReactNode }) => <div className={classNames("text-sm font-bold truncate text-white", className)}>{children}</div>;
-export const ItemDescription = ({ className, children }: { className?: string, children?: React.ReactNode }) => <div className={classNames("text-xs text-gray-400 truncate", className)}>{children}</div>;
+export const ItemTitle = ({ className, children }: { className?: string, children?: React.ReactNode }) => (
+    <div className={classNames("text-sm font-bold truncate text-white", className)}>{children}</div>
+);
+export const ItemDescription = ({ className, children }: { className?: string, children?: React.ReactNode }) => (
+    <div className={classNames("text-xs text-gray-400 truncate", className)}>{children}</div>
+);
+export const ItemActions = ({ className, children }: { className?: string, children?: React.ReactNode }) => (
+    <div className={classNames("ml-auto flex items-center gap-2", className)}>{children}</div>
+);
+export const ItemFooter = ({ className, children }: { className?: string, children?: React.ReactNode }) => (
+    <div className={classNames("w-full mt-4 basis-full", className)}>{children}</div>
+);
 
 
 // --- Avatar ---

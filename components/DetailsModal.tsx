@@ -1,8 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { GeneratedData } from '../types';
 import RarityBadge from './RarityBadge';
 import { Icons } from './Icons';
 import { APP_CONFIG } from '../constants';
+import { downloadPackage } from '../utils/exportUtils';
+import { DownloadProgress } from './DownloadProgress';
 
 interface DetailsModalProps {
   item: GeneratedData | null;
@@ -12,7 +15,6 @@ interface DetailsModalProps {
   onPrev: () => void;
   onToggleFavorite: (id: string) => void;
   onDelete: (id: string) => void;
-  onDownloadPackage: (item: GeneratedData) => void;
   onRemix: (item: GeneratedData) => void;
 }
 
@@ -24,10 +26,11 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
   onPrev,
   onToggleFavorite,
   onDelete,
-  onDownloadPackage,
   onRemix
 }) => {
   const [isCopied, setIsCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,11 +47,33 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, item, onNext, onPrev, onClose, onToggleFavorite]);
 
+  useEffect(() => {
+    // Reset state when item changes
+    setDownloading(false);
+    setProgress(0);
+  }, [item]);
+
   const handleCopyVideoPrompt = () => {
     if (item) {
       navigator.clipboard.writeText(item.videoPrompt);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!item) return;
+    setDownloading(true);
+    setProgress(0);
+    try {
+      await downloadPackage(item, (p) => setProgress(p));
+    } catch (e) {
+      console.error("Download failed", e);
+    } finally {
+      // Small delay to show completion before hiding
+      setTimeout(() => {
+        setDownloading(false);
+      }, 1000);
     }
   };
 
@@ -73,28 +98,42 @@ const DetailsModal: React.FC<DetailsModalProps> = ({
       <div className="w-full max-w-6xl h-[90vh] flex flex-col md:flex-row gap-8 p-4 md:p-8 relative">
         
         {/* Left: Image */}
-        <div className="flex-1 flex items-center justify-center relative bg-dark-card/50 rounded-2xl border border-dark-border p-2">
+        <div className="flex-1 flex items-center justify-center relative bg-dark-card/50 rounded-2xl border border-dark-border p-2 overflow-hidden">
             <img 
               src={item.imageUrl} 
               alt={item.imagePrompt} 
               className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" 
             />
+            
+            {/* Download Progress Overlay */}
+            {downloading && (
+               <div className="absolute inset-0 z-30 flex items-end justify-center pb-8 px-6 bg-black/60 backdrop-blur-sm rounded-xl animate-in fade-in">
+                  <DownloadProgress 
+                    filename={`nft-${item.id.substring(0,8)}.zip`} 
+                    progress={progress} 
+                    className="w-full max-w-sm"
+                  />
+               </div>
+            )}
+
             {/* Quick Actions Overlay */}
-            <div className="absolute bottom-6 flex gap-3">
-               <button 
-                onClick={() => onToggleFavorite(item.id)}
-                className={`p-3 rounded-full backdrop-blur-md border transition-all hover:scale-110 ${item.isFavorite ? 'bg-neon-pink/20 border-neon-pink text-neon-pink' : 'bg-black/50 border-white/20 text-white hover:bg-white/10'}`}
-               >
-                 <Icons.Heart className={`w-6 h-6 ${item.isFavorite ? 'fill-current' : ''}`} />
-               </button>
-               <button 
-                 onClick={() => onDownloadPackage(item)}
-                 className="p-3 bg-black/50 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-white/10 hover:scale-110 transition-all"
-                 title="Download Package"
-               >
-                 <Icons.Download className="w-6 h-6" />
-               </button>
-            </div>
+            {!downloading && (
+              <div className="absolute bottom-6 flex gap-3 z-20">
+                 <button 
+                  onClick={() => onToggleFavorite(item.id)}
+                  className={`p-3 rounded-full backdrop-blur-md border transition-all hover:scale-110 ${item.isFavorite ? 'bg-neon-pink/20 border-neon-pink text-neon-pink' : 'bg-black/50 border-white/20 text-white hover:bg-white/10'}`}
+                 >
+                   <Icons.Heart className={`w-6 h-6 ${item.isFavorite ? 'fill-current' : ''}`} />
+                 </button>
+                 <button 
+                   onClick={handleDownload}
+                   className="p-3 bg-black/50 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-white/10 hover:scale-110 transition-all"
+                   title="Download Package"
+                 >
+                   <Icons.Download className="w-6 h-6" />
+                 </button>
+              </div>
+            )}
         </div>
 
         {/* Right: Details */}

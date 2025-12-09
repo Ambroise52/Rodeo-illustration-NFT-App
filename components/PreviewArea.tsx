@@ -1,6 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Icons } from './Icons';
+import { Spinner } from './UIShared';
 
 interface PreviewAreaProps {
   isGenerating: boolean;
@@ -19,15 +20,22 @@ const PreviewArea: React.FC<PreviewAreaProps> = ({
   isFavorite, 
   onToggleFavorite 
 }) => {
+  const [downloading, setDownloading] = useState(false);
   
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (imageUrl) {
+      setDownloading(true);
+      // Simulate a small delay for visual feedback if instant
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const link = document.createElement('a');
       link.href = imageUrl;
       link.download = `olly-${Date.now()}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      setDownloading(false);
     }
   };
 
@@ -89,10 +97,11 @@ const PreviewArea: React.FC<PreviewAreaProps> = ({
                   <div className="flex flex-col w-full gap-3 max-w-xs">
                     <button 
                       onClick={handleDownload}
-                      className="flex items-center justify-center gap-2 px-6 py-2 bg-white text-black font-bold rounded-full hover:bg-neon-cyan hover:scale-105 transition-all duration-200"
+                      disabled={downloading}
+                      className="flex items-center justify-center gap-2 px-6 py-2 bg-white text-black font-bold rounded-full hover:bg-neon-cyan hover:scale-105 transition-all duration-200 disabled:opacity-70 disabled:cursor-wait"
                     >
-                      <Icons.Download className="w-4 h-4" />
-                      DOWNLOAD ASSET
+                      {downloading ? <Spinner className="w-4 h-4 text-black" /> : <Icons.Download className="w-4 h-4" />}
+                      {downloading ? 'SAVING...' : 'DOWNLOAD ASSET'}
                     </button>
                     
                     {onRegenerateStronger && (

@@ -1,3 +1,4 @@
+
 import JSZip from 'jszip';
 import saveAs from 'file-saver';
 import { GeneratedData } from '../types';
@@ -29,7 +30,7 @@ export const createMetadata = (item: GeneratedData) => {
   }, null, 2);
 };
 
-export const downloadPackage = async (item: GeneratedData) => {
+export const downloadPackage = async (item: GeneratedData, onProgress?: (percent: number) => void) => {
   const zip = new JSZip();
   const baseName = `nft-${item.id}`;
 
@@ -43,20 +44,28 @@ export const downloadPackage = async (item: GeneratedData) => {
   // Add Image
   if (item.imageUrl) {
     try {
+      if (onProgress) onProgress(10);
       const response = await fetch(item.imageUrl);
       const blob = await response.blob();
       zip.file(`${baseName}-image.png`, blob);
+      if (onProgress) onProgress(50);
     } catch (e) {
       console.error("Failed to fetch image for zip", e);
     }
   }
 
-  const content = await zip.generateAsync({ type: "blob" });
+  const content = await zip.generateAsync({ type: "blob" }, (metadata) => {
+    if (onProgress) onProgress(50 + (metadata.percent / 2));
+  });
+  
+  if (onProgress) onProgress(100);
   saveAs(content, `${baseName}-package.zip`);
 };
 
-export const downloadBulk = async (items: GeneratedData[], zipName: string) => {
+export const downloadBulk = async (items: GeneratedData[], zipName: string, onProgress?: (percent: number) => void) => {
   const zip = new JSZip();
+  const totalItems = items.length;
+  let processedItems = 0;
   
   for (const item of items) {
     const folder = zip.folder(`nft-${item.id}`);
@@ -76,8 +85,14 @@ export const downloadBulk = async (items: GeneratedData[], zipName: string) => {
         }
       }
     }
+    processedItems++;
+    if (onProgress) onProgress((processedItems / totalItems) * 80); // Fetching is 80% of work
   }
 
-  const content = await zip.generateAsync({ type: "blob" });
+  const content = await zip.generateAsync({ type: "blob" }, (metadata) => {
+    if (onProgress) onProgress(80 + (metadata.percent * 0.2)); // Zipping is 20%
+  });
+  
+  if (onProgress) onProgress(100);
   saveAs(content, `${zipName}.zip`);
 };
