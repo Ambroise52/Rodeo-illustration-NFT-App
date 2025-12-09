@@ -38,60 +38,35 @@ interface Job {
 // --- Background Animation Component ---
 const GeometricBackground = () => {
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none bg-[#050505]">
-      
-      {/* 1. Perspective Grid (Floor) */}
-      <div className="absolute inset-0 flex items-center justify-center perspective-[1000px] opacity-40">
-        <motion.div 
-          className="w-[200vw] h-[200vh] origin-top"
-          style={{ 
-            backgroundImage: 'linear-gradient(to right, rgba(0, 240, 255, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 240, 255, 0.1) 1px, transparent 1px)',
-            backgroundSize: '80px 80px',
-            transform: 'rotateX(60deg) translateY(-100px) translateZ(-200px)',
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 40%, transparent 90%)'
-          }}
-          animate={{ backgroundPosition: ['0px 0px', '0px 80px'] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        />
-      </div>
-
-      {/* 2. Ambient Gradient Orbs */}
-      <motion.div 
-        className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-neon-purple/20 rounded-full blur-[120px] mix-blend-screen"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div 
-        className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-neon-cyan/10 rounded-full blur-[120px] mix-blend-screen"
-        animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">
+      {/* Subtle Grid - Static */}
+      <div 
+        className="absolute inset-0 opacity-[0.03]" 
+        style={{ 
+          backgroundImage: 'linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+          maskImage: 'radial-gradient(circle at center, black, transparent 80%)'
+        }} 
       />
 
-      {/* 3. Animated SVG Geometry */}
+      {/* Animated SVG Geometry */}
       <motion.svg 
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full opacity-20"
         initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
+        animate={{ opacity: 0.2 }} 
         transition={{ duration: 2 }}
       >
         <defs>
           <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#00F0FF" stopOpacity="0" />
-            <stop offset="50%" stopColor="#00F0FF" stopOpacity="0.6" />
+            <stop offset="50%" stopColor="#00F0FF" stopOpacity="0.4" />
             <stop offset="100%" stopColor="#00F0FF" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#BD00FF" stopOpacity="0" />
-            <stop offset="50%" stopColor="#BD00FF" stopOpacity="0.5" />
+            <stop offset="50%" stopColor="#BD00FF" stopOpacity="0.3" />
             <stop offset="100%" stopColor="#BD00FF" stopOpacity="0" />
           </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
         </defs>
 
         {/* Floating Hexagon */}
@@ -99,17 +74,16 @@ const GeometricBackground = () => {
            d="M50,100 L93,75 L93,25 L50,0 L7,25 L7,75 Z"
            fill="none"
            stroke="#00F0FF"
-           strokeWidth="1.5"
-           filter="url(#glow)"
-           className="opacity-40"
-           initial={{ x: '10vw', y: '20vh', rotate: 0, scale: 2 }}
+           strokeWidth="0.5"
+           className="opacity-20"
+           initial={{ x: '10%', y: '20%', rotate: 0, scale: 2 }}
            animate={{ 
-             y: ['20vh', '25vh', '20vh'], 
+             y: ['20%', '25%', '20%'], 
              rotate: 360 
            }}
            transition={{ 
-             y: { duration: 10, repeat: Infinity, ease: "easeInOut" },
-             rotate: { duration: 60, repeat: Infinity, ease: "linear" }
+             y: { duration: 20, repeat: Infinity, ease: "easeInOut" },
+             rotate: { duration: 120, repeat: Infinity, ease: "linear" }
            }}
         />
 
@@ -118,43 +92,41 @@ const GeometricBackground = () => {
            points="150,20 280,250 20,250"
            fill="none"
            stroke="#FF0099"
-           strokeWidth="1"
-           filter="url(#glow)"
-           className="opacity-30"
-           initial={{ x: '80vw', y: '60vh', rotate: 180, scale: 3 }}
+           strokeWidth="0.5"
+           className="opacity-10"
+           initial={{ x: '80%', y: '60%', rotate: 180, scale: 3 }}
            animate={{ 
              rotate: -360,
-             scale: [3, 3.1, 3]
+             scale: [3, 3.2, 3]
            }}
-           transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
+           transition={{ duration: 150, repeat: Infinity, ease: "linear" }}
         />
 
-        {/* Connecting Lines (Data Streams) */}
+        {/* Connecting Lines */}
         <motion.line 
           x1="0" y1="40%" x2="100%" y2="60%" 
           stroke="url(#lineGrad)" 
-          strokeWidth="2" 
-          initial={{ strokeDasharray: "10, 40", strokeDashoffset: 0 }}
+          strokeWidth="1" 
+          initial={{ strokeDasharray: "10, 20", strokeDashoffset: 0 }}
           animate={{ strokeDashoffset: 1000 }}
-          transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 150, repeat: Infinity, ease: "linear" }}
         />
 
          <motion.line 
           x1="70%" y1="0" x2="30%" y2="100%" 
           stroke="url(#lineGrad2)" 
-          strokeWidth="2" 
-          initial={{ strokeDasharray: "20, 60", strokeDashoffset: 0 }}
+          strokeWidth="1" 
+          initial={{ strokeDasharray: "15, 25", strokeDashoffset: 0 }}
           animate={{ strokeDashoffset: -1000 }}
-          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
         />
 
         {/* Random Particles */}
-        {[...Array(15)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
            <motion.circle
              key={i}
-             r={Math.random() * 2 + 1}
-             fill={i % 2 === 0 ? "#00F0FF" : "#FF0099"}
-             filter="url(#glow)"
+             r={Math.random() * 2}
+             fill="#fff"
              initial={{ 
                cx: Math.random() * 100 + "%", 
                cy: Math.random() * 100 + "%", 
@@ -162,10 +134,10 @@ const GeometricBackground = () => {
              }}
              animate={{ 
                cy: [null, Math.random() * 100 + "%"],
-               opacity: [0, 0.6, 0]
+               opacity: [0, 0.3, 0]
              }}
              transition={{ 
-               duration: Math.random() * 10 + 10, 
+               duration: Math.random() * 20 + 20, 
                repeat: Infinity, 
                ease: "linear" 
              }}
@@ -179,14 +151,15 @@ const GeometricBackground = () => {
 // --- Shared Components ---
 
 const PageHeader: React.FC<{ title: string; subtitle: string; badge?: string }> = ({ title, subtitle, badge }) => (
-  <div className="pt-32 pb-16 px-4 md:px-6 text-center relative overflow-hidden z-10">
+  <div className="pt-32 pb-16 px-6 text-center relative overflow-hidden z-10">
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-neon-cyan/5 rounded-full blur-[100px] -z-10"></div>
     {badge && (
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-6 mx-auto backdrop-blur-md">
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-6 mx-auto">
         <Icons.Sparkles className="w-3 h-3" />
         <span>{badge}</span>
       </div>
     )}
-    <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 text-white drop-shadow-lg">{title}</h1>
+    <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 text-white">{title}</h1>
     <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
   </div>
 );
@@ -782,15 +755,17 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10">
       {/* HERO SECTION */}
       <header className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 overflow-hidden">
-        
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-20">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-neon-purple/20 rounded-full blur-[120px] -z-10 opacity-30 animate-pulse-slow"></div>
+        <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-neon-cyan/10 rounded-full blur-[120px] -z-10 opacity-20"></div>
+
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="text-center lg:text-left">
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-6 backdrop-blur-md">
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-6">
               <Icons.Sparkles className="w-3 h-3" />
               <span>v2.0 Now Live with Gemini 2.5 Flash</span>
             </motion.div>
             
-            <motion.h1 variants={itemVariants} className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1.1] mb-6 drop-shadow-2xl">
+            <motion.h1 variants={itemVariants} className="text-5xl lg:text-7xl font-black tracking-tighter leading-[1.1] mb-6">
               Generate <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-neon-purple">NFT Art</span> with AI in Seconds
             </motion.h1>
             
@@ -802,7 +777,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
               <Button onClick={onStart} className="w-full sm:w-auto px-8 py-6 text-lg bg-neon-cyan text-black hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] font-black">
                 Start Creating Free
               </Button>
-              <Button onClick={() => onNav('COLLECTIONS')} variant="outline" className="w-full sm:w-auto px-8 py-6 text-lg border-white/20 hover:bg-white/10 gap-2 backdrop-blur-md">
+              <Button onClick={() => onNav('COLLECTIONS')} variant="outline" className="w-full sm:w-auto px-8 py-6 text-lg border-white/20 hover:bg-white/10 gap-2">
                 <Icons.PlayCircle className="w-5 h-5" /> View Gallery
               </Button>
             </motion.div>
@@ -814,7 +789,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.8, rotate: 5 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="relative hidden lg:block">
-            <motion.div variants={floatVariants} animate="animate" className="relative z-10 grid grid-cols-2 gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm rotate-[-5deg] hover:rotate-0 transition-all duration-500 shadow-2xl">
+            <motion.div variants={floatVariants} animate="animate" className="relative z-10 grid grid-cols-2 gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm rotate-[-5deg] hover:rotate-0 transition-all duration-500">
               {[
                 { color: "from-purple-500 to-indigo-600", badge: "LEGENDARY", tierColor: "bg-yellow-500" },
                 { color: "from-neon-cyan to-blue-600", badge: "EPIC", tierColor: "bg-purple-500" },
@@ -835,7 +810,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
 
       {/* FEATURES PREVIEW */}
       <section className="py-24 relative">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-black mb-6">Everything You Need to <span className="text-neon-pink">Dominate</span></h2>
             <p className="text-gray-400 max-w-2xl mx-auto">Comprehensive tools built for the next generation of digital artists.</p>
@@ -913,10 +888,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <button onClick={() => handleNav('HOME')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Logo className="w-12 h-8" />
-            <span className="font-black text-xl tracking-tighter hidden sm:block">OLLY</span>
+            <span className="font-black text-xl tracking-tighter">OLLY</span>
           </button>
           
-          <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-gray-400">
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
             <button onClick={() => handleNav('FEATURES')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'FEATURES' ? 'text-white' : ''}`}>Features</button>
             <button onClick={() => handleNav('PRICING')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'PRICING' ? 'text-white' : ''}`}>Pricing</button>
             <button onClick={() => handleNav('COLLECTIONS')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'COLLECTIONS' ? 'text-white' : ''}`}>Collections</button>
@@ -924,9 +899,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           </div>
           
           <div className="flex items-center gap-4">
-            <button onClick={onStart} className="text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
+            <button onClick={onStart} className="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
             <Button onClick={onStart} className="bg-neon-cyan text-black hover:bg-white border-none font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-              Start <span className="hidden sm:inline">&nbsp;Creating</span>
+              Start Creating
             </Button>
           </div>
         </div>
@@ -965,8 +940,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
              </form>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-2 md:col-span-1">
+          <div className="grid md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1 md:col-span-1">
               <div className="flex items-center gap-2 mb-6 cursor-pointer" onClick={() => handleNav('HOME')}>
                 <Logo className="w-8 h-6" />
                 <span className="font-bold text-lg">OLLY</span>
