@@ -63,37 +63,78 @@ const FeaturesView = () => (
     <PageHeader title="Powerful Features" subtitle="Everything you need to create, manage, and scale your NFT collections using state-of-the-art AI." badge="Version 2.0 Live" />
     
     <div className="grid md:grid-cols-2 gap-16 items-center mb-24">
-      <div>
+      <motion.div 
+        initial={{ opacity: 0, x: -50 }} 
+        whileInView={{ opacity: 1, x: 0 }} 
+        viewport={{ once: true }} 
+        transition={{ duration: 0.6 }}
+      >
          <div className="p-4 bg-neon-cyan/10 rounded-2xl w-fit mb-6 text-neon-cyan"><Icons.Zap className="w-8 h-8" /></div>
          <h2 className="text-3xl font-bold mb-4">Gemini 2.5 Flash Engine</h2>
          <p className="text-gray-400 leading-relaxed mb-6">Our core generation engine is powered by Google's latest Gemini 2.5 Flash model, optimized specifically for vector-style geometric art. It understands complex spatial relationships and abstract concepts better than any other model on the market.</p>
          <ul className="space-y-3">
-           {["Sub-second generation times", "Perfect geometric consistency", "Advanced color theory application", "Zero-hallucination vector paths"].map(item => (
-             <li key={item} className="flex items-center gap-2 text-sm text-gray-300"><Icons.Check className="w-4 h-4 text-neon-cyan" /> {item}</li>
+           {["Sub-second generation times", "Perfect geometric consistency", "Advanced color theory application", "Zero-hallucination vector paths"].map((item, i) => (
+             <motion.li 
+                key={item} 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 + (i * 0.1) }}
+                className="flex items-center gap-2 text-sm text-gray-300"
+             >
+                <Icons.Check className="w-4 h-4 text-neon-cyan" /> {item}
+             </motion.li>
            ))}
          </ul>
-      </div>
-      <div className="aspect-square bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-white/10 flex items-center justify-center relative overflow-hidden group">
+      </motion.div>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8 }} 
+        whileInView={{ opacity: 1, scale: 1 }} 
+        viewport={{ once: true }} 
+        transition={{ duration: 0.6 }}
+        className="aspect-square bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-white/10 flex items-center justify-center relative overflow-hidden group"
+      >
          <div className="absolute inset-0 bg-neon-cyan/5 group-hover:bg-neon-cyan/10 transition-colors"></div>
          <Icons.Cpu className="w-32 h-32 text-gray-800 group-hover:text-neon-cyan transition-colors duration-500" />
-      </div>
+      </motion.div>
     </div>
 
     <div className="grid md:grid-cols-2 gap-16 items-center mb-24 md:flex-row-reverse">
-      <div className="md:order-2">
+      <motion.div 
+        className="md:order-2"
+        initial={{ opacity: 0, x: 50 }} 
+        whileInView={{ opacity: 1, x: 0 }} 
+        viewport={{ once: true }} 
+        transition={{ duration: 0.6 }}
+      >
          <div className="p-4 bg-neon-purple/10 rounded-2xl w-fit mb-6 text-neon-purple"><Icons.Video className="w-8 h-8" /></div>
          <h2 className="text-3xl font-bold mb-4">Smart Video Prompts</h2>
          <p className="text-gray-400 leading-relaxed mb-6">Don't just create static images. Olly automatically analyzes your generated artwork and crafts perfect text-to-video prompts compatible with Meta AI and Runway Gen-2, giving life to your creations.</p>
          <ul className="space-y-3">
-           {["Context-aware motion descriptions", "Loop-perfect timing syntax", "Style-consistent animation rules", "One-click copy workflow"].map(item => (
-             <li key={item} className="flex items-center gap-2 text-sm text-gray-300"><Icons.Check className="w-4 h-4 text-neon-purple" /> {item}</li>
+           {["Context-aware motion descriptions", "Loop-perfect timing syntax", "Style-consistent animation rules", "One-click copy workflow"].map((item, i) => (
+             <motion.li 
+                key={item} 
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 + (i * 0.1) }}
+                className="flex items-center gap-2 text-sm text-gray-300"
+             >
+                <Icons.Check className="w-4 h-4 text-neon-purple" /> {item}
+             </motion.li>
            ))}
          </ul>
-      </div>
-      <div className="aspect-square bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-white/10 flex items-center justify-center relative overflow-hidden group md:order-1">
+      </motion.div>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8 }} 
+        whileInView={{ opacity: 1, scale: 1 }} 
+        viewport={{ once: true }} 
+        transition={{ duration: 0.6 }}
+        className="aspect-square bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-white/10 flex items-center justify-center relative overflow-hidden group md:order-1"
+      >
           <div className="absolute inset-0 bg-neon-purple/5 group-hover:bg-neon-purple/10 transition-colors"></div>
           <Icons.PlayCircle className="w-32 h-32 text-gray-800 group-hover:text-neon-purple transition-colors duration-500" />
-      </div>
+      </motion.div>
     </div>
 
     <div className="grid md:grid-cols-3 gap-8">
@@ -105,11 +146,25 @@ const FeaturesView = () => (
          { icon: Icons.Lock, title: "IP Protection", desc: "You own 100% of the commercial rights to your generations." },
          { icon: Icons.Sparkles, title: "Style Tuning", desc: "Fine-tune aesthetic parameters for consistent brand look." }
        ].map((feat, i) => (
-         <div key={i} className="p-6 bg-white/5 rounded-xl border border-white/5 hover:border-white/20 transition-all backdrop-blur-sm">
-            <feat.icon className="w-8 h-8 text-gray-400 mb-4" />
+         <motion.div 
+            key={i} 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 }}
+            className="p-6 bg-white/5 rounded-xl border border-white/5 hover:border-white/20 transition-all backdrop-blur-sm group"
+         >
+            <motion.div
+               initial={{ scale: 0.5 }}
+               whileInView={{ scale: 1 }}
+               viewport={{ once: true }}
+               transition={{ type: "spring", stiffness: 300, delay: i * 0.1 + 0.1 }}
+            >
+                <feat.icon className="w-8 h-8 text-gray-400 mb-4 group-hover:text-neon-cyan transition-colors" />
+            </motion.div>
             <h3 className="font-bold text-lg mb-2">{feat.title}</h3>
             <p className="text-sm text-gray-400">{feat.desc}</p>
-         </div>
+         </motion.div>
        ))}
     </div>
   </motion.div>
@@ -879,8 +934,23 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
               { icon: Icons.Video, title: "Instant Video Prompts", desc: "Get optimized Meta AI-ready animation prompts automatically.", color: "text-neon-purple" },
               { icon: Icons.Sparkles, title: "Rarity System", desc: "Built-in legendary-to-common tier system with ETH valuations.", color: "text-yellow-400" }
             ].map((feature, idx) => (
-              <motion.div key={idx} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-[#111]/80 backdrop-blur-sm border border-[#222] p-8 rounded-2xl group hover:border-white/20 transition-all">
-                <div className={`p-3 rounded-lg bg-white/5 w-fit mb-6 ${feature.color}`}><feature.icon className="w-6 h-6" /></div>
+              <motion.div 
+                key={idx} 
+                initial={{ opacity: 0, y: 30 }} 
+                whileInView={{ opacity: 1, y: 0 }} 
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="bg-[#111]/80 backdrop-blur-sm border border-[#222] p-8 rounded-2xl group hover:border-white/20 transition-all"
+              >
+                <motion.div 
+                    initial={{ scale: 0, rotate: -45 }}
+                    whileInView={{ scale: 1, rotate: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 + (idx * 0.1) }}
+                    className={`p-3 rounded-lg bg-white/5 w-fit mb-6 ${feature.color} group-hover:scale-110 transition-transform duration-300`}
+                >
+                    <feature.icon className="w-6 h-6" />
+                </motion.div>
                 <h3 className="text-xl font-bold mb-3 text-white">{feature.title}</h3>
                 <p className="text-sm text-gray-400 leading-relaxed">{feature.desc}</p>
               </motion.div>
