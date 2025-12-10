@@ -24,12 +24,13 @@ import {
 interface AuthProps {
   onLogin: () => void;
   onBack: () => void;
+  initialView?: 'LOGIN' | 'SIGNUP';
 }
 
 type ViewState = 'LOGIN' | 'SIGNUP' | 'TERMS' | 'PRIVACY';
 
-const Auth: React.FC<AuthProps> = ({ onLogin, onBack }) => {
-  const [view, setView] = useState<ViewState>('LOGIN');
+const Auth: React.FC<AuthProps> = ({ onLogin, onBack, initialView = 'LOGIN' }) => {
+  const [view, setView] = useState<ViewState>(initialView as ViewState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   

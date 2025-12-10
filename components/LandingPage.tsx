@@ -24,7 +24,7 @@ type PageType =
   | 'PRIVACY';
 
 interface LandingPageProps {
-  onStart: () => void;
+  onStart: (mode: 'LOGIN' | 'SIGNUP') => void;
 }
 
 interface Job {
@@ -170,7 +170,7 @@ const FeaturesView = () => (
   </motion.div>
 );
 
-const PricingView = ({ onStart }: { onStart: () => void }) => (
+const PricingView = ({ onStart }: { onStart: (mode: 'LOGIN' | 'SIGNUP') => void }) => (
   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
     <PageHeader title="Simple Pricing" subtitle="Start for free, upgrade as you scale. No hidden fees or gas costs." />
     
@@ -185,7 +185,7 @@ const PricingView = ({ onStart }: { onStart: () => void }) => (
              <li key={f} className="flex items-center gap-3 text-sm text-gray-300"><Icons.Check className="w-4 h-4 text-gray-500" /> {f}</li>
           ))}
         </ul>
-        <Button onClick={onStart} variant="outline" className="w-full">Get Started</Button>
+        <Button onClick={() => onStart('SIGNUP')} variant="outline" className="w-full">Get Started</Button>
       </div>
 
       {/* Pro Tier */}
@@ -201,7 +201,7 @@ const PricingView = ({ onStart }: { onStart: () => void }) => (
              <li key={f} className="flex items-center gap-3 text-sm text-white"><Icons.Check className="w-4 h-4 text-neon-cyan" /> {f}</li>
           ))}
         </ul>
-        <Button onClick={onStart} className="w-full bg-neon-cyan text-black hover:bg-white font-bold">Start Free Trial</Button>
+        <Button onClick={() => onStart('SIGNUP')} className="w-full bg-neon-cyan text-black hover:bg-white font-bold">Start Free Trial</Button>
       </div>
 
       {/* Enterprise Tier */}
@@ -214,7 +214,7 @@ const PricingView = ({ onStart }: { onStart: () => void }) => (
              <li key={f} className="flex items-center gap-3 text-sm text-gray-300"><Icons.Check className="w-4 h-4 text-gray-500" /> {f}</li>
           ))}
         </ul>
-        <Button onClick={onStart} variant="outline" className="w-full">Contact Sales</Button>
+        <Button onClick={() => onStart('SIGNUP')} variant="outline" className="w-full">Contact Sales</Button>
       </div>
     </div>
   </motion.div>
@@ -249,7 +249,7 @@ const RoadmapView = () => (
   </motion.div>
 );
 
-const CollectionsView = ({ onStart }: { onStart: () => void }) => {
+const CollectionsView = ({ onStart }: { onStart: (mode: 'LOGIN' | 'SIGNUP') => void }) => {
   const collections = [
     {
       title: "Cyberpunk Apes",
@@ -303,7 +303,7 @@ const CollectionsView = ({ onStart }: { onStart: () => void }) => {
         {collections.map((col, i) => (
           <div 
             key={i} 
-            onClick={onStart}
+            onClick={() => onStart('SIGNUP')}
             className="group cursor-pointer bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-neon-cyan/50 hover:shadow-[0_0_30px_rgba(0,240,255,0.1)] transition-all duration-300 flex flex-col h-full"
           >
             {/* Image Area */}
@@ -345,7 +345,7 @@ const CollectionsView = ({ onStart }: { onStart: () => void }) => {
 
       <div className="mt-16 text-center">
          <p className="text-gray-400 mb-4">Want to launch your own collection?</p>
-         <Button onClick={onStart} className="bg-neon-cyan text-black hover:bg-white border-none">Start Creating</Button>
+         <Button onClick={() => onStart('SIGNUP')} className="bg-neon-cyan text-black hover:bg-white border-none">Start Creating</Button>
       </div>
     </motion.div>
   );
@@ -850,7 +850,7 @@ const ContactView = () => (
 
 // --- Main Home View (Original Content) ---
 
-const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> = ({ onStart, onNav }) => {
+const HomeView: React.FC<{ onStart: (mode: 'LOGIN' | 'SIGNUP') => void, onNav: (p: PageType) => void }> = ({ onStart, onNav }) => {
   // Animation Variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -887,7 +887,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
             </motion.p>
             
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              <Button onClick={onStart} className="w-full sm:w-auto px-8 py-6 text-lg bg-neon-cyan text-black hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] font-black">
+              <Button onClick={() => onStart('SIGNUP')} className="w-full sm:w-auto px-8 py-6 text-lg bg-neon-cyan text-black hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,240,255,0.4)] font-black">
                 Start Creating Free
               </Button>
               <Button onClick={() => onNav('COLLECTIONS')} variant="outline" className="w-full sm:w-auto px-8 py-6 text-lg border-white/20 hover:bg-white/10 gap-2">
@@ -966,7 +966,7 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
       <section className="py-32 relative overflow-hidden border-t border-white/5">
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter">Ready to Create Your First <br/><span className="text-neon-cyan">AI NFT?</span></h2>
-          <Button onClick={onStart} className="px-10 py-6 text-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white hover:scale-105 transition-transform font-black shadow-2xl shadow-neon-purple/20 border-none">
+          <Button onClick={() => onStart('SIGNUP')} className="px-10 py-6 text-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white hover:scale-105 transition-transform font-black shadow-2xl shadow-neon-purple/20 border-none">
             Launch Olly Studio
           </Button>
         </div>
@@ -1030,8 +1030,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           </div>
           
           <div className="flex items-center gap-4 relative z-20">
-            <button onClick={onStart} className="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
-            <Button onClick={onStart} className="bg-neon-cyan text-black hover:bg-white border-none font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+            <button onClick={() => onStart('LOGIN')} className="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
+            <Button onClick={() => onStart('SIGNUP')} className="bg-neon-cyan text-black hover:bg-white border-none font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]">
               Start Creating
             </Button>
             
@@ -1060,7 +1060,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               <button onClick={() => handleNav('COLLECTIONS')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Collections</button>
               <button onClick={() => handleNav('ROADMAP')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Roadmap</button>
               <button onClick={() => handleNav('ABOUT')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">About</button>
-              <button onClick={onStart} className="text-left text-lg font-bold text-neon-cyan py-2">Login / Sign Up</button>
+              <button onClick={() => onStart('LOGIN')} className="text-left text-lg font-bold text-neon-cyan py-2">Login / Sign Up</button>
             </motion.div>
           )}
         </AnimatePresence>

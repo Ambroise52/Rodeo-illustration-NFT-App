@@ -48,6 +48,7 @@ function App() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [appLoading, setAppLoading] = useState(true);
   const [showAuth, setShowAuth] = useState(false); // New state to toggle Auth screen
+  const [authMode, setAuthMode] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
 
   // Navigation State
   const [activeTab, setActiveTab] = useState<'generator' | 'collections' | 'profile'>('generator');
@@ -514,9 +515,22 @@ function App() {
   // Determine which view to show for unauthenticated users
   if (!session) {
     if (showAuth) {
-      return <Auth onLogin={() => {}} onBack={() => setShowAuth(false)} />;
+      return (
+        <Auth 
+          onLogin={() => {}} 
+          onBack={() => setShowAuth(false)} 
+          initialView={authMode} 
+        />
+      );
     }
-    return <LandingPage onStart={() => setShowAuth(true)} />;
+    return (
+      <LandingPage 
+        onStart={(mode) => {
+          setAuthMode(mode);
+          setShowAuth(true);
+        }} 
+      />
+    );
   }
 
   return (
