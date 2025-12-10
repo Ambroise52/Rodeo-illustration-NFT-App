@@ -37,115 +37,7 @@ interface Job {
 
 // --- Background Animation Component ---
 const GeometricBackground = () => {
-  return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">
-      {/* Subtle Grid - Static */}
-      <div 
-        className="absolute inset-0 opacity-[0.03]" 
-        style={{ 
-          backgroundImage: 'linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-          maskImage: 'radial-gradient(circle at center, black, transparent 80%)'
-        }} 
-      />
-
-      {/* Animated SVG Geometry */}
-      <motion.svg 
-        className="absolute inset-0 w-full h-full opacity-20"
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 0.2 }} 
-        transition={{ duration: 2 }}
-      >
-        <defs>
-          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#00F0FF" stopOpacity="0" />
-            <stop offset="50%" stopColor="#00F0FF" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#00F0FF" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="lineGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#BD00FF" stopOpacity="0" />
-            <stop offset="50%" stopColor="#BD00FF" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#BD00FF" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
-        {/* Floating Hexagon */}
-        <motion.path
-           d="M50,100 L93,75 L93,25 L50,0 L7,25 L7,75 Z"
-           fill="none"
-           stroke="#00F0FF"
-           strokeWidth="0.5"
-           className="opacity-20"
-           initial={{ x: '10%', y: '20%', rotate: 0, scale: 2 }}
-           animate={{ 
-             y: ['20%', '25%', '20%'], 
-             rotate: 360 
-           }}
-           transition={{ 
-             y: { duration: 20, repeat: Infinity, ease: "easeInOut" },
-             rotate: { duration: 120, repeat: Infinity, ease: "linear" }
-           }}
-        />
-
-        {/* Large Triangle Outline */}
-        <motion.polygon
-           points="150,20 280,250 20,250"
-           fill="none"
-           stroke="#FF0099"
-           strokeWidth="0.5"
-           className="opacity-10"
-           initial={{ x: '80%', y: '60%', rotate: 180, scale: 3 }}
-           animate={{ 
-             rotate: -360,
-             scale: [3, 3.2, 3]
-           }}
-           transition={{ duration: 150, repeat: Infinity, ease: "linear" }}
-        />
-
-        {/* Connecting Lines */}
-        <motion.line 
-          x1="0" y1="40%" x2="100%" y2="60%" 
-          stroke="url(#lineGrad)" 
-          strokeWidth="1" 
-          initial={{ strokeDasharray: "10, 20", strokeDashoffset: 0 }}
-          animate={{ strokeDashoffset: 1000 }}
-          transition={{ duration: 150, repeat: Infinity, ease: "linear" }}
-        />
-
-         <motion.line 
-          x1="70%" y1="0" x2="30%" y2="100%" 
-          stroke="url(#lineGrad2)" 
-          strokeWidth="1" 
-          initial={{ strokeDasharray: "15, 25", strokeDashoffset: 0 }}
-          animate={{ strokeDashoffset: -1000 }}
-          transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
-        />
-
-        {/* Random Particles */}
-        {[...Array(8)].map((_, i) => (
-           <motion.circle
-             key={i}
-             r={Math.random() * 2}
-             fill="#fff"
-             initial={{ 
-               cx: Math.random() * 100 + "%", 
-               cy: Math.random() * 100 + "%", 
-               opacity: 0 
-             }}
-             animate={{ 
-               cy: [null, Math.random() * 100 + "%"],
-               opacity: [0, 0.3, 0]
-             }}
-             transition={{ 
-               duration: Math.random() * 20 + 20, 
-               repeat: Infinity, 
-               ease: "linear" 
-             }}
-           />
-        ))}
-      </motion.svg>
-    </div>
-  );
+  return null;
 };
 
 // --- Shared Components ---
@@ -404,60 +296,226 @@ const CollectionsView = ({ onStart }: { onStart: () => void }) => {
   );
 };
 
-const DocumentationView = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 grid md:grid-cols-4 gap-12 pt-24 relative z-10">
-    <div className="hidden md:block space-y-2 border-r border-white/5 pr-8">
-      <h3 className="font-bold text-white mb-4">Getting Started</h3>
-      {["Introduction", "Quick Start", "Prompt Guide", "Exporting", "Video Generation"].map(item => (
-        <button key={item} className="block w-full text-left text-sm text-gray-400 hover:text-neon-cyan py-1 transition-colors">{item}</button>
-      ))}
-      <h3 className="font-bold text-white mt-8 mb-4">Advanced</h3>
-      {["API Reference", "Batch Tools", "Metadata Standards", "Integration"].map(item => (
-        <button key={item} className="block w-full text-left text-sm text-gray-400 hover:text-neon-cyan py-1 transition-colors">{item}</button>
-      ))}
-    </div>
-    <div className="md:col-span-3 prose prose-invert max-w-none">
-      <h1>Introduction to Olly</h1>
-      <p className="lead text-xl text-gray-400">Olly is the first AI-powered NFT generation platform designed specifically for vector-style geometric art.</p>
+const DocumentationView = ({ onGoToApi }: { onGoToApi: () => void }) => {
+  const [activeDoc, setActiveDoc] = useState('INTRODUCTION');
+
+  const docMap: Record<string, React.ReactNode> = {
+    INTRODUCTION: (
+      <>
+        <h1>Introduction to Olly</h1>
+        <p className="lead text-xl text-gray-400">Olly is the first AI-powered NFT generation platform designed specifically for vector-style geometric art.</p>
+        
+        <div className="p-6 bg-[#111]/80 backdrop-blur-sm border-l-4 border-neon-cyan rounded-r-xl my-8">
+          <h4 className="text-neon-cyan font-bold mb-2">Note for V2 Users</h4>
+          <p className="text-sm m-0">We have upgraded our core engine to Gemini 2.5 Flash. Prompts from V1 may generate slightly different (higher quality) results.</p>
+        </div>
+
+        <h2>How it works</h2>
+        <p>Olly combines prompt engineering with state-of-the-art diffusion models to create consistent, stylized assets. Unlike generic AI tools, Olly is fine-tuned for:</p>
+        <ul>
+          <li>Flat design aesthetics</li>
+          <li>Geometric consistency</li>
+          <li>Clean, background-removable subjects</li>
+        </ul>
+      </>
+    ),
+    QUICK_START: (
+      <>
+        <h1>Quick Start Guide</h1>
+        <p className="lead text-xl text-gray-400">Create your first NFT in less than 2 minutes.</p>
+        
+        <ol className="list-decimal pl-6 space-y-4 text-gray-300">
+          <li><strong>Create an Account:</strong> Sign up using your email or Google account to access the creator studio.</li>
+          <li><strong>Navigate to Generator:</strong> The generator is your main workspace. Look for the <Icons.Zap className="inline w-4 h-4 mx-1" /> icon.</li>
+          <li><strong>Select Traits:</strong> Choose a Character, Action, and Background from the dropdowns, or use the "Surprise Me" button for inspiration.</li>
+          <li><strong>Generate:</strong> Click "Generate NFT" and wait for Gemini to synthesize your artwork.</li>
+          <li><strong>Save or Export:</strong> Once generated, you can add it to your collection or download the asset package immediately.</li>
+        </ol>
+      </>
+    ),
+    PROMPT_GUIDE: (
+      <>
+        <h1>Prompt Guide</h1>
+        <p className="lead text-xl text-gray-400">Mastering the Olly engine for specific results.</p>
+        <p>While Olly handles the heavy lifting of prompt engineering, understanding how our engine interprets inputs can help you achieve specific looks.</p>
+        
+        <h3>Keywords</h3>
+        <p>Our model responds strongly to specific aesthetic keywords:</p>
+        <ul className="grid grid-cols-2 gap-2 text-sm font-mono text-neon-cyan">
+          <li>"Geometric"</li>
+          <li>"Flat Design"</li>
+          <li>"Vector"</li>
+          <li>"Minimalist"</li>
+        </ul>
+
+        <h3>High Detail Mode</h3>
+        <p>Toggle the "High Detail" switch in the generator to enable a more complex rendering pipeline. This adds <code className="bg-white/10 px-1 rounded">8k resolution</code> and <code className="bg-white/10 px-1 rounded">intricate patterning</code> to the prompt automatically.</p>
+      </>
+    ),
+    EXPORTING: (
+      <>
+        <h1>Exporting Assets</h1>
+        <p>Olly supports multiple export formats to suit your workflow.</p>
+        
+        <h3>Single Asset Export</h3>
+        <p>When viewing a generated image, click the <strong>Download</strong> button. This provides a ZIP file containing:</p>
+        <ul>
+          <li>High-res PNG image (2048x2048)</li>
+          <li>Metadata JSON file</li>
+          <li>Text file with the exact generation prompt</li>
+        </ul>
+
+        <h3>Bulk Export</h3>
+        <p>From your Collection view, use the "Export All" option to download your entire history. This is perfect for migrating assets to IPFS for minting.</p>
+      </>
+    ),
+    VIDEO_GEN: (
+      <>
+        <h1>Video Generation</h1>
+        <p className="lead text-xl text-gray-400">Bring your static NFTs to life with motion.</p>
+        
+        <div className="p-4 bg-neon-purple/10 border border-neon-purple/20 rounded-lg mb-6">
+          <p className="text-neon-purple text-sm font-bold">New Feature: Native Generation</p>
+          <p className="text-xs text-gray-400">You can now generate videos directly within Olly using the "Animate" button on any asset details page.</p>
+        </div>
+
+        <h3>The Workflow</h3>
+        <ol className="list-decimal pl-6 space-y-2">
+          <li>Select any generated NFT from your gallery.</li>
+          <li>Click the "Animate (Video)" button in the details panel.</li>
+          <li>Olly uses Google's Veo model to interpolate motion based on the image context.</li>
+          <li>The video will be saved to your collection alongside the image.</li>
+        </ol>
+
+        <h3>External Tools</h3>
+        <p>Alternatively, you can copy the "Video Prompt" generated by Olly and use it in tools like Runway Gen-2 or Pika Labs for different motion styles.</p>
+      </>
+    ),
+    BATCH_TOOLS: (
+      <>
+        <h1>Batch Tools</h1>
+        <p>Generate entire collections rapidly.</p>
+        <p>The Batch Generation tool (available to Studio users) allows you to queue up to 3 variations at once. This is useful for exploring a theme quickly.</p>
+        <p>Simply toggle the generation mode icon next to the main button to switch from <Icons.Zap className="inline w-3 h-3" /> Single to <Icons.Layers className="inline w-3 h-3" /> Batch mode.</p>
+      </>
+    ),
+    METADATA: (
+      <>
+        <h1>Metadata Standards</h1>
+        <p>Olly exports metadata in a format compatible with the ERC-721 standard used by OpenSea and other marketplaces.</p>
+        
+        <h3>JSON Structure</h3>
+        <pre className="bg-black/50 p-4 rounded-lg overflow-x-auto border border-white/10 text-xs">
+{`{
+  "name": "Olly Gen #8392",
+  "description": "A geometric warrior...",
+  "image": "ipfs://...",
+  "attributes": [
+    {
+      "trait_type": "Character",
+      "value": "Samurai"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    }
+  ]
+}`}
+        </pre>
+      </>
+    ),
+    INTEGRATION: (
+      <>
+        <h1>Integration Guide</h1>
+        <p>Use your Olly assets in other applications.</p>
+        <h3>Unity / Unreal Engine</h3>
+        <p>Since Olly generates flat, high-contrast images, they work exceptionally well as UI elements or sprites in 2D games. Use the PNG export with transparency (coming soon) for best results.</p>
+        <h3>Web3 Minting</h3>
+        <p>Upload your Bulk Export folder directly to services like Pinata or Thirdweb to deploy your collection to the blockchain.</p>
+      </>
+    )
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 grid md:grid-cols-4 gap-12 pt-24 relative z-10">
+      <div className="hidden md:block space-y-2 border-r border-white/5 pr-8 h-fit sticky top-24">
+        <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-wider text-gray-500">Getting Started</h3>
+        {[
+          { id: 'INTRODUCTION', label: 'Introduction' },
+          { id: 'QUICK_START', label: 'Quick Start' },
+          { id: 'PROMPT_GUIDE', label: 'Prompt Guide' },
+          { id: 'EXPORTING', label: 'Exporting Assets' },
+          { id: 'VIDEO_GEN', label: 'Video Generation' }
+        ].map(item => (
+          <button 
+            key={item.id} 
+            onClick={() => setActiveDoc(item.id)}
+            className={`block w-full text-left text-sm py-1.5 transition-colors ${activeDoc === item.id ? 'text-neon-cyan font-bold pl-2 border-l-2 border-neon-cyan' : 'text-gray-400 hover:text-white border-l-2 border-transparent'}`}
+          >
+            {item.label}
+          </button>
+        ))}
+        
+        <h3 className="font-bold text-white mt-8 mb-4 uppercase text-xs tracking-wider text-gray-500">Advanced</h3>
+        {[
+          { id: 'BATCH_TOOLS', label: 'Batch Tools' },
+          { id: 'METADATA', label: 'Metadata Standards' },
+          { id: 'INTEGRATION', label: 'Integration' }
+        ].map(item => (
+          <button 
+            key={item.id} 
+            onClick={() => setActiveDoc(item.id)}
+            className={`block w-full text-left text-sm py-1.5 transition-colors ${activeDoc === item.id ? 'text-neon-cyan font-bold pl-2 border-l-2 border-neon-cyan' : 'text-gray-400 hover:text-white border-l-2 border-transparent'}`}
+          >
+            {item.label}
+          </button>
+        ))}
+        <button 
+          onClick={onGoToApi}
+          className="block w-full text-left text-sm py-1.5 transition-colors text-gray-400 hover:text-white border-l-2 border-transparent flex items-center gap-2"
+        >
+          API Reference <Icons.ArrowRight className="w-3 h-3" />
+        </button>
+      </div>
       
-      <div className="p-6 bg-[#111]/80 backdrop-blur-sm border-l-4 border-neon-cyan rounded-r-xl my-8">
-        <h4 className="text-neon-cyan font-bold mb-2">Note for V2 Users</h4>
-        <p className="text-sm m-0">We have upgraded our core engine to Gemini 2.5 Flash. Prompts from V1 may generate slightly different (higher quality) results.</p>
+      {/* Mobile Doc Nav */}
+      <div className="md:hidden col-span-1 mb-8">
+        <select 
+          value={activeDoc} 
+          onChange={(e) => setActiveDoc(e.target.value)}
+          className="w-full bg-[#111] border border-white/20 text-white rounded-lg p-3 outline-none focus:border-neon-cyan"
+        >
+          <optgroup label="Getting Started">
+            <option value="INTRODUCTION">Introduction</option>
+            <option value="QUICK_START">Quick Start</option>
+            <option value="PROMPT_GUIDE">Prompt Guide</option>
+            <option value="EXPORTING">Exporting Assets</option>
+            <option value="VIDEO_GEN">Video Generation</option>
+          </optgroup>
+          <optgroup label="Advanced">
+            <option value="BATCH_TOOLS">Batch Tools</option>
+            <option value="METADATA">Metadata Standards</option>
+            <option value="INTEGRATION">Integration</option>
+          </optgroup>
+        </select>
       </div>
 
-      <h2>How it works</h2>
-      <p>Olly combines prompt engineering with state-of-the-art diffusion models to create consistent, stylized assets. Unlike generic AI tools, Olly is fine-tuned for:</p>
-      <ul>
-        <li>Flat design aesthetics</li>
-        <li>Geometric consistency</li>
-        <li>Clean, background-removable subjects</li>
-      </ul>
+      <div className="md:col-span-3 prose prose-invert max-w-none prose-headings:text-white prose-a:text-neon-cyan prose-strong:text-white prose-code:text-neon-purple min-h-[500px]">
+        {docMap[activeDoc]}
+      </div>
+    </motion.div>
+  );
+};
 
-      <h3>Your First Generation</h3>
-      <p>Navigate to the Generator tab. You can either use the "Surprise Me" button for a random combination or manually select:</p>
-      <ol>
-        <li><strong>Character:</strong> The main subject of your NFT.</li>
-        <li><strong>Action:</strong> What the subject is doing.</li>
-        <li><strong>Theme:</strong> The color palette and background style.</li>
-      </ol>
-      
-      <pre className="bg-black/50 p-4 rounded-lg overflow-x-auto border border-white/10">
-        <code>
-{`// Example Prompt Structure
-{
-  "subject": "Cyberpunk Samurai",
-  "action": "Wielding Katana",
-  "style": "Neon Noir",
-  "rarity": "Legendary"
-}`}
-        </code>
-      </pre>
-    </div>
-  </motion.div>
-);
-
-const ApiView = () => (
+const ApiView = ({ onBack }: { onBack: () => void }) => (
   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-5xl mx-auto px-6 pb-24 pt-24 relative z-10">
+    <button 
+        onClick={onBack}
+        className="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors text-sm font-bold"
+    >
+        <Icons.ArrowLeft className="w-4 h-4" /> Back to Documentation
+    </button>
+
     <div className="flex items-center justify-between mb-8">
        <h1 className="text-4xl font-bold">API Reference</h1>
        <div className="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded text-xs font-mono font-bold">v2.1 Stable</div>
@@ -851,10 +909,12 @@ const HomeView: React.FC<{ onStart: () => void, onNav: (p: PageType) => void }> 
 
 const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const [currentPage, setCurrentPage] = useState<PageType>('HOME');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNav = (page: PageType) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentPage(page);
+    setMobileMenuOpen(false);
   };
 
   const renderContent = () => {
@@ -864,8 +924,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       case 'PRICING': return <PricingView onStart={onStart} />;
       case 'ROADMAP': return <RoadmapView />;
       case 'COLLECTIONS': return <CollectionsView onStart={onStart} />;
-      case 'DOCS': return <DocumentationView />;
-      case 'API': return <ApiView />;
+      case 'DOCS': return <DocumentationView onGoToApi={() => handleNav('API')} />;
+      case 'API': return <ApiView onBack={() => handleNav('DOCS')} />;
       case 'COMMUNITY': return <CommunityView />;
       case 'SUPPORT': return <SupportView />;
       case 'ABOUT': return <AboutView />;
@@ -886,11 +946,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       {/* NAVBAR */}
       <nav className="fixed top-0 w-full z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <button onClick={() => handleNav('HOME')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <button onClick={() => handleNav('HOME')} className="flex items-center gap-3 hover:opacity-80 transition-opacity relative z-20">
             <Logo className="w-12 h-8" />
             <span className="font-black text-xl tracking-tighter">OLLY</span>
           </button>
           
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
             <button onClick={() => handleNav('FEATURES')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'FEATURES' ? 'text-white' : ''}`}>Features</button>
             <button onClick={() => handleNav('PRICING')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'PRICING' ? 'text-white' : ''}`}>Pricing</button>
@@ -898,13 +959,41 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             <button onClick={() => handleNav('ROADMAP')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'ROADMAP' ? 'text-white' : ''}`}>Roadmap</button>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 relative z-20">
             <button onClick={onStart} className="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
             <Button onClick={onStart} className="bg-neon-cyan text-black hover:bg-white border-none font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]">
               Start Creating
             </Button>
+            
+            {/* Mobile Menu Toggle */}
+            <button 
+              className="md:hidden p-2 text-white hover:text-neon-cyan transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <Icons.X className="w-6 h-6" /> : <Icons.Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-20 left-0 w-full bg-[#050505] border-b border-white/5 p-6 md:hidden flex flex-col gap-4 shadow-2xl"
+            >
+              <button onClick={() => handleNav('FEATURES')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Features</button>
+              <button onClick={() => handleNav('PRICING')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Pricing</button>
+              <button onClick={() => handleNav('COLLECTIONS')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Collections</button>
+              <button onClick={() => handleNav('ROADMAP')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Roadmap</button>
+              <button onClick={() => handleNav('ABOUT')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">About</button>
+              <button onClick={onStart} className="text-left text-lg font-bold text-neon-cyan py-2">Login / Sign Up</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* MAIN CONTENT AREA */}
@@ -916,32 +1005,29 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       <footer className="bg-[#020202]/90 border-t border-white/5 pt-20 pb-10 relative z-10 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6">
           
-          {/* Newsletter Subscription */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-16 mb-16 border-b border-white/5 bg-gradient-to-r from-neon-cyan/5 to-transparent p-8 rounded-2xl border border-white/5 backdrop-blur-sm">
-             <div className="flex-1 text-center md:text-left">
-               <h3 className="text-2xl font-black text-white mb-2">Don't Miss a Drop</h3>
-               <p className="text-gray-400 max-w-md">Join 50,000+ creators receiving the latest AI art trends and platform updates.</p>
-             </div>
-             <form className="w-full md:w-auto flex flex-col sm:flex-row gap-3" onSubmit={(e) => { e.preventDefault(); alert("Thanks for subscribing! 🚀"); }}>
-               <div className="relative w-full sm:w-80">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                    <Icons.MessageCircle className="w-4 h-4" />
-                  </div>
-                  <input 
-                    type="email" 
-                    placeholder="Enter your email address" 
-                    className="w-full bg-[#050505] border border-white/20 rounded-lg pl-10 pr-4 py-3 text-white focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan outline-none transition-all placeholder:text-gray-600"
-                    required
-                  />
+           {/* NEWSLETTER BANNER - Only on Home, smaller width */}
+           {currentPage === 'HOME' && (
+             <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 mb-20 p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
+               <div className="text-center md:text-left">
+                 <h3 className="text-xl font-bold text-white mb-1">Subscribe to updates</h3>
+                 <p className="text-sm text-gray-400">Get the latest drops and features.</p>
                </div>
-               <Button className="bg-neon-cyan text-black hover:bg-white hover:scale-105 transition-all font-bold h-auto py-3 shadow-[0_0_15px_rgba(0,240,255,0.3)] border-none">
-                 Subscribe
-               </Button>
-             </form>
-          </div>
+               <form className="flex w-full md:w-auto gap-2" onSubmit={(e) => { e.preventDefault(); alert("Thanks for subscribing! 🚀"); }}>
+                  <input 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      className="w-full md:w-64 bg-[#050505] border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan outline-none transition-all placeholder:text-gray-600"
+                      required
+                  />
+                  <Button className="bg-neon-cyan text-black hover:bg-white font-bold h-auto px-4 py-2 text-sm border-none whitespace-nowrap">
+                      Subscribe
+                  </Button>
+               </form>
+             </div>
+           )}
 
-          <div className="grid md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1 md:col-span-1">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-8 mb-16">
+            <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-6 cursor-pointer" onClick={() => handleNav('HOME')}>
                 <Logo className="w-8 h-6" />
                 <span className="font-bold text-lg">OLLY</span>

@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { Icons } from './Icons';
@@ -24,11 +23,12 @@ import {
 
 interface AuthProps {
   onLogin: () => void;
+  onBack: () => void;
 }
 
 type ViewState = 'LOGIN' | 'SIGNUP' | 'TERMS' | 'PRIVACY';
 
-const Auth: React.FC<AuthProps> = ({ onLogin }) => {
+const Auth: React.FC<AuthProps> = ({ onLogin, onBack }) => {
   const [view, setView] = useState<ViewState>('LOGIN');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,9 +88,21 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   if (view === 'PRIVACY') return <PrivacyPolicy onBack={() => setView('LOGIN')} />;
 
   return (
-    <div className="bg-dark-bg flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-      <div className="flex w-full max-w-sm flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <a href="#" className="flex flex-col items-center gap-4 self-center font-medium text-white hover:text-neon-cyan transition-colors">
+    <div className="bg-dark-bg flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10 relative">
+      {/* Back to Home Button */}
+      <div className="absolute top-4 left-4 md:top-8 md:left-8 z-10">
+        <Button 
+          variant="ghost" 
+          onClick={onBack} 
+          className="text-gray-400 hover:text-white flex gap-2 pl-2 pr-4 hover:bg-white/5 transition-colors"
+        >
+          <Icons.ArrowLeft className="w-4 h-4" />
+          <span className="font-bold">Back to Home</span>
+        </Button>
+      </div>
+
+      <div className="flex w-full max-w-sm flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-12 md:mt-0">
+        <a href="#" className="flex flex-col items-center gap-4 self-center font-medium text-white hover:text-neon-cyan transition-colors" onClick={(e) => { e.preventDefault(); onBack(); }}>
           <div className="flex items-center justify-center">
             <Logo className="w-16 h-10" />
           </div>

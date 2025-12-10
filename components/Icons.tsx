@@ -40,7 +40,8 @@ import {
   Twitter,
   Instagram,
   Youtube,
-  MessageCircle
+  MessageCircle,
+  Menu
 } from 'lucide-react';
 
 export const Icons = {
@@ -83,5 +84,6 @@ export const Icons = {
   Twitter,
   Instagram,
   Youtube,
-  MessageCircle
+  MessageCircle,
+  Menu
 };
