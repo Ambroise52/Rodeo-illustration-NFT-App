@@ -6,7 +6,7 @@ import { Logo } from './Logo';
 import { Button } from './UIShared';
 import { TermsOfService, PrivacyPolicy } from './LegalDocs';
 import { dataService } from '../services/dataService';
-import { downloadText } from '../utils/exportUtils';
+import { downloadPromptGuidePDF } from '../utils/exportUtils';
 
 // --- Types ---
 type PageType = 
@@ -36,52 +36,6 @@ interface Job {
   description: string;
   requirements: string[];
 }
-
-const GUIDE_CONTENT = `
-==============================================
-THE OLLY ULTIMATE NFT PROMPTING GUIDE (v2.5)
-==============================================
-
-Welcome to the inner circle! This guide unlocks the full potential of the Olly generation engine.
-
-----------------------------------------------
-1. THE FORMULA
-----------------------------------------------
-The perfect prompt follows this structure:
-[Subject] + [Action] + [Environment] + [Style Modifiers] + [Technical Specs]
-
-Example:
-"A geometric robot (Subject) surfing on a data stream (Action), in a neon cyberpunk street (Environment), smooth flat vector art (Style), 8k resolution, minimalist (Tech)"
-
-----------------------------------------------
-2. HIDDEN KEYWORDS
-----------------------------------------------
-Use these words to force specific styles:
-
-> "Behance Style": Adds a clean, professional portfolio look.
-> "Matte Finish": Removes unwanted glossy reflections.
-> "Interlocking Geometry": Creates complex, puzzle-like shapes.
-> "Zero Line Weight": Ensures a purely shape-based image with no borders.
-
-----------------------------------------------
-3. ANIMATION TIPS
-----------------------------------------------
-When generating video prompts for Meta AI or Runway, focus on:
-- "Seamless loop": Critical for NFT aesthetics.
-- "Morphing": Works better than "Walking" for abstract shapes.
-- "Floating/Levitating": Easiest movements to loop perfectly.
-
-----------------------------------------------
-4. EXCLUSIVE COLOR PALETTES
-----------------------------------------------
-Try these combinations in your prompts:
-- "Cyber-Pastel": Mint green, soft pink, and electric blue.
-- "Deep Void": Charcoal, obsidian, and glowing orange.
-- "Solar Flare": White, gold, and crimson.
-
-Keep creating!
-- The Olly Team
-`;
 
 // --- Animated Shiny Button Component ---
 const AnimatedShinyButton = ({ onClick, children, className }: { onClick: () => void, children?: React.ReactNode, className?: string }) => {
@@ -157,16 +111,14 @@ const NewsletterSection = () => {
     
     try {
       await dataService.subscribeToNewsletter(email);
+      // Automatically download the guide PDF
+      downloadPromptGuidePDF();
       setStatus('SUCCESS');
     } catch (e: any) {
       console.error(e);
       setStatus('ERROR');
       setErrorMsg(e.message || "Failed to subscribe.");
     }
-  };
-
-  const handleDownloadGuide = () => {
-    downloadText(GUIDE_CONTENT, "Olly-Ultimate-Prompt-Guide.txt");
   };
 
   if (status === 'SUCCESS') {
@@ -182,32 +134,20 @@ const NewsletterSection = () => {
             <Icons.Check className="w-8 h-8 text-black" />
           </div>
         </div>
-        <h3 className="text-2xl font-black text-white mb-2">Welcome to the Club!</h3>
-        <p className="text-gray-300 mb-6">
-          Your <strong>10 Free Credits</strong> have been applied to your account.
-          <br/>
-          Download your <strong>Ultimate Prompt Guide</strong> immediately below.
+        <h3 className="text-2xl font-black text-white mb-2">Welcome to the Club</h3>
+        <p className="text-gray-300 mb-2">
+          Your <strong>10 Free Credits</strong> have been applied.
         </p>
-        
-        <div className="flex flex-col gap-3 justify-center items-center">
-            <Button onClick={handleDownloadGuide} className="bg-white text-black hover:bg-neon-cyan font-bold w-full max-w-xs h-12 gap-2">
-              <Icons.Download className="w-4 h-4" /> Download Guide Now
-            </Button>
-            
-            <Button onClick={() => setStatus('IDLE')} variant="link" className="text-xs text-gray-500">
-              Register another email
-            </Button>
-        </div>
+        <p className="text-gray-400 text-sm">
+          "Olly Master Blueprint" PDF is downloading automatically...
+        </p>
       </motion.div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto mb-20 relative group">
-      {/* Decorative Glow */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-neon-cyan via-purple-600 to-neon-pink rounded-2xl opacity-20 blur-lg group-hover:opacity-40 transition-opacity duration-1000"></div>
-      
-      <div className="relative p-8 bg-[#0a0a0a] border border-white/10 rounded-2xl backdrop-blur-sm overflow-hidden">
+      <div className="relative p-8 bg-[#0a0a0a] border border-white/20 rounded-2xl backdrop-blur-sm overflow-hidden hover:border-white/40 transition-all">
         <div className="absolute top-0 right-0 p-4 opacity-10">
            <Icons.Sparkles className="w-32 h-32 text-white transform rotate-12" />
         </div>
@@ -215,11 +155,11 @@ const NewsletterSection = () => {
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
            <div className="flex-1 text-center md:text-left">
              <div className="inline-block px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-3">
-               Limited Time Offer
+               Free PDF Blueprint
              </div>
-             <h3 className="text-2xl font-black text-white mb-2">Unlock Pro Features Free</h3>
+             <h3 className="text-2xl font-black text-white mb-2">Get the Master Prompt Blueprint</h3>
              <p className="text-sm text-gray-400 leading-relaxed">
-               Subscribe to our insider newsletter and instantly get <span className="text-neon-cyan font-bold">10 Bonus Credits</span> + our exclusive <span className="text-white">"Ultimate NFT Prompting Guide"</span> (PDF).
+               Subscribe to our newsletter and get the <span className="text-neon-cyan font-bold">2-Page PDF Blueprint</span> detailing secret keywords, camera angles, and video prompt formulas instantly.
              </p>
            </div>
 
@@ -242,13 +182,13 @@ const NewsletterSection = () => {
                   disabled={status === 'LOADING'}
                   className="bg-white text-black hover:bg-neon-cyan hover:scale-[1.02] font-bold h-12 text-sm border-none shadow-lg transition-all"
                 >
-                    {status === 'LOADING' ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Claim 10 Free Credits'}
+                    {status === 'LOADING' ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Subscribe & Download PDF'}
                 </Button>
                 {status === 'ERROR' && (
                   <p className="text-red-400 text-xs text-center">{errorMsg}</p>
                 )}
                 <p className="text-[10px] text-gray-600 text-center">
-                  We respect your inbox. Unsubscribe anytime.
+                  Instant PDF download. One-time offer.
                 </p>
              </form>
            </div>
