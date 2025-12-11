@@ -35,6 +35,44 @@ interface Job {
   requirements: string[];
 }
 
+// --- Animated Shiny Button Component ---
+const AnimatedShinyButton = ({ onClick, children, className }: { onClick: () => void, children: React.ReactNode, className?: string }) => {
+  return (
+    <motion.button
+      onClick={onClick}
+      className={`relative px-10 py-6 overflow-hidden rounded-xl font-black text-xl group shadow-2xl shadow-neon-purple/20 ${className}`}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+    >
+       {/* Base Gradient */}
+       <div className="absolute inset-0 bg-gradient-to-r from-neon-cyan to-neon-purple" />
+       
+       {/* Shine Effect */}
+       <motion.div 
+         className="absolute inset-0 w-full h-full"
+         initial={{ x: "-100%" }}
+         animate={{ x: "100%" }}
+         transition={{ 
+           repeat: Infinity, 
+           duration: 1.5, 
+           ease: "easeInOut",
+           repeatDelay: 1
+         }}
+       >
+         <div className="w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]" />
+       </motion.div>
+
+       {/* Content */}
+       <span className="relative z-10 text-white drop-shadow-sm flex items-center gap-2 justify-center">
+         {children}
+       </span>
+       
+       {/* Hover Glow */}
+       <div className="absolute inset-0 rounded-xl ring-2 ring-white/0 group-hover:ring-white/30 transition-all duration-300" />
+    </motion.button>
+  )
+};
+
 // --- Background Animation Component ---
 const GeometricBackground = () => {
   return null;
@@ -966,9 +1004,9 @@ const HomeView: React.FC<{ onStart: (mode: 'LOGIN' | 'SIGNUP') => void, onNav: (
       <section className="py-32 relative overflow-hidden border-t border-white/5">
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter">Ready to Create Your First <br/><span className="text-neon-cyan">AI NFT?</span></h2>
-          <Button onClick={() => onStart('SIGNUP')} className="px-10 py-6 text-xl bg-gradient-to-r from-neon-cyan to-neon-purple text-white hover:scale-105 transition-transform font-black shadow-2xl shadow-neon-purple/20 border-none">
+          <AnimatedShinyButton onClick={() => onStart('SIGNUP')}>
             Launch Olly Studio
-          </Button>
+          </AnimatedShinyButton>
         </div>
       </section>
     </motion.div>
