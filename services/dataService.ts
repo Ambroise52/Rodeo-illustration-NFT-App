@@ -245,6 +245,51 @@ export const dataService = {
     return collectionsWithPreviews;
   },
 
+  async getLandingPageCollections(limit: number = 10): Promise<(Collection & { itemCount: number })[]> {
+    const { data, error } = await supabase
+      .from('collections')
+      .select('*')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error(error);
+      return [];
+    }
+
+    const enhanced = await Promise.all(data.map(async (col) => {
+      // Get preview image (latest generation)
+      const { data: images } = await supabase
+        .from('generations')
+        .select('image_url')
+        .eq('collection_id', col.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      // Get item count
+      const { count } = await supabase
+        .from('generations')
+        .select('*', { count: 'exact', head: true })
+        .eq('collection_id', col.id);
+
+      return {
+        id: col.id,
+        name: col.name,
+        description: col.description,
+        creatorId: col.creator_id,
+        createdAt: new Date(col.created_at).getTime(),
+        previewImages: images?.map(i => i.image_url) || [],
+        tags: col.tags || [],
+        isPublic: col.is_public,
+        itemCount: count || 0,
+        memberPreviews: [] // Not needed for Landing Page card detail
+      };
+    }));
+
+    return enhanced;
+  },
+
   async getCollectionItems(collectionId: string): Promise<GeneratedData[]> {
       const { data, error } = await supabase
       .from('generations')
@@ -575,25 +620,37 @@ export const dataService = {
   },
 
   // --- Newsletter ---
-  async subscribeToNewsletter(email: string): Promise<void> {
-    // Validate email simple regex
+  // MODIFIED: Returns the method used ('EDGE' or 'DB') so frontend can handle fallback PDF download
+  async subscribeToNewsletter(email: string): Promise<{ method: 'EDGE' | 'DB' }> {
+    // 1. Simple regex validation first
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) throw new Error("Invalid email address");
 
-    // Attempt to save to database.
-    // NOTE: This requires a table 'newsletter_subscribers' to exist in Supabase.
-    // SQL: create table newsletter_subscribers (id uuid default gen_random_uuid() primary key, email text unique not null, created_at timestamp with time zone default timezone('utc'::text, now()) not null, source text);
-    const { error } = await supabase
-      .from('newsletter_subscribers')
-      .insert({ email, source: 'landing_page_footer' });
-    
+    // 2. Call Supabase Edge Function to send email via Resend
+    const { data, error } = await supabase.functions.invoke('subscribe-newsletter', {
+      body: { email }
+    });
+
     if (error) {
-       // Handle duplicate email error gracefully (Postgres Unique Violation code is 23505)
-       if (error.code === '23505') throw new Error("You are already subscribed!");
-       console.error("Subscription DB Error:", error);
-       throw new Error("Could not subscribe. Please try again.");
+      console.warn("Edge Function failed (likely not deployed). Falling back to direct DB insert for development.", error);
+      // Fallback for development if function isn't deployed yet
+      const { error: dbError } = await supabase
+        .from('newsletter_subscribers')
+        .insert({ email, source: 'landing_page_footer' });
+      
+      if (dbError) {
+         if (dbError.code === '23505') throw new Error("You are already subscribed!");
+         throw new Error("Could not subscribe. Please try again.");
+      }
+      
+      // Return 'DB' to signal that we used the fallback and email wasn't sent
+      return { method: 'DB' };
+    } else if (data?.error) {
+       // Logic error from the Edge Function (e.g. Resend rejected it or User already exists)
+       throw new Error(data.error);
     }
     
-    console.log(`[Newsletter] Subscribed: ${email}`);
+    console.log(`[Newsletter] Subscribed via Edge Function: ${email}`);
+    return { method: 'EDGE' };
   }
 };

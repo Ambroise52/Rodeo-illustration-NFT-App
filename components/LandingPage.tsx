@@ -7,6 +7,7 @@ import { Button } from './UIShared';
 import { TermsOfService, PrivacyPolicy } from './LegalDocs';
 import { dataService } from '../services/dataService';
 import { downloadPromptGuidePDF } from '../utils/exportUtils';
+import { Collection } from '../types'; // Import Collection type
 
 // --- Types ---
 type PageType = 
@@ -101,6 +102,7 @@ const NewsletterSection = () => {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR'>('IDLE');
   const [errorMsg, setErrorMsg] = useState('');
+  const [isFallback, setIsFallback] = useState(false);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,9 +112,16 @@ const NewsletterSection = () => {
     setErrorMsg('');
     
     try {
-      await dataService.subscribeToNewsletter(email);
-      // Automatically download the guide PDF
-      downloadPromptGuidePDF();
+      const result = await dataService.subscribeToNewsletter(email);
+      
+      // If we fell back to DB insert (no Edge Function), download PDF manually
+      if (result.method === 'DB') {
+        setIsFallback(true);
+        downloadPromptGuidePDF();
+      } else {
+        setIsFallback(false);
+      }
+      
       setStatus('SUCCESS');
     } catch (e: any) {
       console.error(e);
@@ -129,18 +138,34 @@ const NewsletterSection = () => {
         className="max-w-xl mx-auto mb-20 p-8 bg-gradient-to-br from-green-900/30 to-black border border-green-500/50 rounded-2xl backdrop-blur-sm text-center relative overflow-hidden"
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent"></div>
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)]">
             <Icons.Check className="w-8 h-8 text-black" />
           </div>
         </div>
         <h3 className="text-2xl font-black text-white mb-2">Welcome to the Club</h3>
-        <p className="text-gray-300 mb-2">
-          Your <strong>10 Free Credits</strong> have been applied.
-        </p>
-        <p className="text-gray-400 text-sm">
-          "Olly Master Blueprint" PDF is downloading automatically...
-        </p>
+        
+        {isFallback ? (
+           <p className="text-gray-300 mb-6">
+             Your PDF is <strong>downloading automatically</strong>.
+           </p>
+        ) : (
+           <p className="text-gray-300 mb-6">
+             We've sent the <strong>Master Blueprint PDF</strong> to <span className="text-white font-bold underline">{email}</span>.
+           </p>
+        )}
+        
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-left">
+            <div className="flex items-start gap-3">
+                <Icons.Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+                <div>
+                    <p className="text-yellow-400 font-bold text-sm mb-1 uppercase tracking-wide">Important Step</p>
+                    <p className="text-xs text-gray-300 leading-relaxed">
+                        To claim your <strong>10 Free Credits</strong>, you must use this exact email address ({email}) when you create your account.
+                    </p>
+                </div>
+            </div>
+        </div>
       </motion.div>
     );
   }
@@ -159,7 +184,7 @@ const NewsletterSection = () => {
              </div>
              <h3 className="text-2xl font-black text-white mb-2">Get the Master Prompt Blueprint</h3>
              <p className="text-sm text-gray-400 leading-relaxed">
-               Subscribe to our newsletter and get the <span className="text-neon-cyan font-bold">2-Page PDF Blueprint</span> detailing secret keywords, camera angles, and video prompt formulas instantly.
+               Subscribe to our newsletter to receive the <span className="text-neon-cyan font-bold">PDF Guide</span> and unlock <span className="text-white font-bold">10 Free Credits</span> for your account.
              </p>
            </div>
 
@@ -182,13 +207,13 @@ const NewsletterSection = () => {
                   disabled={status === 'LOADING'}
                   className="bg-white text-black hover:bg-neon-cyan hover:scale-[1.02] font-bold h-12 text-sm border-none shadow-lg transition-all"
                 >
-                    {status === 'LOADING' ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Subscribe & Download PDF'}
+                    {status === 'LOADING' ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Subscribe & Unlock Credits'}
                 </Button>
                 {status === 'ERROR' && (
                   <p className="text-red-400 text-xs text-center">{errorMsg}</p>
                 )}
                 <p className="text-[10px] text-gray-600 text-center">
-                  Instant PDF download. One-time offer.
+                  PDF & Credits sent via email.
                 </p>
              </form>
            </div>
@@ -392,98 +417,95 @@ const RoadmapView = () => (
 );
 
 const CollectionsView = ({ onStart }: { onStart: (mode: 'LOGIN' | 'SIGNUP') => void }) => {
-  const collections = [
-    {
-      title: "Cyberpunk Apes",
-      desc: "A collection of 10,000 unique cybernetically enhanced primates ruling the digital underworld.",
-      img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=800&auto=format&fit=crop",
-      count: "10k",
-      avatars: ["A", "B", "C"]
-    },
-    {
-      title: "Neon Samurai",
-      desc: "Warriors of the future. High fidelity vector art with glow effects.",
-      img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop",
-      count: "5.5k",
-      avatars: ["D", "E"]
-    },
-    {
-      title: "Abstract Geometry",
-      desc: "Pure shapes and colors. Mathematical perfection in NFT form.",
-      img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
-      count: "1.2k",
-      avatars: ["F", "G", "H"]
-    },
-    {
-      title: "Vaporwave Glitch",
-      desc: "Retro-futuristic aesthetics meeting modern generative noise algorithms.",
-      img: "https://images.unsplash.com/photo-1620121692029-d088224ddc74?q=80&w=800&auto=format&fit=crop",
-      count: "8.9k",
-      avatars: ["I", "J"]
-    },
-    {
-      title: "Cosmic Entities",
-      desc: "Beings from another dimension. ethereal, floating, and majestic.",
-      img: "https://images.unsplash.com/photo-1634152962476-4b8a00e1915c?q=80&w=800&auto=format&fit=crop",
-      count: "333",
-      avatars: ["K", "L", "M", "N"]
-    },
-    {
-      title: "Pixel Punks 3.0",
-      desc: "The next evolution of pixel art. 3D depth with 8-bit charm.",
-      img: "https://images.unsplash.com/photo-1633412802994-5c058f151b66?q=80&w=800&auto=format&fit=crop",
-      count: "20k",
-      avatars: ["O", "P"]
-    }
-  ];
+  const [collections, setCollections] = useState<(Collection & { itemCount: number })[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      setLoading(true);
+      try {
+        // Fetch real public collections from Supabase via service
+        const data = await dataService.getLandingPageCollections(10);
+        setCollections(data);
+      } catch (e) {
+        console.error("Failed to load collections for landing page", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCollections();
+  }, []);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
       <PageHeader title="Trending Collections" subtitle="Discover premier collections created by top artists using Olly." />
       
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {collections.map((col, i) => (
-          <div 
-            key={i} 
-            onClick={() => onStart('SIGNUP')}
-            className="group cursor-pointer bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-neon-cyan/50 hover:shadow-[0_0_30px_rgba(0,240,255,0.1)] transition-all duration-300 flex flex-col h-full"
-          >
-            {/* Image Area */}
-            <div className="aspect-[4/3] relative overflow-hidden">
-              <img 
-                src={col.img} 
-                alt={col.title} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent opacity-60"></div>
-              
-              <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-                <Icons.Layers className="w-3 h-3 text-neon-cyan" />
-                <span className="text-xs font-bold text-white">{col.count}</span>
-              </div>
-            </div>
-
-            {/* Content Area */}
-            <div className="p-6 flex flex-col flex-grow">
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-neon-cyan transition-colors">{col.title}</h3>
-              <p className="text-gray-400 text-sm mb-6 line-clamp-2">{col.desc}</p>
-              
-              <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-                <div className="flex -space-x-3">
-                  {col.avatars.map((letter, idx) => (
-                    <div key={idx} className="w-8 h-8 rounded-full bg-gray-800 border-2 border-[#111] flex items-center justify-center text-[10px] font-bold text-gray-400">
-                      {letter}
-                    </div>
-                  ))}
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+          <Icons.RefreshCw className="w-8 h-8 animate-spin text-neon-cyan" />
+        </div>
+      ) : collections.length === 0 ? (
+        <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/10">
+          <Icons.Box className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">No Collections Yet</h3>
+          <p className="text-gray-400 mb-6">Be the first to create a public collection on Olly.</p>
+          <Button onClick={() => onStart('SIGNUP')} className="bg-neon-cyan text-black hover:bg-white font-bold">Start Creating</Button>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {collections.map((col, i) => (
+            <div 
+              key={col.id} 
+              onClick={() => onStart('SIGNUP')}
+              className="group cursor-pointer bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-neon-cyan/50 hover:shadow-[0_0_30px_rgba(0,240,255,0.1)] transition-all duration-300 flex flex-col h-full"
+            >
+              {/* Image Area */}
+              <div className="aspect-[4/3] relative overflow-hidden bg-gray-900">
+                {col.previewImages && col.previewImages[0] ? (
+                  <img 
+                    src={col.previewImages[0]} 
+                    alt={col.name} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-white/5">
+                    <Icons.Image className="w-12 h-12 text-white/10 group-hover:text-neon-cyan/50 transition-colors" />
+                  </div>
+                )}
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent opacity-60"></div>
+                
+                <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+                  <Icons.Layers className="w-3 h-3 text-neon-cyan" />
+                  <span className="text-xs font-bold text-white">{col.itemCount} Items</span>
                 </div>
-                <button className="text-xs font-bold text-white group-hover:text-neon-cyan transition-colors flex items-center gap-1">
-                  View <Icons.ArrowRight className="w-3 h-3" />
-                </button>
+              </div>
+
+              {/* Content Area */}
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-neon-cyan transition-colors">{col.name}</h3>
+                <p className="text-gray-400 text-sm mb-6 line-clamp-2">{col.description || 'No description provided.'}</p>
+                
+                <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+                  {col.tags && col.tags.length > 0 ? (
+                    <div className="flex gap-1 flex-wrap">
+                      {col.tags.slice(0, 2).map(tag => (
+                        <span key={tag} className="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 border border-white/5">#{tag}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-[10px] text-gray-600">No tags</span>
+                  )}
+                  
+                  <button className="text-xs font-bold text-white group-hover:text-neon-cyan transition-colors flex items-center gap-1">
+                    View <Icons.ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <div className="mt-16 text-center">
          <p className="text-gray-400 mb-4">Want to launch your own collection?</p>
@@ -1177,114 +1199,4 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             <button onClick={() => handleNav('FEATURES')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'FEATURES' ? 'text-white' : ''}`}>Features</button>
             <button onClick={() => handleNav('PRICING')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'PRICING' ? 'text-white' : ''}`}>Pricing</button>
             <button onClick={() => handleNav('COLLECTIONS')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'COLLECTIONS' ? 'text-white' : ''}`}>Collections</button>
-            <button onClick={() => handleNav('ROADMAP')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'ROADMAP' ? 'text-white' : ''}`}>Roadmap</button>
-          </div>
-          
-          <div className="flex items-center gap-4 relative z-20">
-            <button onClick={() => onStart('LOGIN')} className="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
-            <Button onClick={() => onStart('SIGNUP')} className="bg-neon-cyan text-black hover:bg-white border-none font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-              Start Creating
-            </Button>
-            
-            {/* Mobile Menu Toggle */}
-            <button 
-              className="md:hidden p-2 text-white hover:text-neon-cyan transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <Icons.X className="w-6 h-6" /> : <Icons.Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu Overlay */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-              className="absolute top-20 left-0 w-full bg-[#050505] border-b border-white/5 p-6 md:hidden flex flex-col gap-4 shadow-2xl"
-            >
-              <button onClick={() => handleNav('FEATURES')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Features</button>
-              <button onClick={() => handleNav('PRICING')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Pricing</button>
-              <button onClick={() => handleNav('COLLECTIONS')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Collections</button>
-              <button onClick={() => handleNav('ROADMAP')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Roadmap</button>
-              <button onClick={() => handleNav('ABOUT')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">About</button>
-              <button onClick={() => onStart('LOGIN')} className="text-left text-lg font-bold text-neon-cyan py-2">Login / Sign Up</button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
-
-      {/* MAIN CONTENT AREA */}
-      <AnimatePresence mode='wait'>
-         {renderContent()}
-      </AnimatePresence>
-
-      {/* FOOTER */}
-      <footer className="bg-[#020202]/90 border-t border-white/5 pt-20 pb-10 relative z-10 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6">
-          
-           {/* NEWSLETTER BANNER - Only on Home */}
-           {currentPage === 'HOME' && <NewsletterSection />}
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-8 mb-16">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-6 cursor-pointer" onClick={() => handleNav('HOME')}>
-                <Logo className="w-8 h-6" />
-                <span className="font-bold text-lg">OLLY</span>
-              </div>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                The premier AI-powered platform for generating unique, high-quality NFT assets and animation prompts.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-white mb-6">Product</h4>
-              <ul className="space-y-4 text-sm text-gray-500">
-                <li><button onClick={() => handleNav('FEATURES')} className="hover:text-neon-cyan transition-colors">Features</button></li>
-                <li><button onClick={() => handleNav('PRICING')} className="hover:text-neon-cyan transition-colors">Pricing</button></li>
-                <li><button onClick={() => handleNav('ROADMAP')} className="hover:text-neon-cyan transition-colors">Roadmap</button></li>
-                <li><button onClick={() => handleNav('COLLECTIONS')} className="hover:text-neon-cyan transition-colors">Collections</button></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-6">Resources</h4>
-              <ul className="space-y-4 text-sm text-gray-500">
-                <li><button onClick={() => handleNav('DOCS')} className="hover:text-neon-cyan transition-colors">Documentation</button></li>
-                <li><button onClick={() => handleNav('API')} className="hover:text-neon-cyan transition-colors">API</button></li>
-                <li><button onClick={() => handleNav('COMMUNITY')} className="hover:text-neon-cyan transition-colors">Community</button></li>
-                <li><button onClick={() => handleNav('SUPPORT')} className="hover:text-neon-cyan transition-colors">Support</button></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-6">Company</h4>
-              <ul className="space-y-4 text-sm text-gray-500">
-                <li><button onClick={() => handleNav('ABOUT')} className="hover:text-neon-cyan transition-colors">About</button></li>
-                <li><button onClick={() => handleNav('CAREERS')} className="hover:text-neon-cyan transition-colors">Careers</button></li>
-                <li><button onClick={() => handleNav('CONTACT')} className="hover:text-neon-cyan transition-colors">Contact</button></li>
-                <li><button onClick={() => handleNav('TERMS')} className="hover:text-neon-cyan transition-colors">Legal</button></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-gray-600">© 2025 Olly. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-               <Icons.Github className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
-               <Icons.Twitter className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
-               <Icons.Instagram className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
-               <Icons.Youtube className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
-            </div>
-            <div className="text-xs text-gray-600 font-mono">
-              Built with Gemini AI + Supabase
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-export default LandingPage;
+            <button onClick={() => handleNav('ROADMAP')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'ROAD
