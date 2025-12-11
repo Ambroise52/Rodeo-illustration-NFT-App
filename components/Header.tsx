@@ -7,6 +7,7 @@ import { supabase } from '../services/supabaseClient';
 import { dataService } from '../services/dataService';
 import { NotificationsPopover } from './Notifications';
 import { Avatar, AvatarFallback, Button } from './UIShared';
+import { motion } from 'framer-motion';
 
 interface HeaderProps {
   userProfile: UserProfile | null;
@@ -50,14 +51,24 @@ const Header: React.FC<HeaderProps> = ({ userProfile, activeTab, onTabChange }) 
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id as any)}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                className={`relative flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${
                   activeTab === item.id 
-                    ? 'bg-neon-cyan text-black shadow-lg shadow-neon-cyan/20' 
+                    ? 'text-black' 
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <item.icon className="w-3 h-3" />
-                {item.label}
+                {activeTab === item.id && (
+                  <motion.div
+                    layoutId="active-tab-bg"
+                    className="absolute inset-0 bg-neon-cyan rounded-md"
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <item.icon className="w-3 h-3" />
+                  {item.label}
+                </span>
               </button>
             ))}
           </nav>

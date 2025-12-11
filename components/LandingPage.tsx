@@ -5,6 +5,8 @@ import { Icons } from './Icons';
 import { Logo } from './Logo';
 import { Button } from './UIShared';
 import { TermsOfService, PrivacyPolicy } from './LegalDocs';
+import { dataService } from '../services/dataService';
+import { downloadText } from '../utils/exportUtils';
 
 // --- Types ---
 type PageType = 
@@ -35,8 +37,54 @@ interface Job {
   requirements: string[];
 }
 
+const GUIDE_CONTENT = `
+==============================================
+THE OLLY ULTIMATE NFT PROMPTING GUIDE (v2.5)
+==============================================
+
+Welcome to the inner circle! This guide unlocks the full potential of the Olly generation engine.
+
+----------------------------------------------
+1. THE FORMULA
+----------------------------------------------
+The perfect prompt follows this structure:
+[Subject] + [Action] + [Environment] + [Style Modifiers] + [Technical Specs]
+
+Example:
+"A geometric robot (Subject) surfing on a data stream (Action), in a neon cyberpunk street (Environment), smooth flat vector art (Style), 8k resolution, minimalist (Tech)"
+
+----------------------------------------------
+2. HIDDEN KEYWORDS
+----------------------------------------------
+Use these words to force specific styles:
+
+> "Behance Style": Adds a clean, professional portfolio look.
+> "Matte Finish": Removes unwanted glossy reflections.
+> "Interlocking Geometry": Creates complex, puzzle-like shapes.
+> "Zero Line Weight": Ensures a purely shape-based image with no borders.
+
+----------------------------------------------
+3. ANIMATION TIPS
+----------------------------------------------
+When generating video prompts for Meta AI or Runway, focus on:
+- "Seamless loop": Critical for NFT aesthetics.
+- "Morphing": Works better than "Walking" for abstract shapes.
+- "Floating/Levitating": Easiest movements to loop perfectly.
+
+----------------------------------------------
+4. EXCLUSIVE COLOR PALETTES
+----------------------------------------------
+Try these combinations in your prompts:
+- "Cyber-Pastel": Mint green, soft pink, and electric blue.
+- "Deep Void": Charcoal, obsidian, and glowing orange.
+- "Solar Flare": White, gold, and crimson.
+
+Keep creating!
+- The Olly Team
+`;
+
 // --- Animated Shiny Button Component ---
-const AnimatedShinyButton = ({ onClick, children, className }: { onClick: () => void, children: React.ReactNode, className?: string }) => {
+const AnimatedShinyButton = ({ onClick, children, className }: { onClick: () => void, children?: React.ReactNode, className?: string }) => {
   return (
     <motion.button
       onClick={onClick}
@@ -93,6 +141,122 @@ const PageHeader: React.FC<{ title: string; subtitle: string; badge?: string }> 
     <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
   </div>
 );
+
+// --- Newsletter Component ---
+const NewsletterSection = () => {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR'>('IDLE');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    
+    setStatus('LOADING');
+    setErrorMsg('');
+    
+    try {
+      await dataService.subscribeToNewsletter(email);
+      setStatus('SUCCESS');
+    } catch (e: any) {
+      console.error(e);
+      setStatus('ERROR');
+      setErrorMsg(e.message || "Failed to subscribe.");
+    }
+  };
+
+  const handleDownloadGuide = () => {
+    downloadText(GUIDE_CONTENT, "Olly-Ultimate-Prompt-Guide.txt");
+  };
+
+  if (status === 'SUCCESS') {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-xl mx-auto mb-20 p-8 bg-gradient-to-br from-green-900/30 to-black border border-green-500/50 rounded-2xl backdrop-blur-sm text-center relative overflow-hidden"
+      >
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent"></div>
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+            <Icons.Check className="w-8 h-8 text-black" />
+          </div>
+        </div>
+        <h3 className="text-2xl font-black text-white mb-2">Welcome to the Club!</h3>
+        <p className="text-gray-300 mb-6">
+          Your <strong>10 Free Credits</strong> have been applied to your account.
+          <br/>
+          Download your <strong>Ultimate Prompt Guide</strong> immediately below.
+        </p>
+        
+        <div className="flex flex-col gap-3 justify-center items-center">
+            <Button onClick={handleDownloadGuide} className="bg-white text-black hover:bg-neon-cyan font-bold w-full max-w-xs h-12 gap-2">
+              <Icons.Download className="w-4 h-4" /> Download Guide Now
+            </Button>
+            
+            <Button onClick={() => setStatus('IDLE')} variant="link" className="text-xs text-gray-500">
+              Register another email
+            </Button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto mb-20 relative group">
+      {/* Decorative Glow */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-neon-cyan via-purple-600 to-neon-pink rounded-2xl opacity-20 blur-lg group-hover:opacity-40 transition-opacity duration-1000"></div>
+      
+      <div className="relative p-8 bg-[#0a0a0a] border border-white/10 rounded-2xl backdrop-blur-sm overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-10">
+           <Icons.Sparkles className="w-32 h-32 text-white transform rotate-12" />
+        </div>
+
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+           <div className="flex-1 text-center md:text-left">
+             <div className="inline-block px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-3">
+               Limited Time Offer
+             </div>
+             <h3 className="text-2xl font-black text-white mb-2">Unlock Pro Features Free</h3>
+             <p className="text-sm text-gray-400 leading-relaxed">
+               Subscribe to our insider newsletter and instantly get <span className="text-neon-cyan font-bold">10 Bonus Credits</span> + our exclusive <span className="text-white">"Ultimate NFT Prompting Guide"</span> (PDF).
+             </p>
+           </div>
+
+           <div className="w-full md:w-auto min-w-[300px]">
+             <form className="flex flex-col gap-3" onSubmit={handleSubscribe}>
+                <div className="relative">
+                  <Icons.MessageCircle className="absolute left-3 top-3 w-5 h-5 text-gray-500" />
+                  <input 
+                      type="email" 
+                      placeholder="Enter your best email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-black/50 border border-white/20 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan outline-none transition-all placeholder:text-gray-600"
+                      required
+                      disabled={status === 'LOADING'}
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  disabled={status === 'LOADING'}
+                  className="bg-white text-black hover:bg-neon-cyan hover:scale-[1.02] font-bold h-12 text-sm border-none shadow-lg transition-all"
+                >
+                    {status === 'LOADING' ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Claim 10 Free Credits'}
+                </Button>
+                {status === 'ERROR' && (
+                  <p className="text-red-400 text-xs text-center">{errorMsg}</p>
+                )}
+                <p className="text-[10px] text-gray-600 text-center">
+                  We respect your inbox. Unsubscribe anytime.
+                </p>
+             </form>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // --- Sub-Pages ---
 
@@ -902,6 +1066,15 @@ const HomeView: React.FC<{ onStart: (mode: 'LOGIN' | 'SIGNUP') => void, onNav: (
     animate: { y: [0, -15, 0], transition: { duration: 4, repeat: Infinity, ease: "easeInOut" } }
   };
 
+  const iconVariants = {
+    hidden: { scale: 0, rotate: -180 },
+    visible: { 
+      scale: 1, 
+      rotate: 0, 
+      transition: { type: "spring", stiffness: 260, damping: 20 } 
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10">
       {/* HERO SECTION */}
@@ -981,10 +1154,10 @@ const HomeView: React.FC<{ onStart: (mode: 'LOGIN' | 'SIGNUP') => void, onNav: (
                 className="bg-[#111]/80 backdrop-blur-sm border border-[#222] p-8 rounded-2xl group hover:border-white/20 transition-all"
               >
                 <motion.div 
-                    initial={{ scale: 0, rotate: -45 }}
-                    whileInView={{ scale: 1, rotate: 0 }}
+                    variants={iconVariants}
+                    initial="hidden"
+                    whileInView="visible"
                     viewport={{ once: true }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 + (idx * 0.1) }}
                     className={`p-3 rounded-lg bg-white/5 w-fit mb-6 ${feature.color} group-hover:scale-110 transition-transform duration-300`}
                 >
                     <feature.icon className="w-6 h-6" />
@@ -1113,26 +1286,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       <footer className="bg-[#020202]/90 border-t border-white/5 pt-20 pb-10 relative z-10 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6">
           
-           {/* NEWSLETTER BANNER - Only on Home, smaller width */}
-           {currentPage === 'HOME' && (
-             <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 mb-20 p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-               <div className="text-center md:text-left">
-                 <h3 className="text-xl font-bold text-white mb-1">Subscribe to updates</h3>
-                 <p className="text-sm text-gray-400">Get the latest drops and features.</p>
-               </div>
-               <form className="flex w-full md:w-auto gap-2" onSubmit={(e) => { e.preventDefault(); alert("Thanks for subscribing! 🚀"); }}>
-                  <input 
-                      type="email" 
-                      placeholder="Enter your email" 
-                      className="w-full md:w-64 bg-[#050505] border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan outline-none transition-all placeholder:text-gray-600"
-                      required
-                  />
-                  <Button className="bg-neon-cyan text-black hover:bg-white font-bold h-auto px-4 py-2 text-sm border-none whitespace-nowrap">
-                      Subscribe
-                  </Button>
-               </form>
-             </div>
-           )}
+           {/* NEWSLETTER BANNER - Only on Home */}
+           {currentPage === 'HOME' && <NewsletterSection />}
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-8 mb-16">
             <div className="col-span-2 md:col-span-1">

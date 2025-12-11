@@ -1,5 +1,4 @@
 
-
 import { supabase } from './supabaseClient';
 import { GeneratedData, UserProfile, Collection, CollectionRequest, Notification } from '../types';
 
@@ -573,5 +572,28 @@ export const dataService = {
       .eq('is_read', false);
     
     return count || 0;
+  },
+
+  // --- Newsletter ---
+  async subscribeToNewsletter(email: string): Promise<void> {
+    // Validate email simple regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) throw new Error("Invalid email address");
+
+    // Attempt to save to database.
+    // NOTE: This requires a table 'newsletter_subscribers' to exist in Supabase.
+    // SQL: create table newsletter_subscribers (id uuid default gen_random_uuid() primary key, email text unique not null, created_at timestamp with time zone default timezone('utc'::text, now()) not null, source text);
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .insert({ email, source: 'landing_page_footer' });
+    
+    if (error) {
+       // Handle duplicate email error gracefully (Postgres Unique Violation code is 23505)
+       if (error.code === '23505') throw new Error("You are already subscribed!");
+       console.error("Subscription DB Error:", error);
+       throw new Error("Could not subscribe. Please try again.");
+    }
+    
+    console.log(`[Newsletter] Subscribed: ${email}`);
   }
 };
