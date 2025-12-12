@@ -157,7 +157,7 @@ const NewsletterSection = () => {
              <div className="inline-block px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-[10px] font-bold text-yellow-400 uppercase tracking-wider mb-3">
                Free PDF Blueprint
              </div>
-             <h3 className="text-2xl font-black text-white mb-2">Get the Master Prompt Blueprint</h3>
+             <h3 className="text-2xl font-black text-white mb-2">Get the NFT Master Guide</h3>
              <p className="text-sm text-gray-400 leading-relaxed">
                Subscribe to our newsletter to receive the <span className="text-neon-cyan font-bold">PDF Guide</span> and unlock <span className="text-white font-bold">10 Free Credits</span> for your account.
              </p>
@@ -201,33 +201,6 @@ const NewsletterSection = () => {
 
 // --- Logos ---
 
-const CoinbaseLogo = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 255.99263 255.99263" className="w-12 h-12 md:w-16 md:h-16 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
-    <g fillOpacity="0" fill="#dddddd" fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" strokeMiterlimit="10">
-      <path d="M0,255.99263v-255.99263h255.99263v255.99263z"></path>
-    </g>
-    <g fill="none" fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" strokeMiterlimit="10">
-      <g transform="scale(5.33333,5.33333)">
-        <circle cx="24" cy="24" r="20" fill="#2962ff"></circle>
-        <path d="M24,31c-3.86,0 -7,-3.14 -7,-7c0,-3.86 3.14,-7 7,-7c3.52,0 6.44,2.61 6.92,6h7.04c-0.51,-7.26 -6.58,-13 -13.96,-13c-7.72,0 -14,6.28 -14,14c0,7.72 6.28,14 14,14c7.38,0 13.45,-5.74 13.96,-13h-7.04c-0.48,3.39 -3.4,6 -6.92,6z" fill="#ffffff"></path>
-      </g>
-    </g>
-  </svg>
-);
-
-const SupabaseLogo = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 255.99263 255.99263" className="w-12 h-12 md:w-16 md:h-16 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
-    <g fillOpacity="0" fill="#dddddd" fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" strokeMiterlimit="10">
-      <path d="M0,255.99263v-255.99263h255.99263v255.99263z"></path>
-    </g>
-    <g fill="#71c674" fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" strokeMiterlimit="10">
-      <g transform="scale(5.33333,5.33333)">
-        <path d="M43.9,22.5l-16.4,20.8c-1.2,1.4 -3.5,0.6 -3.5,-1.2v-12.1h-17.4c-2.1,0 -3.3,-2.5 -2,-4.1l16.1,-20.8c1.1,-1.5 3.4,-0.7 3.4,1.2v12.1h17.7c2.3,0 3.5,2.4 2.1,4.1z"></path>
-      </g>
-    </g>
-  </svg>
-);
-
 const ChatGPTLogo = () => (
   <img 
     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAABmJLR0QA/wD/AP+gvaeTAAAHTElEQVR4nO2dbWxb5RmGr+e1TZJ2tBrawpYlcUI7Oug00arSxpowO1m/GHXCVto/sD9M++i6FjGxT1AjNqQxaSoTFBDi34omdYLGBALNaGzSFm1joEoTqTalS5x0H4xttB2Fhtjn2Y8kXeR2tOfDPuXNuST/iu7nvZXLPvY5Oq8NERERERERERERERERERERERER7w/EbaC5L9WGsroSZfwwnsnf7yXXkkvVOidkuQjLxEi9g1Mz/Rd5MyYyZkrFo8e6hyaC7PpexN0GjGM+r+jOSpTxyUULady77op4zdQWRTfpKT4rhloAVUXmPEcdVRyJkcymR1GeA3mi0D34UgW6n8W1kPczTdk1DTEpflf13a8oLHARbUXYCro1mU2/isqPC92D+yrR0VRi6CVHT49pzqZ2GIpHVdmOOxnlrET0qWRv+oXGbGppUBVnsV5IQ1/qQ80rXuwX5AFgUWCDhc4Y8kpLb2pLYDOxXEhTdk1DoiQ5gXUVWmKRivyyJdvRE9RAa4UseWptvVDKI3yywkuJojuT2fRdQQyzUkjj3uvrirGp/YJ+vIrL3t+c7bjF7xArhZja2l3AdVVeVgR9vGlfxxI/Q6wT0tTb2S7KV0NaflHMOI/4GWCXEEWMOA/h4QpEgBXWNGXTGa95q4S09KUzwKfC7mHgHh9Zi1D9ZtgVZljV0pv+tJegNUKasmsaFOkIu8csKtzmJWeNkBhTa4BY2D3m4Olk1BohitwQdocyljb2dXzMbcgaIcC1YRcox5Sca1xnKlEkJFrDLnAORq5yHalEj5AI7kpuQIiy2G3GJiGJsAucg+plbiM2CTkddoFyFPmP24w1QhT5R9gdyjGirjtZI0Tgj2F3KEdxXHeyScgrYXco4+1EYuGw25A1QkoqB8LuMBdBD4/c+Nyk25w1QiaOtB8GjofdYxYH8ysvOWuE0NPjqOiesGvMcNo4zjwXApgYPwfeCbsHyKNjN+dPeElaJWTsC/m/Aw+FXONEvBT/qdewVUIA3p7Ue4HxsNYX5AfHvjjg+ZzIOiFvbM6/JaJbgKmqLy70j2UGH/UzwjohAGOZ/G8Q7qjyssNqpm5FUD9DrBQCUMjkHkb17iotdyyupfXjNx160+8ga4UAFLrz9wmyFShWag1BXzaY1UFt6rFaCMBY1+AjqHwOpRDwaEV5MJ6oax/tOvB6UEOtFwJQ6B586UxdYrmK/oRgzlN+j0pboTu33cvlkfdi3uygen3dwGng+63ZzgccdbYjfBlodDGiBDoAsruQyfX7ffP+f8wbIbPMHF5+SE/PPc0rXrxeoENglcIyoB5YzPSr6C1gBBhWdChRumzAz/nFxTIvDlnn5drXJIbEFDWKGEVm/xcy5xEDDCqmqO9U5Z6vefcKST7Z/lGJJXao/PM2Bxqmd91q+d3ZC2Ye9cBnRLideLzU3Js+oMLuiUyuLzpk+eTDe1MfWFBjekC3KVrjYURMhLUCa5NPp4+YrOwY7RocCrrnvDhkNfV2ttfVyDDotwEvMsq5zkHzyWz64ZZcqjaAeWexXkgy27HNiDMo0BTwaAG+oafkcMuzqY8ENdRqIclsx92gD1LZQ/NKLcrhJb03BCLcWiHJbMc20B9Vabmriia+v3Hvuiv8DrJSSFNvZzvorqouqnpNrGZyz7kf2NxhnZBl2dWXizhPEMonSNmQzKa2+plgnZAz1OyswBv4xSNyX2u280qvcauETH/aUV/P0ABY7OB8x2vYKiFMmTuAurBrAF9rfqbtg16C9gjp6TEqemvYNWZYiJPw9DUb1ghpXTHUBrje01cpjOomT7mgi4SFwiWzJRpAkdVL+ze4vkxjkRBdFXaHMhZMTZ12vRHVIiFyddgdyhHMMrcZa4QIWh92h3IcFdedrBECLAy7QDmCXu42Y5OQ6t86eiFE3nUbsUnIqbALlKPCSbcZm4SMhl3gHBz9s9uITUJeC7tAOU7MHHWbsUaIoAfD7lDGyPGNg39xG7JGiBZLA0Ap7B7/Q5/3krJGSOFLB/+myiWzNdo45heeckEXCRMVdofdAaa3KIzePPg7L1mrhExkcn3AkbB7OGo831xhlRAEVaPfgsrc5nkxqDIw3j3Y5zVvlxBgfGP+EOBr46UPToopfd3PAOuEAMgivRN4tcrLKsLthcyQrxNUK4WMpfNnEonieuBP1VtV7ypkck/6nWKlEICRGw++4RBPC/KHCi+lKvq9Qlf+Z0EMs1YIwETXr/9anEykgGcrtMRJhFu8/mTf+bBaCMDxzfv/XcjkNqK6DfD0hTDnQ2G/xmIrgzhMzcV6IQAIWujO7zaYTyDswscXZgr6sqpkxrty68dvesH11dwLMW92UMHZDZ93tuxL3evEZLNR3aRIGxe+uW4E9HlR2TPWnf9tJTu6FuKoc8hgAjtmhsHMd1k9Bjy2tH9DzVRpcrk4ztUOXIlM/+qnOPxLJVZwjA57uWobERERERERERERERERERERERERFhO/8FIwUq5gTtlIMAAAAASUVORK5CYII=" 
@@ -244,22 +217,36 @@ const EthereumLogo = () => (
   />
 );
 
-const RodeoLogo = () => (
-  <div className="flex items-center gap-2 group-hover:scale-105 transition-all duration-300">
-    <div className="w-10 h-10 md:w-12 md:h-12 bg-white text-black rounded-xl flex items-center justify-center font-black text-xl shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-      R
-    </div>
-    <span className="text-2xl font-black text-white tracking-tighter opacity-70 group-hover:opacity-100 transition-opacity">RODEO</span>
-  </div>
-);
-
 const IntegrationSection = () => {
   const logos = [
-    { id: 'coinbase', component: <CoinbaseLogo /> },
-    { id: 'supabase', component: <SupabaseLogo /> },
+    { 
+      id: 'coinbase', 
+      src: 'https://logo.svgcdn.com/token-branded/coinbase.svg', 
+      alt: 'Coinbase' 
+    },
+    { 
+      id: 'supabase', 
+      src: 'https://logo.svgcdn.com/devicon/supabase-original.svg', 
+      alt: 'Supabase' 
+    },
+    { 
+      id: 'claude', 
+      src: 'https://logo.svgcdn.com/logos/claude-icon.svg', 
+      alt: 'Claude' 
+    },
+    { 
+      id: 'clerk', 
+      src: 'https://workable-application-form.s3.amazonaws.com/advanced/production/5faba140a2e294c4d44b07eb/5a2307b9-37fe-9bd0-b5f4-2666152d200d', 
+      alt: 'Clerk' 
+    },
+    { 
+      id: 'rodeo', 
+      src: 'https://ik.imagekit.io/vloluweqt/Logos/1723083649527.jpg', 
+      alt: 'Rodeo',
+      className: 'rounded-xl'
+    },
     { id: 'chatgpt', component: <ChatGPTLogo /> },
     { id: 'ethereum', component: <EthereumLogo /> },
-    { id: 'rodeo', component: <RodeoLogo /> },
     { id: 'github', component: <Icons.Github className="w-12 h-12 md:w-16 md:h-16 text-gray-500 group-hover:text-white transition-colors" /> },
   ];
 
@@ -276,14 +263,26 @@ const IntegrationSection = () => {
         <div className="flex animate-marquee gap-12 md:gap-24 min-w-full shrink-0 items-center justify-around px-12 md:px-24">
            {logos.map((logo) => (
              <div key={logo.id} className="group flex items-center justify-center shrink-0 grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100">
-               {logo.component}
+               {logo.component ? logo.component : (
+                 <img 
+                   src={logo.src} 
+                   alt={logo.alt} 
+                   className={`w-12 h-12 md:w-16 md:h-16 object-contain transition-all duration-500 ${logo.className || ''}`}
+                 />
+               )}
              </div>
            ))}
         </div>
         <div className="flex animate-marquee gap-12 md:gap-24 min-w-full shrink-0 items-center justify-around px-12 md:px-24" aria-hidden="true">
            {logos.map((logo) => (
              <div key={`${logo.id}-copy`} className="group flex items-center justify-center shrink-0 grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100">
-               {logo.component}
+               {logo.component ? logo.component : (
+                 <img 
+                   src={logo.src} 
+                   alt={logo.alt} 
+                   className={`w-12 h-12 md:w-16 md:h-16 object-contain transition-all duration-500 ${logo.className || ''}`}
+                 />
+               )}
              </div>
            ))}
         </div>
@@ -306,7 +305,7 @@ const FeaturesView = () => (
       >
          <div className="p-4 bg-neon-cyan/10 rounded-2xl w-fit mb-6 text-neon-cyan"><Icons.Zap className="w-8 h-8" /></div>
          <h2 className="text-3xl font-bold mb-4">Gemini 2.5 Flash Engine</h2>
-         <p className="text-gray-400 leading-relaxed mb-6">Our core generation engine is powered by Google's latest Gemini 2.5 Flash model, optimized specifically for vector-style geometric art. It understands complex spatial relationships and abstract concepts better than any other model on the market.</p>
+         <p className="text-gray-400 leading-relaxed mb-6">Our core generation engine is powered by Google's latest Gemini 2.5 Flash model, optimized specifically for unique NFT art generation. It understands complex traits and rarity concepts better than any other model on the market.</p>
          <ul className="space-y-3">
            {["Sub-second generation times", "Perfect geometric consistency", "Advanced color theory application", "Zero-hallucination vector paths"].map((item, i) => (
              <motion.li 
@@ -333,7 +332,45 @@ const FeaturesView = () => (
          <Icons.Cpu className="w-32 h-32 text-gray-800 group-hover:text-neon-cyan transition-colors duration-500" />
       </motion.div>
     </div>
-    {/* More features logic omitted for brevity as it was correct in previous block, adding key parts */}
+    
+    <div className="grid md:grid-cols-2 gap-16 items-center mb-24 md:flex-row-reverse">
+      <motion.div 
+        className="md:order-2"
+        initial={{ opacity: 0, x: 50 }} 
+        whileInView={{ opacity: 1, x: 0 }} 
+        viewport={{ once: true }} 
+        transition={{ duration: 0.6 }}
+      >
+         <div className="p-4 bg-neon-purple/10 rounded-2xl w-fit mb-6 text-neon-purple"><Icons.Video className="w-8 h-8" /></div>
+         <h2 className="text-3xl font-bold mb-4">Smart Video Prompts</h2>
+         <p className="text-gray-400 leading-relaxed mb-6">Don't just create static images. Olly automatically analyzes your generated artwork and crafts perfect text-to-video prompts compatible with Meta AI and Runway Gen-2, giving life to your creations.</p>
+         <ul className="space-y-3">
+           {["Context-aware motion descriptions", "Loop-perfect timing syntax", "Style-consistent animation rules", "One-click copy workflow"].map((item, i) => (
+             <motion.li 
+                key={item} 
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 + (i * 0.1) }}
+                className="flex items-center gap-2 text-sm text-gray-300"
+             >
+                <Icons.Check className="w-4 h-4 text-neon-purple" /> {item}
+             </motion.li>
+           ))}
+         </ul>
+      </motion.div>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8 }} 
+        whileInView={{ opacity: 1, scale: 1 }} 
+        viewport={{ once: true }} 
+        transition={{ duration: 0.6 }}
+        className="aspect-square bg-gradient-to-br from-gray-900 to-black rounded-3xl border border-white/10 flex items-center justify-center relative overflow-hidden group md:order-1"
+      >
+          <div className="absolute inset-0 bg-neon-purple/5 group-hover:bg-neon-purple/10 transition-colors"></div>
+          <Icons.PlayCircle className="w-32 h-32 text-gray-800 group-hover:text-neon-purple transition-colors duration-500" />
+      </motion.div>
+    </div>
+
     <div className="grid md:grid-cols-3 gap-8">
        {[
          { icon: Icons.Layers, title: "Batch Processing", desc: "Generate up to 100 variations at once with our bulk tool." },
@@ -371,7 +408,6 @@ const PricingView = ({ onStart }: { onStart: (mode: 'LOGIN' | 'SIGNUP') => void 
   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
     <PageHeader title="Simple Pricing" subtitle="Start for free, upgrade as you scale. No hidden fees or gas costs." />
     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-      {/* Free Tier */}
       <div className="bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 flex flex-col relative group hover:border-white/30 transition-all">
         <h3 className="text-xl font-bold text-gray-300 mb-2">Explorer</h3>
         <div className="text-4xl font-black text-white mb-6">$0<span className="text-sm font-normal text-gray-500">/mo</span></div>
@@ -383,7 +419,6 @@ const PricingView = ({ onStart }: { onStart: (mode: 'LOGIN' | 'SIGNUP') => void 
         </ul>
         <Button onClick={() => onStart('SIGNUP')} variant="outline" className="w-full">Get Started</Button>
       </div>
-      {/* Pro Tier */}
       <div className="bg-black/80 backdrop-blur-sm border border-neon-cyan rounded-2xl p-8 flex flex-col relative transform md:-translate-y-4 shadow-[0_0_30px_rgba(0,240,255,0.1)]">
         <div className="absolute top-0 center-0 w-full text-center -translate-y-1/2">
            <span className="bg-neon-cyan text-black text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Most Popular</span>
@@ -398,7 +433,6 @@ const PricingView = ({ onStart }: { onStart: (mode: 'LOGIN' | 'SIGNUP') => void 
         </ul>
         <Button onClick={() => onStart('SIGNUP')} className="w-full bg-neon-cyan text-black hover:bg-white font-bold">Start Free Trial</Button>
       </div>
-      {/* Enterprise Tier */}
       <div className="bg-[#111]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 flex flex-col relative group hover:border-white/30 transition-all">
         <h3 className="text-xl font-bold text-gray-300 mb-2">Agency</h3>
         <div className="text-4xl font-black text-white mb-6">$99<span className="text-sm font-normal text-gray-500">/mo</span></div>
@@ -1031,15 +1065,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-cyan opacity-75"></span>
                  <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-cyan"></span>
                </span>
-               AI-Powered NFT Generation Engine
+               AI-Powered NFT Art Engine
              </div>
              <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[1.1] text-white max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
-               Create <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">Vector-Perfect</span><br />
-               Digital Assets.
+               Generate Unique <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">NFT Art</span><br />
+               in Seconds.
              </h1>
              <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-               Generate consistent, high-quality flat design illustrations and animations. 
-               The only AI tool fine-tuned for geometric aesthetics and video motion.
+               Create, manage, and export professional NFT collections. 
+               The ultimate AI tool for generating mint-ready digital collectibles and animations.
              </p>
              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
                 <AnimatedShinyButton onClick={() => onStart('SIGNUP')}>
@@ -1048,6 +1082,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                 <button onClick={() => setPage('DOCS')} className="px-8 py-4 rounded-xl font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2">
                    <Icons.Code className="w-5 h-5" /> Documentation
                 </button>
+             </div>
+
+             <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-24 text-left animate-in fade-in slide-in-from-bottom-12 duration-700 delay-500">
+                <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl backdrop-blur-sm hover:border-neon-cyan/30 transition-all group">
+                   <div className="w-12 h-12 bg-neon-cyan/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Icons.Sparkles className="w-6 h-6 text-neon-cyan" />
+                   </div>
+                   <h3 className="text-lg font-bold text-white mb-2">AI-Powered Art</h3>
+                   <p className="text-sm text-gray-400">Generate thousands of unique traits and variations instantly using our tuned Gemini 2.5 engine.</p>
+                </div>
+                <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl backdrop-blur-sm hover:border-neon-purple/30 transition-all group">
+                   <div className="w-12 h-12 bg-neon-purple/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Icons.Grid className="w-6 h-6 text-neon-purple" />
+                   </div>
+                   <h3 className="text-lg font-bold text-white mb-2">Collection Manager</h3>
+                   <p className="text-sm text-gray-400">Organize your assets, manage rarity tiers, and remix styles effortlessly.</p>
+                </div>
+                <div className="p-6 bg-[#111]/80 border border-white/10 rounded-xl backdrop-blur-sm hover:border-neon-pink/30 transition-all group">
+                   <div className="w-12 h-12 bg-neon-pink/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Icons.Download className="w-6 h-6 text-neon-pink" />
+                   </div>
+                   <h3 className="text-lg font-bold text-white mb-2">Mint Ready</h3>
+                   <p className="text-sm text-gray-400">One-click export of images and ERC-721 metadata compatible with OpenSea and Solana.</p>
+                </div>
              </div>
           </div>
           <IntegrationSection />
@@ -1120,7 +1178,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                   <span className="font-black text-lg tracking-tighter">OLLY</span>
                </div>
                <p className="text-sm text-gray-500 leading-relaxed">
-                 The world's first AI generation engine designed specifically for vector-style geometric art and seamless video loops.
+                 The world's first AI generation engine designed specifically for unique NFT art and seamless video loops.
                </p>
                <div className="flex gap-4">
                   <a href="#" className="text-gray-500 hover:text-white transition-colors"><Icons.Twitter className="w-5 h-5" /></a>
