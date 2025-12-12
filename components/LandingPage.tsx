@@ -201,14 +201,6 @@ const NewsletterSection = () => {
 
 // --- Logos ---
 
-const ChatGPTLogo = () => (
-  <img 
-    src="data:image/png;base64,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" 
-    alt="ChatGPT" 
-    className="w-12 h-12 md:w-16 md:h-16 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 rounded-full"
-  />
-);
-
 const EthereumLogo = () => (
   <img 
     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAD5ElEQVR4nO2ZfWgTZxzHH8fQscEQwTH/GGOwMehQtPiKw+FwY/UNC2v3ljS1ebnk+nKpmXmedozfU50oCIJOEQeDDWFjDDb2z9isTGRiU7U17aVRx1gZts+jRRTdmLqZPuPKTq7Xu5ikvdxl+IHfPwlJfh+e33P3fS4IPeR/Du4arZXi6h5UiQBce5JQfrkhnMrJct+zqNLAlB8mlAtfqEcEW9IZVEkk4cpKTFlOF9BKaldlVAkAZGZjyoe05o0CjdGzdxXl/FzkdTBwqjdvFNAq3DpwAnmZ7TtGXsSU37YT8Id7RCx+YRPyIgDiEUL5z8bmzQJabY2e+wNAPIq8BqYsZm7eSkCrSNvgF8hLdH40tgBTfqNQAX8kNR5rU5chr0CAf2PVvJ3AxL1BPj+KvBIX7JrPJ+DT7g1uxww9LpQq0OB2zNDjQqkCPjdjhjEuTEfA50bMMMeF6Qo0ljtmmOOCuTBwoSR/FcHmfrF09afijS3fiXeDp/NKhMsVM6zigl7bPxwRzYmLIiCdud9Y1ZIDE7Vo+WGxtuZr8VbDSet7Q7gMMcMuLmzr/F1Iiir84dSUxnQBvV6qPihWv3pUbK7/sfwxwxgXjGOSbzTMAsZaajFejsUMPS5YjUmpAlUW4+VYzIiT336yG5PpClSZxqv27eM3Z1xAiqvJxui528U0X6xA1ZIDonrVJ2LDm9+fRE4QgOHHJEU96o/05mZaYOGyQ+K1jd+O1dWdeBo5TSiRfi7cku7RLn3TFqj+WKxZ9+Xdev+x9Y42TSjz4x1XFhpfi8WzrzfJ/ZdLFVix5rPx2vru3ebvjCqD+2ZcILGXP4EpUwnlRzp2sfmF7o9C5zz036oGpDN34p3ZBcgJtBUgwP8iwK8TyrGWiR60Px4054FJn0sJWcm8g5yEAG+5fzOj/BLp4nX59ke+OZdMKxdpG/jK0ebtj5Cse8r+SGQ3BGN9Yytf+TxX+143Nb4XVYZqmuS+q5POBc39HCExqywCAMNzCWXDkxIoZf9Y7Y9Crl4Bqfee1Db0AionSeDLCbC/p6TSIvaHT0uhoZSIxYeiyA0I5R225wLg2WQXq4nG1c6AdPaO/Tlg8AfkFhPxGtixUk9kTXLf9TrDSrlCAvhTGBgrVsAf7s3J719ajLxARxdfS4DdK0Yg0p7FyEsQynYXKhBqTZ9GXkM7CmLgpwp4Ov1nBEYfR17kg50jz2Dg12z/H4j0jsvbMi8jL0OAbyTAxq0EXH8WWigE2EGzQKglPYAqhdb9v8whwPt1AS2wBSEzD1USBK4+T4Dd0h4CSO2Dzp62nAIDa5AU9YhjP/AQ5C7/Agi7eV7YmtI+AAAAAElFTkSuQmCC" 
@@ -237,7 +229,8 @@ const IntegrationSection = () => {
     { 
       id: 'clerk', 
       src: 'https://workable-application-form.s3.amazonaws.com/advanced/production/5faba140a2e294c4d44b07eb/5a2307b9-37fe-9bd0-b5f4-2666152d200d', 
-      alt: 'Clerk' 
+      alt: 'Clerk',
+      className: 'scale-150' // Increased size for visibility
     },
     { 
       id: 'rodeo', 
@@ -245,7 +238,6 @@ const IntegrationSection = () => {
       alt: 'Rodeo',
       className: 'rounded-xl'
     },
-    { id: 'chatgpt', component: <ChatGPTLogo /> },
     { id: 'ethereum', component: <EthereumLogo /> },
     { id: 'github', component: <Icons.Github className="w-12 h-12 md:w-16 md:h-16 text-gray-500 group-hover:text-white transition-colors" /> },
   ];
@@ -259,10 +251,11 @@ const IntegrationSection = () => {
          <p className="text-gray-400 max-w-2xl mx-auto">Seamlessly integrated with the modern creative stack.</p>
       </div>
       
+      {/* Added animationDirection: 'reverse' for left-to-right sliding */}
       <div className="flex w-full overflow-hidden mask-gradient-x">
-        <div className="flex animate-marquee gap-12 md:gap-24 min-w-full shrink-0 items-center justify-around px-12 md:px-24">
+        <div className="flex animate-marquee gap-12 md:gap-24 min-w-full shrink-0 items-center justify-around px-12 md:px-24" style={{ animationDirection: 'reverse' }}>
            {logos.map((logo) => (
-             <div key={logo.id} className="group flex items-center justify-center shrink-0 grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100">
+             <div key={logo.id} className="group flex items-center justify-center shrink-0 transition-all duration-500 hover:scale-110">
                {logo.component ? logo.component : (
                  <img 
                    src={logo.src} 
@@ -273,9 +266,9 @@ const IntegrationSection = () => {
              </div>
            ))}
         </div>
-        <div className="flex animate-marquee gap-12 md:gap-24 min-w-full shrink-0 items-center justify-around px-12 md:px-24" aria-hidden="true">
+        <div className="flex animate-marquee gap-12 md:gap-24 min-w-full shrink-0 items-center justify-around px-12 md:px-24" aria-hidden="true" style={{ animationDirection: 'reverse' }}>
            {logos.map((logo) => (
-             <div key={`${logo.id}-copy`} className="group flex items-center justify-center shrink-0 grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100">
+             <div key={`${logo.id}-copy`} className="group flex items-center justify-center shrink-0 transition-all duration-500 hover:scale-110">
                {logo.component ? logo.component : (
                  <img 
                    src={logo.src} 
@@ -1079,8 +1072,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                 <AnimatedShinyButton onClick={() => onStart('SIGNUP')}>
                    Start Creating Free <Icons.ArrowRight className="w-5 h-5" />
                 </AnimatedShinyButton>
-                <button onClick={() => setPage('DOCS')} className="px-8 py-4 rounded-xl font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2">
-                   <Icons.Code className="w-5 h-5" /> Documentation
+                <button onClick={() => setPage('COLLECTIONS')} className="px-8 py-4 rounded-xl font-bold text-white bg-white/5 hover:bg-white/10 border border-white/30 transition-all flex items-center gap-2">
+                   <Icons.Grid className="w-5 h-5" /> Gallery
                 </button>
              </div>
 
@@ -1106,6 +1099,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
                    <h3 className="text-lg font-bold text-white mb-2">Mint Ready</h3>
                    <p className="text-sm text-gray-400">One-click export of images and ERC-721 metadata compatible with OpenSea and Solana.</p>
                 </div>
+             </div>
+             
+             <div className="mt-8 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-700">
+               <button onClick={() => setPage('FEATURES')} className="text-sm font-bold text-gray-400 hover:text-white flex items-center justify-center gap-2 mx-auto transition-colors group">
+                 More Features <Icons.ChevronDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
+               </button>
              </div>
           </div>
           <IntegrationSection />
