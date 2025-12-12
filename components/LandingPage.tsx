@@ -115,7 +115,12 @@ const NewsletterSection = () => {
     } catch (e: any) {
       console.error(e);
       setStatus('ERROR');
-      setErrorMsg(e.message || "Failed to subscribe.");
+      // Friendly error handling
+      if (e.message.includes('subscribed')) {
+        setErrorMsg("You're already on the list! Check your spam folder.");
+      } else {
+        setErrorMsg(e.message || "Failed to subscribe.");
+      }
     }
   };
 
@@ -124,7 +129,7 @@ const NewsletterSection = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-xl mx-auto mb-20 p-8 bg-gradient-to-br from-green-900/30 to-black border border-green-500/50 rounded-2xl backdrop-blur-sm text-center relative overflow-hidden"
+        className="max-w-xl mx-auto mb-20 p-8 bg-gradient-to-br from-green-900/40 to-black border border-green-500/50 rounded-2xl backdrop-blur-sm text-center relative overflow-hidden"
       >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent"></div>
         <div className="flex justify-center mb-6">
@@ -132,18 +137,18 @@ const NewsletterSection = () => {
             <Icons.Check className="w-8 h-8 text-black" />
           </div>
         </div>
-        <h3 className="text-2xl font-black text-white mb-2">Check Your Inbox</h3>
+        <h3 className="text-2xl font-black text-white mb-2">Blueprint Sent!</h3>
         <p className="text-gray-300 mb-6">
-          We've sent the <strong>Master Blueprint PDF</strong> to <span className="text-white font-bold underline">{email}</span>.
+          We've emailed the PDF to <span className="text-white font-bold">{email}</span>.
         </p>
         
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-left">
+        <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-left">
             <div className="flex items-start gap-3">
                 <Icons.Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
                 <div>
-                    <p className="text-yellow-400 font-bold text-sm mb-1 uppercase tracking-wide">Important Step</p>
+                    <p className="text-yellow-400 font-bold text-sm mb-1 uppercase tracking-wide">Don't see it?</p>
                     <p className="text-xs text-gray-300 leading-relaxed">
-                        To claim your <strong>10 Free Credits</strong>, you must use this exact email address ({email}) when you create your account.
+                        Please check your <strong>Spam</strong> or <strong>Promotions</strong> folder. Since this is an automated email, it sometimes lands there.
                     </p>
                 </div>
             </div>
@@ -187,12 +192,14 @@ const NewsletterSection = () => {
                 <Button 
                   type="submit" 
                   disabled={status === 'LOADING'}
-                  className="bg-white text-black hover:bg-neon-cyan hover:scale-[1.02] font-bold h-12 text-sm border-none shadow-lg transition-all"
+                  className="bg-white text-black hover:bg-neon-cyan hover:scale-[1.02] font-bold h-12 text-sm border-none shadow-lg transition-all w-full"
                 >
                     {status === 'LOADING' ? <Icons.RefreshCw className="w-4 h-4 animate-spin" /> : 'Subscribe & Unlock Credits'}
                 </Button>
                 {status === 'ERROR' && (
-                  <p className="text-red-400 text-xs text-center">{errorMsg}</p>
+                  <div className="p-2 bg-red-500/10 border border-red-500/20 rounded text-center">
+                    <p className="text-red-400 text-xs font-bold">{errorMsg}</p>
+                  </div>
                 )}
                 <p className="text-[10px] text-gray-600 text-center">
                   PDF & Credits sent via email.
