@@ -41,7 +41,8 @@ import {
   Instagram,
   Youtube,
   MessageCircle,
-  Menu
+  Menu,
+  Code
 } from 'lucide-react';
 
 export const Icons = {
@@ -62,21 +63,21 @@ export const Icons = {
   Search,
   Filter,
   Trash: Trash2,
-  X,
-  ArrowLeft,
-  ArrowRight,
-  Share: Share2,
-  Box,
-  Package,
-  Grid,
-  List,
-  Layers,
-  Bell,
-  User,
-  Plus,
-  Globe,
-  Lock,
-  Settings,
+  X, 
+  ArrowLeft, 
+  ArrowRight, 
+  Share: Share2, 
+  Box, 
+  Package, 
+  Grid, 
+  List, 
+  Layers, 
+  Bell, 
+  User, 
+  Plus, 
+  Globe, 
+  Lock, 
+  Settings, 
   Check,
   Loader2,
   PlayCircle,
@@ -85,5 +86,6 @@ export const Icons = {
   Instagram,
   Youtube,
   MessageCircle,
-  Menu
+  Menu,
+  Code
 };

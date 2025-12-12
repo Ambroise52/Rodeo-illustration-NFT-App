@@ -142,13 +142,24 @@ const NewsletterSection = () => {
           We've emailed the PDF to <span className="text-white font-bold">{email}</span>.
         </p>
         
-        <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-left">
+        <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-left space-y-4">
             <div className="flex items-start gap-3">
                 <Icons.Star className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
                 <div>
                     <p className="text-yellow-400 font-bold text-sm mb-1 uppercase tracking-wide">Don't see it?</p>
                     <p className="text-xs text-gray-300 leading-relaxed">
                         Please check your <strong>Spam</strong> or <strong>Promotions</strong> folder. Since this is an automated email, it sometimes lands there.
+                    </p>
+                </div>
+            </div>
+            
+            {/* Developer Helper Note */}
+            <div className="flex items-start gap-3 border-t border-white/10 pt-3">
+                <Icons.Code className="w-5 h-5 text-neon-purple shrink-0 mt-0.5" />
+                <div>
+                    <p className="text-neon-purple font-bold text-sm mb-1 uppercase tracking-wide">Developer Note</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                        If you are in <strong>Resend Test Mode</strong>, emails will <strong>ONLY</strong> be delivered to the email address you used to sign up for Resend.
                     </p>
                 </div>
             </div>
@@ -1140,65 +1151,77 @@ const HomeView: React.FC<{ onStart: (mode: 'LOGIN' | 'SIGNUP') => void, onNav: (
   );
 };
 
-// --- Main Landing Page Controller ---
-
 const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
-  const [currentPage, setCurrentPage] = useState<PageType>('HOME');
+  const [activePage, setActivePage] = useState<PageType>('HOME');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const navLinks: { id: PageType; label: string }[] = [
+    { id: 'FEATURES', label: 'Features' },
+    { id: 'PRICING', label: 'Pricing' },
+    { id: 'COLLECTIONS', label: 'Collections' },
+    { id: 'ROADMAP', label: 'Roadmap' },
+    { id: 'DOCS', label: 'Docs' },
+  ];
+
   const handleNav = (page: PageType) => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setCurrentPage(page);
+    setActivePage(page);
     setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const renderContent = () => {
-    switch(currentPage) {
-      case 'HOME': return <HomeView onStart={onStart} onNav={handleNav} />;
+  const renderPage = () => {
+    switch (activePage) {
+      case 'HOME': return <HomeView onStart={onStart} onNav={setActivePage} />;
       case 'FEATURES': return <FeaturesView />;
       case 'PRICING': return <PricingView onStart={onStart} />;
       case 'ROADMAP': return <RoadmapView />;
       case 'COLLECTIONS': return <CollectionsView onStart={onStart} />;
-      case 'DOCS': return <DocumentationView onGoToApi={() => handleNav('API')} />;
-      case 'API': return <ApiView onBack={() => handleNav('DOCS')} />;
+      case 'DOCS': return <DocumentationView onGoToApi={() => setActivePage('API')} />;
+      case 'API': return <ApiView onBack={() => setActivePage('DOCS')} />;
       case 'COMMUNITY': return <CommunityView />;
       case 'SUPPORT': return <SupportView />;
       case 'ABOUT': return <AboutView />;
       case 'CAREERS': return <CareersView />;
       case 'CONTACT': return <ContactView />;
-      case 'TERMS': return <TermsOfService onBack={() => handleNav('HOME')} />;
-      case 'PRIVACY': return <PrivacyPolicy onBack={() => handleNav('HOME')} />;
-      default: return <HomeView onStart={onStart} onNav={handleNav} />;
+      default: return <HomeView onStart={onStart} onNav={setActivePage} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-neon-cyan selection:text-black overflow-x-hidden relative">
-      
-      {/* Background Animation */}
-      <GeometricBackground />
+    <div className="min-h-screen bg-black text-white selection:bg-neon-cyan selection:text-black font-sans overflow-x-hidden">
+      {/* Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black via-transparent to-black opacity-80"></div>
+      </div>
 
-      {/* NAVBAR */}
-      <nav className="fixed top-0 w-full z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
+      {/* Navbar */}
+      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-black/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <button onClick={() => handleNav('HOME')} className="flex items-center gap-3 hover:opacity-80 transition-opacity relative z-20">
-            <Logo className="w-12 h-8" />
-            <span className="font-black text-xl tracking-tighter">OLLY</span>
-          </button>
-          
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-            <button onClick={() => handleNav('FEATURES')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'FEATURES' ? 'text-white' : ''}`}>Features</button>
-            <button onClick={() => handleNav('PRICING')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'PRICING' ? 'text-white' : ''}`}>Pricing</button>
-            <button onClick={() => handleNav('COLLECTIONS')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'COLLECTIONS' ? 'text-white' : ''}`}>Collections</button>
-            <button onClick={() => handleNav('ROADMAP')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'ROADMAP' ? 'text-white' : ''}`}>Roadmap</button>
+          <div 
+            className="flex items-center gap-2 cursor-pointer group relative z-20" 
+            onClick={() => handleNav('HOME')}
+          >
+            <Logo className="w-8 h-8 group-hover:scale-110 transition-transform" />
+            <span className="font-bold text-xl tracking-tighter">Olly</span>
           </div>
-          
+
+          {/* Desktop Nav - Visible on MD and up */}
+          <div className="hidden md:flex items-center gap-8">
+            {navLinks.filter(link => link.id !== 'DOCS').map(link => (
+              <button 
+                key={link.id}
+                onClick={() => handleNav(link.id)}
+                className={`text-sm font-medium transition-colors ${activePage === link.id ? 'text-neon-cyan' : 'text-gray-400 hover:text-white'}`}
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+
           <div className="flex items-center gap-4 relative z-20">
-            <button onClick={() => onStart('LOGIN')} className="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
-            <Button onClick={() => onStart('SIGNUP')} className="bg-neon-cyan text-black hover:bg-white border-none font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-              Start Creating
-            </Button>
+            <button onClick={() => onStart('LOGIN')} className="text-sm font-bold text-gray-300 hover:text-white hidden sm:block">Log In</button>
+            <Button onClick={() => onStart('SIGNUP')} className="bg-white text-black hover:bg-neon-cyan border-none font-bold">Start Creating</Button>
             
             {/* Mobile Menu Toggle */}
             <button 
@@ -1214,85 +1237,91 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-20 left-0 w-full bg-[#050505] border-b border-white/5 p-6 md:hidden flex flex-col gap-4 shadow-2xl"
+              className="md:hidden bg-black border-b border-white/10 overflow-hidden shadow-2xl"
             >
-              <button onClick={() => handleNav('FEATURES')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Features</button>
-              <button onClick={() => handleNav('PRICING')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Pricing</button>
-              <button onClick={() => handleNav('COLLECTIONS')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Collections</button>
-              <button onClick={() => handleNav('ROADMAP')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Roadmap</button>
-              <button onClick={() => handleNav('ABOUT')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">About</button>
-              <button onClick={() => onStart('LOGIN')} className="text-left text-lg font-bold text-neon-cyan py-2">Login / Sign Up</button>
+              <div className="flex flex-col p-6 gap-4">
+                {navLinks.map(link => (
+                  <button 
+                    key={link.id}
+                    onClick={() => handleNav(link.id)}
+                    className={`text-left text-lg font-bold py-2 border-b border-white/5 ${activePage === link.id ? 'text-neon-cyan' : 'text-gray-300'}`}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+                <button onClick={() => onStart('LOGIN')} className="text-left text-lg font-bold text-gray-300 py-2 sm:hidden border-b border-white/5">Log In</button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </nav>
 
-      {/* MAIN CONTENT AREA */}
-      <AnimatePresence mode='wait'>
-         {renderContent()}
-      </AnimatePresence>
+      <main className="pt-20 min-h-screen relative z-10">
+        <AnimatePresence mode="wait">
+           {renderPage()}
+        </AnimatePresence>
+      </main>
 
-      {/* FOOTER */}
-      <footer className="bg-[#020202]/90 border-t border-white/5 pt-20 pb-10 relative z-10 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6">
-          
-           {/* NEWSLETTER BANNER - Only on Home */}
-           {currentPage === 'HOME' && <NewsletterSection />}
+      <NewsletterSection />
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-8 mb-16">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-6 cursor-pointer" onClick={() => handleNav('HOME')}>
-                <Logo className="w-8 h-6" />
-                <span className="font-bold text-lg">OLLY</span>
+      {/* Footer */}
+      <footer className="border-t border-white/10 bg-[#050505] relative z-10">
+        <div className="max-w-7xl mx-auto px-6 py-20">
+          <div className="grid md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1">
+              <div className="flex items-center gap-2 mb-6">
+                <Logo className="w-6 h-6" />
+                <span className="font-bold text-lg">Olly</span>
               </div>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                The premier AI-powered platform for generating unique, high-quality NFT assets and animation prompts.
+              <p className="text-sm text-gray-500 mb-6">
+                The world's most advanced AI generation engine for geometric vector art and NFTs.
               </p>
+              <div className="flex gap-4">
+                <a href="#" className="text-gray-500 hover:text-white transition-colors"><Icons.Twitter className="w-5 h-5" /></a>
+                <a href="#" className="text-gray-500 hover:text-white transition-colors"><Icons.Github className="w-5 h-5" /></a>
+                <a href="#" className="text-gray-500 hover:text-white transition-colors"><Icons.Instagram className="w-5 h-5" /></a>
+              </div>
             </div>
-            
+
             <div>
               <h4 className="font-bold text-white mb-6">Product</h4>
               <ul className="space-y-4 text-sm text-gray-500">
-                <li><button onClick={() => handleNav('FEATURES')} className="hover:text-neon-cyan transition-colors">Features</button></li>
-                <li><button onClick={() => handleNav('PRICING')} className="hover:text-neon-cyan transition-colors">Pricing</button></li>
-                <li><button onClick={() => handleNav('ROADMAP')} className="hover:text-neon-cyan transition-colors">Roadmap</button></li>
-                <li><button onClick={() => handleNav('COLLECTIONS')} className="hover:text-neon-cyan transition-colors">Collections</button></li>
+                <li><button onClick={() => handleNav('FEATURES')} className="hover:text-neon-cyan">Features</button></li>
+                <li><button onClick={() => handleNav('PRICING')} className="hover:text-neon-cyan">Pricing</button></li>
+                <li><button onClick={() => handleNav('ROADMAP')} className="hover:text-neon-cyan">Roadmap</button></li>
+                <li><button onClick={() => handleNav('API')} className="hover:text-neon-cyan">API</button></li>
               </ul>
             </div>
+
             <div>
               <h4 className="font-bold text-white mb-6">Resources</h4>
               <ul className="space-y-4 text-sm text-gray-500">
-                <li><button onClick={() => handleNav('DOCS')} className="hover:text-neon-cyan transition-colors">Documentation</button></li>
-                <li><button onClick={() => handleNav('API')} className="hover:text-neon-cyan transition-colors">API</button></li>
-                <li><button onClick={() => handleNav('COMMUNITY')} className="hover:text-neon-cyan transition-colors">Community</button></li>
-                <li><button onClick={() => handleNav('SUPPORT')} className="hover:text-neon-cyan transition-colors">Support</button></li>
+                <li><button onClick={() => handleNav('DOCS')} className="hover:text-neon-cyan">Documentation</button></li>
+                <li><button onClick={() => handleNav('COMMUNITY')} className="hover:text-neon-cyan">Community</button></li>
+                <li><button onClick={() => handleNav('SUPPORT')} className="hover:text-neon-cyan">Help Center</button></li>
+                <li><button onClick={() => handleNav('CONTACT')} className="hover:text-neon-cyan">Contact</button></li>
               </ul>
             </div>
+
             <div>
               <h4 className="font-bold text-white mb-6">Company</h4>
               <ul className="space-y-4 text-sm text-gray-500">
-                <li><button onClick={() => handleNav('ABOUT')} className="hover:text-neon-cyan transition-colors">About</button></li>
-                <li><button onClick={() => handleNav('CAREERS')} className="hover:text-neon-cyan transition-colors">Careers</button></li>
-                <li><button onClick={() => handleNav('CONTACT')} className="hover:text-neon-cyan transition-colors">Contact</button></li>
-                <li><button onClick={() => handleNav('TERMS')} className="hover:text-neon-cyan transition-colors">Legal</button></li>
+                <li><button onClick={() => handleNav('ABOUT')} className="hover:text-neon-cyan">About</button></li>
+                <li><button onClick={() => handleNav('CAREERS')} className="hover:text-neon-cyan">Careers</button></li>
+                <li><a href="#" className="hover:text-neon-cyan">Legal</a></li>
+                <li><a href="#" className="hover:text-neon-cyan">Privacy</a></li>
               </ul>
             </div>
           </div>
-          
-          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-gray-600">© 2025 Olly. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-               <Icons.Github className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
-               <Icons.Twitter className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
-               <Icons.Instagram className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
-               <Icons.Youtube className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
-            </div>
-            <div className="text-xs text-gray-600 font-mono">
-              Built with Gemini AI + Supabase
+          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600">
+            <p>© 2024 Olly AI Inc. All rights reserved.</p>
+            <div className="flex gap-8">
+               <span>Terms of Service</span>
+               <span>Privacy Policy</span>
             </div>
           </div>
         </div>
