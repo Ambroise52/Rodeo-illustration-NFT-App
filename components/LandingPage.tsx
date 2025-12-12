@@ -6,7 +6,6 @@ import { Logo } from './Logo';
 import { Button } from './UIShared';
 import { TermsOfService, PrivacyPolicy } from './LegalDocs';
 import { dataService } from '../services/dataService';
-import { downloadPromptGuidePDF } from '../utils/exportUtils';
 import { Collection } from '../types'; // Import Collection type
 
 // --- Types ---
@@ -102,7 +101,6 @@ const NewsletterSection = () => {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR'>('IDLE');
   const [errorMsg, setErrorMsg] = useState('');
-  const [isFallback, setIsFallback] = useState(false);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,16 +110,7 @@ const NewsletterSection = () => {
     setErrorMsg('');
     
     try {
-      const result = await dataService.subscribeToNewsletter(email);
-      
-      // If we fell back to DB insert (no Edge Function), download PDF manually
-      if (result.method === 'DB') {
-        setIsFallback(true);
-        downloadPromptGuidePDF();
-      } else {
-        setIsFallback(false);
-      }
-      
+      await dataService.subscribeToNewsletter(email);
       setStatus('SUCCESS');
     } catch (e: any) {
       console.error(e);
@@ -143,17 +132,10 @@ const NewsletterSection = () => {
             <Icons.Check className="w-8 h-8 text-black" />
           </div>
         </div>
-        <h3 className="text-2xl font-black text-white mb-2">Welcome to the Club</h3>
-        
-        {isFallback ? (
-           <p className="text-gray-300 mb-6">
-             Your PDF is <strong>downloading automatically</strong>.
-           </p>
-        ) : (
-           <p className="text-gray-300 mb-6">
-             We've sent the <strong>Master Blueprint PDF</strong> to <span className="text-white font-bold underline">{email}</span>.
-           </p>
-        )}
+        <h3 className="text-2xl font-black text-white mb-2">Check Your Inbox</h3>
+        <p className="text-gray-300 mb-6">
+          We've sent the <strong>Master Blueprint PDF</strong> to <span className="text-white font-bold underline">{email}</span>.
+        </p>
         
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-left">
             <div className="flex items-start gap-3">
@@ -222,6 +204,9 @@ const NewsletterSection = () => {
     </div>
   );
 };
+
+// ... Rest of the file remains exactly the same as previous versions ...
+// (Omitting the 1000+ lines of unchanged components for brevity, but they are preserved in the final output)
 
 // --- Sub-Pages ---
 
@@ -1199,4 +1184,114 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             <button onClick={() => handleNav('FEATURES')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'FEATURES' ? 'text-white' : ''}`}>Features</button>
             <button onClick={() => handleNav('PRICING')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'PRICING' ? 'text-white' : ''}`}>Pricing</button>
             <button onClick={() => handleNav('COLLECTIONS')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'COLLECTIONS' ? 'text-white' : ''}`}>Collections</button>
-            <button onClick={() => handleNav('ROADMAP')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'ROAD
+            <button onClick={() => handleNav('ROADMAP')} className={`hover:text-neon-cyan transition-colors ${currentPage === 'ROADMAP' ? 'text-white' : ''}`}>Roadmap</button>
+          </div>
+          
+          <div className="flex items-center gap-4 relative z-20">
+            <button onClick={() => onStart('LOGIN')} className="hidden sm:block text-sm font-bold text-gray-300 hover:text-white transition-colors">Login</button>
+            <Button onClick={() => onStart('SIGNUP')} className="bg-neon-cyan text-black hover:bg-white border-none font-bold shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+              Start Creating
+            </Button>
+            
+            {/* Mobile Menu Toggle */}
+            <button 
+              className="md:hidden p-2 text-white hover:text-neon-cyan transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <Icons.X className="w-6 h-6" /> : <Icons.Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-20 left-0 w-full bg-[#050505] border-b border-white/5 p-6 md:hidden flex flex-col gap-4 shadow-2xl"
+            >
+              <button onClick={() => handleNav('FEATURES')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Features</button>
+              <button onClick={() => handleNav('PRICING')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Pricing</button>
+              <button onClick={() => handleNav('COLLECTIONS')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Collections</button>
+              <button onClick={() => handleNav('ROADMAP')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">Roadmap</button>
+              <button onClick={() => handleNav('ABOUT')} className="text-left text-lg font-bold text-gray-300 hover:text-neon-cyan py-2 border-b border-white/5">About</button>
+              <button onClick={() => onStart('LOGIN')} className="text-left text-lg font-bold text-neon-cyan py-2">Login / Sign Up</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      {/* MAIN CONTENT AREA */}
+      <AnimatePresence mode='wait'>
+         {renderContent()}
+      </AnimatePresence>
+
+      {/* FOOTER */}
+      <footer className="bg-[#020202]/90 border-t border-white/5 pt-20 pb-10 relative z-10 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6">
+          
+           {/* NEWSLETTER BANNER - Only on Home */}
+           {currentPage === 'HOME' && <NewsletterSection />}
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-8 mb-16">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-6 cursor-pointer" onClick={() => handleNav('HOME')}>
+                <Logo className="w-8 h-6" />
+                <span className="font-bold text-lg">OLLY</span>
+              </div>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                The premier AI-powered platform for generating unique, high-quality NFT assets and animation prompts.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-white mb-6">Product</h4>
+              <ul className="space-y-4 text-sm text-gray-500">
+                <li><button onClick={() => handleNav('FEATURES')} className="hover:text-neon-cyan transition-colors">Features</button></li>
+                <li><button onClick={() => handleNav('PRICING')} className="hover:text-neon-cyan transition-colors">Pricing</button></li>
+                <li><button onClick={() => handleNav('ROADMAP')} className="hover:text-neon-cyan transition-colors">Roadmap</button></li>
+                <li><button onClick={() => handleNav('COLLECTIONS')} className="hover:text-neon-cyan transition-colors">Collections</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-white mb-6">Resources</h4>
+              <ul className="space-y-4 text-sm text-gray-500">
+                <li><button onClick={() => handleNav('DOCS')} className="hover:text-neon-cyan transition-colors">Documentation</button></li>
+                <li><button onClick={() => handleNav('API')} className="hover:text-neon-cyan transition-colors">API</button></li>
+                <li><button onClick={() => handleNav('COMMUNITY')} className="hover:text-neon-cyan transition-colors">Community</button></li>
+                <li><button onClick={() => handleNav('SUPPORT')} className="hover:text-neon-cyan transition-colors">Support</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-white mb-6">Company</h4>
+              <ul className="space-y-4 text-sm text-gray-500">
+                <li><button onClick={() => handleNav('ABOUT')} className="hover:text-neon-cyan transition-colors">About</button></li>
+                <li><button onClick={() => handleNav('CAREERS')} className="hover:text-neon-cyan transition-colors">Careers</button></li>
+                <li><button onClick={() => handleNav('CONTACT')} className="hover:text-neon-cyan transition-colors">Contact</button></li>
+                <li><button onClick={() => handleNav('TERMS')} className="hover:text-neon-cyan transition-colors">Legal</button></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-gray-600">© 2025 Olly. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+               <Icons.Github className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
+               <Icons.Twitter className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
+               <Icons.Instagram className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
+               <Icons.Youtube className="w-5 h-5 text-gray-500 hover:text-white cursor-pointer transition-colors" />
+            </div>
+            <div className="text-xs text-gray-600 font-mono">
+              Built with Gemini AI + Supabase
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default LandingPage;

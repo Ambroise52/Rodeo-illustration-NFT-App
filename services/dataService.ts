@@ -620,37 +620,21 @@ export const dataService = {
   },
 
   // --- Newsletter ---
-  // MODIFIED: Returns the method used ('EDGE' or 'DB') so frontend can handle fallback PDF download
-  async subscribeToNewsletter(email: string): Promise<{ method: 'EDGE' | 'DB' }> {
+  async subscribeToNewsletter(email: string): Promise<void> {
     // 1. Simple regex validation first
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) throw new Error("Invalid email address");
 
-    // 2. Call Supabase Edge Function to send email via Resend
-    const { data, error } = await supabase.functions.invoke('subscribe-newsletter', {
-      body: { email }
-    });
-
+    // 2. Direct DB insert.
+    // The Database Trigger (SQL) configured in Supabase will handle calling Resend.
+    // This allows us to avoid using the CLI for Edge Functions while still keeping logic server-side.
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .insert({ email, source: 'landing_page_footer' });
+      
     if (error) {
-      console.warn("Edge Function failed (likely not deployed). Falling back to direct DB insert for development.", error);
-      // Fallback for development if function isn't deployed yet
-      const { error: dbError } = await supabase
-        .from('newsletter_subscribers')
-        .insert({ email, source: 'landing_page_footer' });
-      
-      if (dbError) {
-         if (dbError.code === '23505') throw new Error("You are already subscribed!");
-         throw new Error("Could not subscribe. Please try again.");
-      }
-      
-      // Return 'DB' to signal that we used the fallback and email wasn't sent
-      return { method: 'DB' };
-    } else if (data?.error) {
-       // Logic error from the Edge Function (e.g. Resend rejected it or User already exists)
-       throw new Error(data.error);
+       if (error.code === '23505') throw new Error("You are already subscribed!");
+       throw new Error("Could not subscribe. Please try again.");
     }
-    
-    console.log(`[Newsletter] Subscribed via Edge Function: ${email}`);
-    return { method: 'EDGE' };
   }
 };
